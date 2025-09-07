@@ -14,7 +14,7 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 @OpenAPIDefinition(
         info = @Info(
-                title = "API - Plataforma de Alojamientos (Universidad del Quindío)",
+                title = "API - Plataforma de Alojamientos (Hosped)",
                 version = "1.0.0",
                 description = "API para gestión de usuarios, anfitriones, alojamientos, reservas y comentarios",
                 contact = @Contact(name = "Equipo Proyecto", email = "dev@uq.edu.co"),
