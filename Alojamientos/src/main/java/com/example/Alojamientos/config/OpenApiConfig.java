@@ -7,6 +7,7 @@ import io.swagger.v3.oas.annotations.info.License;
 import io.swagger.v3.oas.annotations.servers.Server;
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;
+import io.swagger.v3.oas.models.security.SecurityRequirement;
 import io.swagger.v3.oas.models.security.SecurityScheme;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -38,6 +39,8 @@ public class OpenApiConfig {
                                         .bearerFormat("JWT")
                                         .description("Utilizar esquema Bearer con JWT. Ej: 'Bearer eyJ...'")
                         )
-                );
+                )
+                // 👉 Esto aplica el esquema de autenticación a toda la API
+                .addSecurityItem(new SecurityRequirement().addList("BearerAuth"));
     }
 }
