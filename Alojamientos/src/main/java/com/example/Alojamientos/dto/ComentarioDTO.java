@@ -1,18 +1,26 @@
 package com.example.Alojamientos.dto;
 
-import lombok.Data;
+import lombok.*;
 import jakarta.validation.constraints.*;
 
 @Data
-public class ComentarioCreateDTO {
+@Builder
+@NoArgsConstructor
+@AllArgsConstructor
+public class ComentarioDTO {
+
     @NotNull
-    private Long reservationId;
+    private Integer reservationId;
+
+    @NotNull
+    private Integer userId;
 
     @NotNull
     @Min(1)
     @Max(5)
     private Integer rating;
 
+    @NotBlank
     @Size(max = 500)
     private String text;
 }

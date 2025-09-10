@@ -10,7 +10,7 @@ import jakarta.validation.constraints.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class UsuarioRegistroDTO {
+public class UsuarioDTO {
     @NotBlank
     @Size(max = 100)
     private String name;
@@ -33,4 +33,3 @@ public class UsuarioRegistroDTO {
     @NotBlank
     private String role; // GUEST or HOST
 }
-
