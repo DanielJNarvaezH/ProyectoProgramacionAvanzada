@@ -1,4 +1,4 @@
-package com.example.Alojamientos.dto;
+package com.example.Alojamientos.businessLayer.dto;
 
 import lombok.*;
 import jakarta.validation.constraints.*;

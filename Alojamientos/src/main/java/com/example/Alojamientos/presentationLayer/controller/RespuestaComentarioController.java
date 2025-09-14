@@ -1,6 +1,6 @@
-package com.example.Alojamientos.controller;
+package com.example.Alojamientos.presentationLayer.controller;
 
-import com.example.Alojamientos.dto.RespuestaComentarioDTO;
+import com.example.Alojamientos.businessLayer.dto.RespuestaComentarioDTO;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import io.swagger.v3.oas.annotations.media.*;

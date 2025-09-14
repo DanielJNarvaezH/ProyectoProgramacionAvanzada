@@ -1,4 +1,4 @@
-package com.example.Alojamientos.dto;
+package com.example.Alojamientos.businessLayer.dto;
 
 import lombok.*;
 import jakarta.validation.constraints.*;
@@ -7,18 +7,13 @@ import jakarta.validation.constraints.*;
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class ComentarioDTO {
+public class RespuestaComentarioDTO {
 
     @NotNull
-    private Integer reservationId;
+    private Integer commentId;
 
     @NotNull
-    private Integer userId;
-
-    @NotNull
-    @Min(1)
-    @Max(5)
-    private Integer rating;
+    private Integer hostId;
 
     @NotBlank
     @Size(max = 500)
