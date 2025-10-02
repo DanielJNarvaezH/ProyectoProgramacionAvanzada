@@ -17,7 +17,7 @@ public interface ComentarioDao {
 
     List<ComentarioEntity> findByUsuarioId(Integer usuarioId);
 
-    List<ComentarioEntity> findByAlojamientoIdOrderByFechaDesc(Integer alojamientoId);
+    List<ComentarioEntity> findByAlojamientoIdOrderByFechaCreacionDesc(Integer alojamientoId);
 
     long countByAlojamientoId(Integer alojamientoId);
 }

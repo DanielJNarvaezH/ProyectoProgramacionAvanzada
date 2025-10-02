@@ -30,7 +30,7 @@ public interface PagoDao {
     /**
      * Listar todos los pagos de un usuario a través de sus reservas.
      */
-    List<PagoEntity> findByUsuarioId(Integer usuarioId);
+    List<PagoEntity> findByReserva_Huesped_Id(Integer usuarioId);
 
     /**
      * Buscar un pago por su referencia externa.
@@ -45,5 +45,5 @@ public interface PagoDao {
     /**
      * Verificar si una reserva ya tiene un pago con cierto estado.
      */
-    boolean existsByReservaAndEstado(Integer reservaId, PagoEntity.EstadoPago estado);
+    boolean existsByReservaIdAndEstado(Integer reservaId, PagoEntity.EstadoPago estado);
 }

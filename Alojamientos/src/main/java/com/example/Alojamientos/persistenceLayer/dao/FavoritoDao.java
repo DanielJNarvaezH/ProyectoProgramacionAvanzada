@@ -15,7 +15,7 @@ public interface FavoritoDao {
 
     List<FavoritoEntity> findByUsuarioId(Integer usuarioId);
 
-    boolean existsByUsuarioAndAlojamiento(Integer usuarioId, Integer alojamientoId);
+    boolean existsByUsuarioIdAndAlojamientoId(Integer usuarioId, Integer alojamientoId);
+    void deleteByUsuarioIdAndAlojamientoId(Integer usuarioId, Integer alojamientoId);
 
-    void deleteByUsuarioAndAlojamiento(Integer usuarioId, Integer alojamientoId);
 }

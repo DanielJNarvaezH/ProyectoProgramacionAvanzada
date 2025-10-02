@@ -15,7 +15,7 @@ public interface NotificacionDao {
 
     List<NotificacionEntity> findByUsuarioId(Integer usuarioId);
 
-    List<NotificacionEntity> findUnreadByUsuarioId(Integer usuarioId);
+    List<NotificacionEntity> findByUsuarioIdAndLeidaFalse(Integer usuarioId);
 
-    long countUnreadByUsuarioId(Integer usuarioId);
+    long countByUsuarioIdAndLeidaFalse(Integer usuarioId);
 }

@@ -9,13 +9,13 @@ public interface ImagenDao {
 
     Optional<ImagenEntity> findById(Integer id);
 
-    List<ImagenEntity> findByAlojamiento(Integer idAlojamiento);
+    List<ImagenEntity> findByAlojamientoId(Integer idAlojamiento);
 
     ImagenEntity save(ImagenEntity imagen);
 
     void deleteById(Integer id);
 
-    void deleteByAlojamiento(Integer idAlojamiento);
+    void deleteByAlojamientoId(Integer idAlojamiento);
 
-    boolean existsByAlojamiento(Integer idAlojamiento);
+    boolean existsByAlojamientoId(Integer idAlojamiento);
 }

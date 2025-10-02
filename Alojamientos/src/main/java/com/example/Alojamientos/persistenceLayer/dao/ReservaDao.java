@@ -10,13 +10,13 @@ public interface ReservaDao {
 
     Optional<ReservaEntity> findById(Integer id);
 
-    List<ReservaEntity> findByHuesped(Integer idHuesped);
+    List<ReservaEntity> findByHuespedId(Integer idHuesped);
 
     List<ReservaEntity> findByAlojamiento(Integer idAlojamiento);
 
     List<ReservaEntity> findReservasSolapadas(Integer idAlojamiento, LocalDate fechaInicio, LocalDate fechaFin);
 
-    boolean existsByHuespedAndAlojamiento(Integer idHuesped, Integer idAlojamiento);
+    boolean existsByHuespedIdAndAlojamientoId(Integer idHuesped, Integer idAlojamiento);
 
     ReservaEntity save(ReservaEntity reserva);
 

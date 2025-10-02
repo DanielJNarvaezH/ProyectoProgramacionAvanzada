@@ -11,13 +11,13 @@ public interface AlojamientoDao {
 
     List<AlojamientoEntity> findByCiudad(String ciudad);
 
-    List<AlojamientoEntity> findByAnfitrion(Integer idAnfitrion);
+    List<AlojamientoEntity> findByAnfitrionId(Integer idAnfitrion);
 
     List<AlojamientoEntity> findActivos();
 
     List<AlojamientoEntity> findByCapacidadMinima(Integer capacidad);
 
-    List<AlojamientoEntity> findByRangoPrecio(Double precioMin, Double precioMax);
+    List<AlojamientoEntity> findByRangoPrecio(BigDecimal precioMin, BigDecimal precioMax);
 
     AlojamientoEntity save(AlojamientoEntity alojamiento);
 
