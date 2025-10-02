@@ -18,21 +18,21 @@ public interface AlojamientoServicioRepository extends JpaRepository<Alojamiento
 
     /**
      * Busca todos los alojamientos que tengan un servicio específico
-     * @param idServicio id del servicio
+     * @param Servicio_Id id del servicio
      * @return lista de relaciones alojamiento-servicio
      */
-    List<AlojamientoServicio> findByIdServicio(Integer idServicio);
+    List<AlojamientoServicio> findByServicio_Id(Integer Servicio_Id);
 
     /**
      * Verifica si un servicio ya está asignado a un alojamiento
-     * @param idAlojamiento id del alojamiento
-     * @param idServicio id del servicio
+     * @param Alojamiento_Id id del alojamiento
+     * @param Servicio_Id id del servicio
      * @return true si ya existe la relación
      */
-    boolean existsByIdAlojamientoAndIdServicio(Integer idAlojamiento, Integer idServicio);
+    boolean existsByAlojamiento_IdAndServicio_Id(Integer Alojamiento_Id, Integer Servicio_Id);
 
     /**
      * Elimina la relación entre un alojamiento y un servicio
      */
-    void deleteByIdAlojamientoAndIdServicio(Integer idAlojamiento, Integer idServicio);
+    void deleteByAlojamiento_IdAndServicio_Id(Integer Alojamiento_Id, Integer Servicio_Id);
 }

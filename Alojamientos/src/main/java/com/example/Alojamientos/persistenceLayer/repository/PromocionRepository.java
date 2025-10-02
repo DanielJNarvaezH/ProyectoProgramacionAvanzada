@@ -15,7 +15,7 @@ public interface PromocionRepository extends JpaRepository<Promocion, Integer> {
      * @param fecha fecha de consulta
      * @return lista de promociones vigentes
      */
-    List<Promocion> findByFechaInicioBeforeAndFechaFinAfter(LocalDate fechaInicio, LocalDate fechaFin);
+    List<Promocion> findByFechaInicioBeforeAndFechaFinAfter(LocalDate fecha);
 
     /**
      * Obtiene las promociones de un alojamiento específico

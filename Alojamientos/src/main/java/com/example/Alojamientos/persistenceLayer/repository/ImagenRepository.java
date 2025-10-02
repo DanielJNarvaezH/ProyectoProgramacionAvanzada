@@ -11,21 +11,21 @@ public interface ImagenRepository extends JpaRepository<Imagen, Integer> {
 
     /**
      * Busca todas las imágenes de un alojamiento específico
-     * @param idAlojamiento id del alojamiento
+     * @param Alojamiento_Id id del alojamiento
      * @return lista de imágenes
      */
-    List<Imagen> findByIdAlojamiento(Integer idAlojamiento);
+    List<Imagen> findByAlojamiento_Id(Integer Alojamiento_Id);
 
     /**
      * Elimina todas las imágenes asociadas a un alojamiento
-     * @param idAlojamiento id del alojamiento
+     * @param Alojamiento_Id id del alojamiento
      */
-    void deleteByIdAlojamiento(Integer idAlojamiento);
+    void deleteByAlojamiento_Id(Integer Alojamiento_Id);
 
     /**
      * Verifica si un alojamiento ya tiene imágenes guardadas
-     * @param idAlojamiento id del alojamiento
+     * @param Alojamiento_Id id del alojamiento
      * @return true si existen imágenes
      */
-    boolean existsByIdAlojamiento(Integer idAlojamiento);
+    boolean existsByAlojamiento_Id(Integer Alojamiento_Id);
 }
