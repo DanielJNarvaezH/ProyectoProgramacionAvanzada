@@ -1,6 +1,6 @@
 package com.example.Alojamientos.persistenceLayer.repository;
 
-import com.example.Alojamientos.persistenceLayer.entity.Pago;
+import com.example.Alojamientos.persistenceLayer.entity.PagoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -8,41 +8,25 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface PagoRepository extends JpaRepository<Pago, Integer> {
+public interface PagoRepository extends JpaRepository<PagoEntity, Integer> {
 
     /**
-     * Busca todos los pagos asociados a una reserva
-     * @param idReserva id de la reserva
-     * @return lista de pagos
+     * Busca el pago asociado a una reserva
      */
-    List<Pago> findByIdReserva(Integer idReserva);
+    Optional<PagoEntity> findByReserva_Id(Integer idReserva);
 
     /**
-     * Busca todos los pagos realizados por un usuario
-     * @param idUsuario id del usuario
-     * @return lista de pagos
+     * Busca un pago por su referencia externa (código único)
      */
-    List<Pago> findByIdUsuario(Integer idUsuario);
+    Optional<PagoEntity> findByReferenciaExterna(String referenciaExterna);
 
     /**
-     * Busca un pago por el código de transacción único
-     * @param codigoTransaccion código único
-     * @return pago encontrado
+     * Obtiene los pagos filtrados por estado
      */
-    Optional<Pago> findByCodigoTransaccion(String codigoTransaccion);
+    List<PagoEntity> findByEstado(PagoEntity.EstadoPago estado);
 
     /**
-     * Obtiene los pagos filtrados por estado (ej: PENDIENTE, APROBADO, RECHAZADO)
-     * @param estado estado del pago
-     * @return lista de pagos en ese estado
+     * Verifica si una reserva ya tiene un pago con un estado específico
      */
-    List<Pago> findByEstado(String estado);
-
-    /**
-     * Verifica si una reserva ya tiene un pago aprobado
-     * @param idReserva id de la reserva
-     * @param estado estado del pago
-     * @return true si existe un pago con ese estado
-     */
-    boolean existsByIdReservaAndEstado(Integer idReserva, String estado);
+    boolean existsByReserva_IdAndEstado(Integer idReserva, PagoEntity.EstadoPago estado);
 }

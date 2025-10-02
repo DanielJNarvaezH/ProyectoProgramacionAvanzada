@@ -34,8 +34,8 @@ public class PagoEntity {
     @Column(nullable = false, length = 15)
     private EstadoPago estado = EstadoPago.PENDIENTE;
 
-    @Column(name = "referencia_externa", length = 100)
-    private String referenciaExterna;
+    @Column(name = "referencia_externa", length = 100, unique = true)
+    private String referenciaExterna; // este sustituye a codigoTransaccion
 
     @Column(name = "fecha_pago", nullable = false, updatable = false)
     private LocalDateTime fechaPago = LocalDateTime.now();

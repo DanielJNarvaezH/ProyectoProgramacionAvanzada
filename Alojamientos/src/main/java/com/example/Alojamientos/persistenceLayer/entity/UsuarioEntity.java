@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Table(name = "usuario")
@@ -51,11 +52,41 @@ public class UsuarioEntity {
     @Column(name = "fecha_actualizacion", insertable = false, updatable = false)
     private java.sql.Timestamp fechaActualizacion;
 
-    // Relaciones se agregan después con otras entidades
-    // Ejemplo: @OneToMany(mappedBy = "anfitrion") private List<AlojamientoEntity> alojamientos;
+    // ==========================
+    // Relaciones
+    // ==========================
+
+    // 1 usuario (anfitrión) -> muchos alojamientos
+    @OneToMany(mappedBy = "anfitrion", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<AlojamientoEntity> alojamientos;
+
+    // 1 usuario (huésped) -> muchas reservas
+    @OneToMany(mappedBy = "huesped", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReservaEntity> reservas;
+
+    // 1 usuario -> muchos comentarios
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ComentarioEntity> comentarios;
+
+    // 1 usuario -> muchas respuestas a comentarios
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<RespuestaComentarioEntity> respuestas;
+
+    // 1 usuario -> muchos códigos de recuperación
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<CodigoRecuperacionEntity> codigosRecuperacion;
+
+    // 1 usuario -> muchas notificaciones
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<NotificacionEntity> notificaciones;
+
+    // 1 usuario -> muchos favoritos
+    @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FavoritosEntity> favoritos;
 
     public enum Rol {
         USUARIO,
-        ANFITRION
+        ANFITRION,
+        ADMIN
     }
 }

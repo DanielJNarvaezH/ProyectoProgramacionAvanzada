@@ -1,32 +1,26 @@
 package com.example.Alojamientos.persistenceLayer.repository;
 
-import com.example.Alojamientos.persistenceLayer.entity.RespuestaComentario;
+import com.example.Alojamientos.persistenceLayer.entity.RespuestaComentarioEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface RespuestaComentarioRepository extends JpaRepository<RespuestaComentario, Integer> {
+public interface RespuestaComentarioRepository extends JpaRepository<RespuestaComentarioEntity, Integer> {
 
     /**
      * Busca todas las respuestas asociadas a un comentario
-     * @param idComentario id del comentario
-     * @return lista de respuestas
      */
-    List<RespuestaComentario> findByIdComentario(Integer idComentario);
+    List<RespuestaComentarioEntity> findByComentario_Id(Integer idComentario);
 
     /**
      * Busca todas las respuestas hechas por un usuario específico
-     * @param idUsuario id del usuario
-     * @return lista de respuestas
      */
-    List<RespuestaComentario> findByIdUsuario(Integer idUsuario);
+    List<RespuestaComentarioEntity> findByUsuario_Id(Integer idUsuario);
 
     /**
      * Cuenta cuántas respuestas tiene un comentario
-     * @param idComentario id del comentario
-     * @return número de respuestas
      */
-    long countByIdComentario(Integer idComentario);
+    long countByComentario_Id(Integer idComentario);
 }

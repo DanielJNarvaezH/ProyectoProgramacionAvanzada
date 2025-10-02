@@ -31,5 +31,12 @@ public class ImagenEntity {
     private Integer ordenVisualizacion = 0;
 
     @Column(name = "fecha_subida", nullable = false, updatable = false)
-    private LocalDateTime fechaSubida = LocalDateTime.now();
+    private LocalDateTime fechaSubida;
+
+    @PrePersist
+    protected void onCreate() {
+        if (fechaSubida == null) {
+            fechaSubida = LocalDateTime.now();
+        }
+    }
 }

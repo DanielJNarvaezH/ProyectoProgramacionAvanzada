@@ -27,6 +27,12 @@ public class ReservaEntity {
     @JoinColumn(name = "id_alojamiento", nullable = false)
     private AlojamientoEntity alojamiento;
 
+    @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true)
+    private PagoEntity pago;
+
+    @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true)
+    private ComentarioEntity comentario;
+
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate fechaInicio;
 
@@ -41,16 +47,23 @@ public class ReservaEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 15)
-    private EstadoReserva estado = EstadoReserva.CONFIRMADA;
+    private EstadoReserva estado = EstadoReserva.PENDIENTE;
 
     @Column(name = "fecha_reserva", nullable = false, updatable = false)
-    private LocalDateTime fechaReserva = LocalDateTime.now();
+    private LocalDateTime fechaReserva;
 
     @Column(name = "fecha_cancelacion")
     private LocalDateTime fechaCancelacion;
 
     @Column(name = "motivo_cancelacion", length = 500)
     private String motivoCancelacion;
+
+    @PrePersist
+    protected void onCreate() {
+        if (fechaReserva == null) {
+            fechaReserva = LocalDateTime.now();
+        }
+    }
 
     public enum EstadoReserva {
         PENDIENTE,

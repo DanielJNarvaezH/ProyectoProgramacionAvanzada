@@ -6,10 +6,15 @@ import lombok.*;
 import java.time.LocalDateTime;
 
 @Entity
-@Table(name = "favorito",
+@Table(
+        name = "favorito",
         uniqueConstraints = {
-                @UniqueConstraint(name = "uk_favorito_usuario_alojamiento", columnNames = {"id_usuario", "id_alojamiento"})
-        })
+                @UniqueConstraint(
+                        name = "uk_favorito_usuario_alojamiento",
+                        columnNames = {"id_usuario", "id_alojamiento"}
+                )
+        }
+)
 @Data
 @NoArgsConstructor
 @AllArgsConstructor

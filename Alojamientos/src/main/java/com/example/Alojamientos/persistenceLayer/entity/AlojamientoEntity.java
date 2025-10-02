@@ -1,11 +1,3 @@
-package com.example.Alojamientos.persistenceLayer.entity;
-
-import jakarta.persistence.*;
-import lombok.*;
-
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-
 @Entity
 @Table(name = "alojamiento")
 @Data
@@ -57,4 +49,17 @@ public class AlojamientoEntity {
 
     @Column(name = "fecha_actualizacion", insertable = false, updatable = false)
     private Timestamp fechaActualizacion;
+
+    // 🔹 Relaciones
+    @OneToMany(mappedBy = "alojamiento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ReservaEntity> reservas;
+
+    @OneToMany(mappedBy = "alojamiento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ComentarioEntity> comentarios;
+
+    @OneToMany(mappedBy = "alojamiento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ImagenEntity> imagenes;
+
+    @OneToMany(mappedBy = "alojamiento", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<FavoritoEntity> favoritos;
 }

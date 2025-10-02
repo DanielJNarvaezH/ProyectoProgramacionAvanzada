@@ -22,14 +22,14 @@ public class RespuestaComentarioEntity {
     @JoinColumn(name = "id_comentario", nullable = false)
     private ComentarioEntity comentario;
 
-    // Relación con el anfitrión (usuario que responde)
+    // Relación con el usuario que responde (puede ser anfitrión o admin)
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
-    @JoinColumn(name = "id_anfitrion", nullable = false)
-    private UsuarioEntity anfitrion;
+    @JoinColumn(name = "id_usuario", nullable = false)
+    private UsuarioEntity usuario;
 
     @Column(nullable = false, length = 500)
     private String texto;
 
-    @Column(name = "fecha_respuesta", nullable = false, updatable = false)
-    private LocalDateTime fechaRespuesta = LocalDateTime.now();
+    @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    private LocalDateTime fechaCreacion = LocalDateTime.now();
 }
