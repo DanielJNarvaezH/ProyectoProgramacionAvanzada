@@ -22,8 +22,8 @@ public class ReservaDAOImpl implements ReservaDAO {
     }
 
     @Override
-    public List<ReservaEntity> findByHuesped(Integer idHuesped) {
-        return reservaRepository.findByHuesped_Id(idHuesped);
+    public List<ReservaEntity> findByHuespedId(Integer idHuesped) {
+        return reservaRepository.findByHuespedId(idHuesped);
     }
 
     @Override
@@ -37,7 +37,7 @@ public class ReservaDAOImpl implements ReservaDAO {
     }
 
     @Override
-    public boolean existsByHuespedAndAlojamiento(Integer idHuesped, Integer idAlojamiento) {
+    public boolean existsByHuespedIdAndAlojamientoId(Integer idHuesped, Integer idAlojamiento) {
         return reservaRepository.existsByHuesped_IdAndAlojamiento_Id(idHuesped, idAlojamiento);
     }
 

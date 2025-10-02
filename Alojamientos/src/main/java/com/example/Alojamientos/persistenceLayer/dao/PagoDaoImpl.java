@@ -49,7 +49,7 @@ public class PagoDaoImpl implements PagoDao {
     }
 
     @Override
-    public List<PagoEntity> findByUsuarioId(Integer usuarioId) {
+    public List<PagoEntity> findByReserva_Huesped_Id(Integer usuarioId) {
         TypedQuery<PagoEntity> query = entityManager.createQuery(
                 "SELECT p FROM PagoEntity p " +
                         "JOIN p.reserva r " +
@@ -82,7 +82,7 @@ public class PagoDaoImpl implements PagoDao {
     }
 
     @Override
-    public boolean existsByReservaAndEstado(Integer reservaId, PagoEntity.EstadoPago estado) {
+    public boolean existsByReservaIdAndEstado(Integer reservaId, PagoEntity.EstadoPago estado) {
         TypedQuery<Long> query = entityManager.createQuery(
                 "SELECT COUNT(p) FROM PagoEntity p " +
                         "WHERE p.reserva.id = :reservaId AND p.estado = :estado",

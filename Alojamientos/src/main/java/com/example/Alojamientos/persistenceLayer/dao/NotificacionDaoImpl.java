@@ -49,7 +49,7 @@ public class NotificacionDaoImpl implements NotificacionDao {
     }
 
     @Override
-    public List<NotificacionEntity> findUnreadByUsuarioId(Integer usuarioId) {
+    public List<NotificacionEntity> findByUsuarioIdAndLeidaFalse(Integer usuarioId) {
         TypedQuery<NotificacionEntity> query = entityManager.createQuery(
                 "SELECT n FROM NotificacionEntity n WHERE n.usuario.id = :usuarioId AND n.leida = false ORDER BY n.fechaCreacion DESC",
                 NotificacionEntity.class
@@ -59,7 +59,7 @@ public class NotificacionDaoImpl implements NotificacionDao {
     }
 
     @Override
-    public long countUnreadByUsuarioId(Integer usuarioId) {
+    public long countByUsuarioIdAndLeidaFalse(Integer usuarioId) {
         TypedQuery<Long> query = entityManager.createQuery(
                 "SELECT COUNT(n) FROM NotificacionEntity n WHERE n.usuario.id = :usuarioId AND n.leida = false",
                 Long.class

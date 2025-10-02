@@ -49,7 +49,7 @@ public class FavoritoDaoImpl implements FavoritoDao {
     }
 
     @Override
-    public boolean existsByUsuarioAndAlojamiento(Integer usuarioId, Integer alojamientoId) {
+    public boolean existsByUsuarioIdAndAlojamientoId(Integer usuarioId, Integer alojamientoId) {
         Long count = entityManager.createQuery(
                         "SELECT COUNT(f) FROM FavoritoEntity f WHERE f.usuario.id = :usuarioId AND f.alojamiento.id = :alojamientoId",
                         Long.class
@@ -61,7 +61,7 @@ public class FavoritoDaoImpl implements FavoritoDao {
     }
 
     @Override
-    public void deleteByUsuarioAndAlojamiento(Integer usuarioId, Integer alojamientoId) {
+    public void deleteByUsuarioIdAndAlojamientoId(Integer usuarioId, Integer alojamientoId) {
         entityManager.createQuery(
                         "DELETE FROM FavoritoEntity f WHERE f.usuario.id = :usuarioId AND f.alojamiento.id = :alojamientoId"
                 )

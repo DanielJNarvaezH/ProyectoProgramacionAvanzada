@@ -22,11 +22,11 @@ public class AlojamientoDaoImpl implements AlojamientoDao {
 
     @Override
     public List<AlojamientoEntity> findByCiudad(String ciudad) {
-        return alojamientoRepository.findByCiudadIgnoreCase(ciudad);
+        return alojamientoRepository.findByAnfitrionId(idAnfitrion);
     }
 
     @Override
-    public List<AlojamientoEntity> findByAnfitrion(Integer idAnfitrion) {
+    public List<AlojamientoEntity> findByAnfitrionId(Integer idAnfitrion);{
         return alojamientoRepository.findByIdAnfitrion(idAnfitrion);
     }
 
@@ -41,7 +41,7 @@ public class AlojamientoDaoImpl implements AlojamientoDao {
     }
 
     @Override
-    public List<AlojamientoEntity> findByRangoPrecio(Double precioMin, Double precioMax) {
+    public List<AlojamientoEntity> findByRangoPrecio(BigDecimal precioMin, BigDecimal precioMax) {
         return alojamientoRepository.findByPrecioPorNocheBetween(precioMin, precioMax);
     }
 

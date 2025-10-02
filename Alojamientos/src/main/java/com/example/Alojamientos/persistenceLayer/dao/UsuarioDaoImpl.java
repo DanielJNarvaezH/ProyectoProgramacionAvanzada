@@ -26,8 +26,6 @@ public class UsuarioDaoImpl implements UsuarioDao {
     @Override
     public Optional<UsuarioEntity> findUsuarioCompletoById(Integer id) {
         String jpql = "SELECT u FROM UsuarioEntity u " +
-                "LEFT JOIN FETCH u.alojamientos " + // se activará cuando relaciones Usuario con Alojamiento
-                "LEFT JOIN FETCH u.reservas " +     // idem con Reservas
                 "WHERE u.id = :id";
         return em.createQuery(jpql, UsuarioEntity.class)
                 .setParameter("id", id)
@@ -35,21 +33,5 @@ public class UsuarioDaoImpl implements UsuarioDao {
                 .findFirst();
     }
 
-    @Override
-    public List<UsuarioEntity> findUsuariosConAlojamientosActivos() {
-        String jpql = "SELECT DISTINCT u FROM UsuarioEntity u " +
-                "JOIN u.alojamientos a " +
-                "WHERE a.estado = 'ACTIVO'";
-        return em.createQuery(jpql, UsuarioEntity.class)
-                .getResultList();
-    }
 
-    @Override
-    public boolean esMayorDeEdad(Integer usuarioId) {
-        String jpql = "SELECT u.fechaNacimiento FROM UsuarioEntity u WHERE u.id = :id";
-        LocalDate fecha = em.createQuery(jpql, LocalDate.class)
-                .setParameter("id", usuarioId)
-                .getSingleResult();
-        return fecha.isBefore(LocalDate.now().minusYears(18));
-    }
 }

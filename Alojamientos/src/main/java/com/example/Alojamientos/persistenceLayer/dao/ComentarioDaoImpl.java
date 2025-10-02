@@ -59,7 +59,7 @@ public class ComentarioDaoImpl implements ComentarioDao {
     }
 
     @Override
-    public List<ComentarioEntity> findByAlojamientoIdOrderByFechaDesc(Integer alojamientoId) {
+    public List<ComentarioEntity> findByAlojamientoIdOrderByFechaCreacionDesc(Integer alojamientoId){
         TypedQuery<ComentarioEntity> query = entityManager.createQuery(
                 "SELECT c FROM ComentarioEntity c WHERE c.alojamiento.id = :alojamientoId ORDER BY c.fechaCreacion DESC",
                 ComentarioEntity.class
