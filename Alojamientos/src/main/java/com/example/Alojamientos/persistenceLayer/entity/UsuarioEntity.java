@@ -80,9 +80,9 @@ public class UsuarioEntity {
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<NotificacionEntity> notificaciones;
 
-    // 1 usuario -> muchos favoritos
+    // 1 usuario -> muchos favorito
     @OneToMany(mappedBy = "usuario", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<FavoritosEntity> favoritos;
+    private List<FavoritoEntity> favorito;
 
     public enum Rol {
         USUARIO,

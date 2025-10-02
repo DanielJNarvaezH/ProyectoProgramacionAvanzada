@@ -30,8 +30,9 @@ public class ReservaEntity {
     @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true)
     private PagoEntity pago;
 
-    @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true)
-    private ComentarioEntity comentario;
+    @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<ComentarioEntity> comentarios;
+
 
     @Column(name = "fecha_inicio", nullable = false)
     private LocalDate fechaInicio;
