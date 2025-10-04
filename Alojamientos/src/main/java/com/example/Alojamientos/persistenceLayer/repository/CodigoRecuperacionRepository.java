@@ -22,7 +22,7 @@ public interface CodigoRecuperacionRepository extends JpaRepository<CodigoRecupe
      * @param idUsuario id del usuario
      * @return List<CodigoRecuperacion>
      */
-    List<CodigoRecuperacionEntity> findByIdUsuarioAndUsadoFalse(Integer idUsuario);
+    List<CodigoRecuperacionEntity> findByUsuario_IdAndUsadoFalse(Integer idUsuario);
 
     /**
      * Elimina los códigos expirados

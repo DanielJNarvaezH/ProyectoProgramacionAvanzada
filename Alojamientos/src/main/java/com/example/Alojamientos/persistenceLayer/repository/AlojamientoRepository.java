@@ -11,36 +11,26 @@ public interface AlojamientoRepository extends JpaRepository<AlojamientoEntity, 
 
     /**
      * Busca alojamientos por ciudad
-     * @param ciudad nombre de la ciudad
-     * @return lista de alojamientos
      */
     List<AlojamientoEntity> findByCiudadIgnoreCase(String ciudad);
 
     /**
-     * Busca alojamientos por anfitrión
-     * @param idAnfitrion id del anfitrión
-     * @return lista de alojamientos
+     * Busca alojamientos por anfitrión (usando el id del anfitrión)
      */
-    List<AlojamientoEntity> findByIdAnfitrion(Integer idAnfitrion);
+    List<AlojamientoEntity> findByAnfitrion_Id(Integer idAnfitrion);
 
     /**
      * Obtiene todos los alojamientos activos
-     * @return lista de alojamientos activos
      */
     List<AlojamientoEntity> findByActivoTrue();
 
     /**
      * Busca alojamientos con capacidad mayor o igual al número de huéspedes
-     * @param capacidad número mínimo de huéspedes
-     * @return lista de alojamientos que cumplen
      */
     List<AlojamientoEntity> findByCapacidadMaximaGreaterThanEqual(Integer capacidad);
 
     /**
      * Busca alojamientos por rango de precio
-     * @param precioMin precio mínimo
-     * @param precioMax precio máximo
-     * @return lista de alojamientos en ese rango
      */
     List<AlojamientoEntity> findByPrecioPorNocheBetween(Double precioMin, Double precioMax);
 }

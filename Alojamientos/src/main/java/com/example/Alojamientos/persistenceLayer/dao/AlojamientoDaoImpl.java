@@ -28,7 +28,7 @@ public class AlojamientoDaoImpl implements AlojamientoDao {
 
     @Override
     public List<AlojamientoEntity> findByAnfitrionId(Integer idAnfitrion) {
-        return alojamientoRepository.findByIdAnfitrion(idAnfitrion);
+        return alojamientoRepository.findByAnfitrion_Id(idAnfitrion);
     }
 
     @Override

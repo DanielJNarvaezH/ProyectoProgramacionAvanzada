@@ -14,25 +14,25 @@ public interface AlojamientoServicioRepository extends JpaRepository<Alojamiento
      * @param idAlojamiento id del alojamiento
      * @return lista de relaciones alojamiento-servicio
      */
-    List<AlojamientoServicioEntity> findByIdAlojamiento(Integer idAlojamiento);
+    List<AlojamientoServicioEntity> findByAlojamiento_Id(Integer idAlojamiento);
 
     /**
      * Busca todos los alojamientos que tengan un servicio específico
-     * @param Servicio_Id id del servicio
+     * @param idServicio id del servicio
      * @return lista de relaciones alojamiento-servicio
      */
-    List<AlojamientoServicioEntity> findByServicio_Id(Integer Servicio_Id);
+    List<AlojamientoServicioEntity> findByServicio_Id(Integer idServicio);
 
     /**
      * Verifica si un servicio ya está asignado a un alojamiento
-     * @param Alojamiento_Id id del alojamiento
-     * @param Servicio_Id id del servicio
+     * @param idAlojamiento id del alojamiento
+     * @param idServicio id del servicio
      * @return true si ya existe la relación
      */
-    boolean existsByAlojamiento_IdAndServicio_Id(Integer Alojamiento_Id, Integer Servicio_Id);
+    boolean existsByAlojamiento_IdAndServicio_Id(Integer idAlojamiento, Integer idServicio);
 
     /**
      * Elimina la relación entre un alojamiento y un servicio
      */
-    void deleteByAlojamiento_IdAndServicio_Id(Integer Alojamiento_Id, Integer Servicio_Id);
+    void deleteByAlojamiento_IdAndServicio_Id(Integer idAlojamiento, Integer idServicio);
 }
