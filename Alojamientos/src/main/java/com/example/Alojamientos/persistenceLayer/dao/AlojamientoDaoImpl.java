@@ -5,12 +5,8 @@ import com.example.Alojamientos.persistenceLayer.entity.AlojamientoEntity;
 import com.example.Alojamientos.persistenceLayer.repository.AlojamientoRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Repository;
+
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.List;
-
-
-
 import java.util.List;
 import java.util.Optional;
 
@@ -27,11 +23,11 @@ public class AlojamientoDaoImpl implements AlojamientoDao {
 
     @Override
     public List<AlojamientoEntity> findByCiudad(String ciudad) {
-        return alojamientoRepository.findByAnfitrionId(idAnfitrion);
+        return alojamientoRepository.findByCiudadIgnoreCase(ciudad);
     }
 
     @Override
-    public List<AlojamientoEntity> findByAnfitrionId(Integer idAnfitrion);{
+    public List<AlojamientoEntity> findByAnfitrionId(Integer idAnfitrion) {
         return alojamientoRepository.findByIdAnfitrion(idAnfitrion);
     }
 
@@ -47,7 +43,11 @@ public class AlojamientoDaoImpl implements AlojamientoDao {
 
     @Override
     public List<AlojamientoEntity> findByRangoPrecio(BigDecimal precioMin, BigDecimal precioMax) {
-        return alojamientoRepository.findByPrecioPorNocheBetween(precioMin, precioMax);
+        // Convertir BigDecimal a Double para el repositorio
+        return alojamientoRepository.findByPrecioPorNocheBetween(
+                precioMin.doubleValue(),
+                precioMax.doubleValue()
+        );
     }
 
     @Override

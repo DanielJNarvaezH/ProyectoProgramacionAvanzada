@@ -13,9 +13,6 @@ public interface UsuarioDao {
     // Buscar usuario completo (con posibles relaciones en el futuro: reservas, alojamientos, etc.)
     Optional<UsuarioEntity> findUsuarioCompletoById(Integer id);
 
-    // Usuarios con alojamientos activos (cuando se agregue la relación con AlojamientoEntity)
-    List<UsuarioEntity> findUsuariosConAlojamientosActivos();
-
     // Validar mayoría de edad
     boolean esMayorDeEdad(Integer usuarioId);
 }

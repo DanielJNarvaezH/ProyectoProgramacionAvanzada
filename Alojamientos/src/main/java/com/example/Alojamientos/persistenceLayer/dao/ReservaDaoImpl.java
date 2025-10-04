@@ -23,7 +23,8 @@ public class ReservaDaoImpl implements ReservaDao {
 
     @Override
     public List<ReservaEntity> findByHuespedId(Integer idHuesped) {
-        return reservaRepository.findByHuespedId(idHuesped);
+        // El método real en el repository es findByHuesped_Id
+        return reservaRepository.findByHuesped_Id(idHuesped);
     }
 
     @Override
@@ -33,7 +34,9 @@ public class ReservaDaoImpl implements ReservaDao {
 
     @Override
     public List<ReservaEntity> findReservasSolapadas(Integer idAlojamiento, LocalDate fechaInicio, LocalDate fechaFin) {
-        return reservaRepository.findByAlojamiento_IdAndFechaFinAfterAndFechaInicioBefore(idAlojamiento, fechaInicio, fechaFin);
+        return reservaRepository.findByAlojamiento_IdAndFechaFinAfterAndFechaInicioBefore(
+                idAlojamiento, fechaInicio, fechaFin
+        );
     }
 
     @Override

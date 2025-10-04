@@ -21,8 +21,8 @@ public class ImagenDaoImpl implements ImagenDao {
     }
 
     @Override
-    public List<ImagenEntity> findByAlojamiento(Integer AlojamientoId) {
-        return imagenRepository.findByAlojamientoId(AlojamientoId);
+    public List<ImagenEntity> findByAlojamiento(Integer alojamientoId) {
+        return imagenRepository.findByAlojamiento_Id(alojamientoId);
     }
 
     @Override
@@ -36,12 +36,12 @@ public class ImagenDaoImpl implements ImagenDao {
     }
 
     @Override
-    public void deleteByAlojamiento(Integer AlojamientoId) {
-        imagenRepository.deleteByAlojamientoId(AlojamientoId);
+    public void deleteByAlojamiento(Integer alojamientoId) {
+        imagenRepository.deleteByAlojamiento_Id(alojamientoId);
     }
 
     @Override
-    public boolean existsByAlojamiento(Integer AlojamientoId) {
-        return imagenRepository.existsByAlojamientoId(AlojamientoId);
+    public boolean existsByAlojamiento(Integer alojamientoId) {
+        return imagenRepository.existsByAlojamiento_Id(alojamientoId);
     }
 }
