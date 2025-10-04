@@ -24,5 +24,6 @@ public class AlojamientoServicioEntity {
     private ServicioEntity servicio;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean activo = true;
 }

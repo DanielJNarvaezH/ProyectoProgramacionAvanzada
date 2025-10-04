@@ -48,6 +48,7 @@ public class ReservaEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 15)
+    @Builder.Default
     private EstadoReserva estado = EstadoReserva.PENDIENTE;
 
     @Column(name = "fecha_reserva", nullable = false, updatable = false)

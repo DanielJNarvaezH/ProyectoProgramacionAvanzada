@@ -44,6 +44,7 @@ public class UsuarioEntity {
     private LocalDate fechaNacimiento;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean activo = true;
 
     @Column(name = "fecha_registro", updatable = false, insertable = false)

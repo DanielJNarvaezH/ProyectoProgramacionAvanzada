@@ -31,5 +31,6 @@ public class RespuestaComentarioEntity {
     private String texto;
 
     @Column(name = "fecha_creacion", nullable = false, updatable = false)
+    @Builder.Default
     private LocalDateTime fechaCreacion = LocalDateTime.now();
 }

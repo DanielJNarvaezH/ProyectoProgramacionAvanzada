@@ -28,6 +28,7 @@ public class ImagenEntity {
     private String descripcion;
 
     @Column(name = "orden_visualizacion", nullable = false)
+    @Builder.Default
     private Integer ordenVisualizacion = 0;
 
     @Column(name = "fecha_subida", nullable = false, updatable = false)

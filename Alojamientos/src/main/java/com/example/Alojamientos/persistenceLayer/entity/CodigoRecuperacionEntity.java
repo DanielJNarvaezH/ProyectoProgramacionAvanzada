@@ -31,5 +31,6 @@ public class CodigoRecuperacionEntity {
     private Timestamp fechaExpiracion;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean usado = false;
 }

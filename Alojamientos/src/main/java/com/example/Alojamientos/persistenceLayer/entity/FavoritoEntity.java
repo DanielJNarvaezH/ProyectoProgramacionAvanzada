@@ -36,5 +36,6 @@ public class FavoritoEntity {
     private AlojamientoEntity alojamiento;
 
     @Column(name = "fecha_agregado", nullable = false, updatable = false)
+    @Builder.Default
     private LocalDateTime fechaAgregado = LocalDateTime.now();
 }
