@@ -3,6 +3,7 @@ package com.example.Alojamientos.persistenceLayer.entity;
 import jakarta.persistence.*;
 import lombok.*;
 
+
 @Entity
 @Table(name = "alojamiento_servicio")
 @Data

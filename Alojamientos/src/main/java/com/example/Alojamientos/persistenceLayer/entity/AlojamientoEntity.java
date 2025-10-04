@@ -1,3 +1,12 @@
+package com.example.Alojamientos.persistenceLayer.entity;
+
+import jakarta.persistence.*;
+import lombok.*;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.List;
+
+
 @Entity
 @Table(name = "alojamiento")
 @Data
@@ -42,6 +51,7 @@ public class AlojamientoEntity {
     private String imagenPrincipal;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean activo = true;
 
     @Column(name = "fecha_creacion", insertable = false, updatable = false)
