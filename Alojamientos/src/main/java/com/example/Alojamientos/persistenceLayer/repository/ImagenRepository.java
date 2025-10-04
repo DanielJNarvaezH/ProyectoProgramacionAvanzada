@@ -1,20 +1,20 @@
 package com.example.Alojamientos.persistenceLayer.repository;
 
-import com.example.Alojamientos.persistenceLayer.entity.Imagen;
+import com.example.Alojamientos.persistenceLayer.entity.ImagenEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
 @Repository
-public interface ImagenRepository extends JpaRepository<Imagen, Integer> {
+public interface ImagenRepository extends JpaRepository<ImagenEntity, Integer> {
 
     /**
      * Busca todas las imágenes de un alojamiento específico
      * @param Alojamiento_Id id del alojamiento
      * @return lista de imágenes
      */
-    List<Imagen> findByAlojamiento_Id(Integer Alojamiento_Id);
+    List<ImagenEntity> findByAlojamiento_Id(Integer Alojamiento_Id);
 
     /**
      * Elimina todas las imágenes asociadas a un alojamiento

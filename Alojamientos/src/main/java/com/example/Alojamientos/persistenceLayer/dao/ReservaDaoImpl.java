@@ -1,6 +1,6 @@
 package com.example.Alojamientos.persistenceLayer.dao.impl;
 
-import com.example.Alojamientos.persistenceLayer.dao.ReservaDAO;
+import com.example.Alojamientos.persistenceLayer.dao.ReservaDao;
 import com.example.Alojamientos.persistenceLayer.entity.ReservaEntity;
 import com.example.Alojamientos.persistenceLayer.repository.ReservaRepository;
 import lombok.RequiredArgsConstructor;
@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class ReservaDaoImpl implements ReservaDAO {
+public class ReservaDaoImpl implements ReservaDao {
 
     private final ReservaRepository reservaRepository;
 

@@ -1,6 +1,6 @@
 package com.example.Alojamientos.persistenceLayer.dao.impl;
 
-import com.example.Alojamientos.persistenceLayer.dao.ImagenDAO;
+import com.example.Alojamientos.persistenceLayer.dao.ImagenDao;
 import com.example.Alojamientos.persistenceLayer.entity.ImagenEntity;
 import com.example.Alojamientos.persistenceLayer.repository.ImagenRepository;
 import lombok.RequiredArgsConstructor;
