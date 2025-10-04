@@ -12,7 +12,7 @@ import java.util.Optional;
 
 @Repository
 @RequiredArgsConstructor
-public class ReservaDAOImpl implements ReservaDAO {
+public class ReservaDaoImpl implements ReservaDAO {
 
     private final ReservaRepository reservaRepository;
 

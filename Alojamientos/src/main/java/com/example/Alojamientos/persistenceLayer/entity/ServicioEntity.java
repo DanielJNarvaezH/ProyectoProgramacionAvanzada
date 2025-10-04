@@ -25,5 +25,6 @@ public class ServicioEntity {
     private String icono;
 
     @Column(nullable = false)
+    @Builder.Default
     private Boolean activo = true;
 }

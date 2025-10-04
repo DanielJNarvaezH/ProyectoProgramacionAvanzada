@@ -32,15 +32,18 @@ public class PagoEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 15)
+    @Builder.Default
     private EstadoPago estado = EstadoPago.PENDIENTE;
 
     @Column(name = "referencia_externa", length = 100, unique = true)
     private String referenciaExterna; // este sustituye a codigoTransaccion
 
     @Column(name = "fecha_pago", nullable = false, updatable = false)
+    @Builder.Default
     private LocalDateTime fechaPago = LocalDateTime.now();
 
     @Column(name = "fecha_actualizacion", nullable = false)
+    @Builder.Default
     private LocalDateTime fechaActualizacion = LocalDateTime.now();
 
     public enum MetodoPago {
