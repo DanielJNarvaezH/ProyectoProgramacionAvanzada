@@ -52,4 +52,5 @@ public interface AlojamientoServicioRepository extends JpaRepository<Alojamiento
     Optional<AlojamientoServicioEntity> findByAlojamiento_IdAndServicio_Id(Integer alojamientoId, Integer servicioId);
 
     boolean existsByAlojamiento_IdAndServicio_IdAndActivoTrue(Integer alojamientoId, Integer servicioId);
+    //
 }
