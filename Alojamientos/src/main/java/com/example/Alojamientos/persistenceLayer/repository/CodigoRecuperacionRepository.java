@@ -7,6 +7,14 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 import java.util.List;
 
+import com.example.Alojamientos.persistenceLayer.entity.CodigoRecuperacionEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface CodigoRecuperacionRepository extends JpaRepository<CodigoRecuperacionEntity, Integer> {
 
@@ -29,4 +37,10 @@ public interface CodigoRecuperacionRepository extends JpaRepository<CodigoRecupe
      * @param fechaActual fecha actual (usualmente NOW() en SQL)
      */
     void deleteByFechaExpiracionBefore(java.time.LocalDateTime fechaActual);
+
+
+
+    Optional<CodigoRecuperacionEntity> findByCodigoAndUsuario_IdAndUsadoFalse(String codigo, Integer usuarioId);
+
+    List<CodigoRecuperacionEntity> findByFechaExpiracionBeforeAndUsadoFalse(Timestamp fecha);
 }

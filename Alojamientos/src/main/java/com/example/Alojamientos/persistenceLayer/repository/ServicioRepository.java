@@ -7,6 +7,13 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
+import com.example.Alojamientos.persistenceLayer.entity.ServicioEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+import java.util.Optional;
+
 @Repository
 public interface ServicioRepository extends JpaRepository<ServicioEntity, Integer> {
 
@@ -29,4 +36,10 @@ public interface ServicioRepository extends JpaRepository<ServicioEntity, Intege
      * @return boolean
      */
     boolean existsByNombre(String nombre);
+
+
+    boolean existsByNombre(String nombre);
+
+    List<ServicioEntity> findByActivoTrue();
+
 }

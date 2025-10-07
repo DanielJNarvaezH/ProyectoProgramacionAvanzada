@@ -6,6 +6,13 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 
+import com.example.Alojamientos.persistenceLayer.entity.ComentarioEntity;
+import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.stereotype.Repository;
+
+import java.util.List;
+
+
 @Repository
 public interface ComentarioRepository extends JpaRepository<ComentarioEntity, Integer> {
 
@@ -28,4 +35,6 @@ public interface ComentarioRepository extends JpaRepository<ComentarioEntity, In
      * Cuenta cuántos comentarios tiene un alojamiento
      */
     long countByAlojamiento_Id(Integer idAlojamiento);
+
+    boolean existsByReserva_Id(Integer reservaId);
 }
