@@ -12,6 +12,9 @@ import java.sql.Timestamp;
 import java.time.LocalDateTime;
 import java.util.Random;
 
+import java.util.List;
+
+
 @Service
 @RequiredArgsConstructor
 @Transactional
@@ -58,6 +61,14 @@ public class CodigoRecuperacionService {
      */
     @Transactional(readOnly = true)
     public boolean validarCodigo(String codigo, Integer usuarioId) {
+        if (codigo == null || codigo.trim().isEmpty()) {
+            return false;
+        }
+
+        if (usuarioId == null) {
+            return false;
+        }
+
         CodigoRecuperacionEntity entity = codigoRepository
                 .findByCodigoAndUsuario_IdAndUsadoFalse(codigo, usuarioId)
                 .orElse(null);
@@ -66,8 +77,17 @@ public class CodigoRecuperacionService {
             return false;
         }
 
-        // Verificar que no esté expirado
-        return entity.getFechaExpiracion().after(Timestamp.valueOf(LocalDateTime.now()));
+        // RN7: Verificar que no esté expirado (15 minutos)
+        Timestamp ahora = Timestamp.valueOf(LocalDateTime.now());
+        boolean noExpirado = entity.getFechaExpiracion().after(ahora);
+
+        if (!noExpirado) {
+            // El código expiró, marcarlo como usado para limpieza
+            entity.setUsado(true);
+            codigoRepository.save(entity);
+        }
+
+        return noExpirado;
     }
 
     /**

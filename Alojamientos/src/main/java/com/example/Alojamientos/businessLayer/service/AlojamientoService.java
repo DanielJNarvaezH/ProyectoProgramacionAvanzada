@@ -28,14 +28,43 @@ public class AlojamientoService {
      * RN11: Coordenadas geográficas obligatorias
      */
     public AlojamientoDTO crearAlojamiento(AlojamientoDTO dto) {
-        // RN8: Validar que tenga al menos 1 imagen (mainImage)
-        if (dto.getMainImage() == null || dto.getMainImage().isEmpty()) {
+        // RN8: Validar que tenga imagen principal
+        if (dto.getMainImage() == null || dto.getMainImage().trim().isEmpty()) {
             throw new IllegalArgumentException("El alojamiento debe tener al menos una imagen principal");
         }
 
         // RN11: Validar coordenadas
         if (dto.getLatitude() == null || dto.getLongitude() == null) {
             throw new IllegalArgumentException("Las coordenadas geográficas son obligatorias");
+        }
+
+        // Validar rango de coordenadas
+        if (dto.getLatitude() < -90 || dto.getLatitude() > 90) {
+            throw new IllegalArgumentException("La latitud debe estar entre -90 y 90 grados");
+        }
+
+        if (dto.getLongitude() < -180 || dto.getLongitude() > 180) {
+            throw new IllegalArgumentException("La longitud debe estar entre -180 y 180 grados");
+        }
+
+        // Validar precio positivo
+        if (dto.getPricePerNight() == null || dto.getPricePerNight() <= 0) {
+            throw new IllegalArgumentException("El precio por noche debe ser mayor a 0");
+        }
+
+        // Validar capacidad mínima
+        if (dto.getMaxCapacity() == null || dto.getMaxCapacity() < 1) {
+            throw new IllegalArgumentException("La capacidad máxima debe ser al menos 1 huésped");
+        }
+
+        // Validar que el nombre no esté vacío
+        if (dto.getName() == null || dto.getName().trim().isEmpty()) {
+            throw new IllegalArgumentException("El nombre del alojamiento es obligatorio");
+        }
+
+        // Validar que la descripción no esté vacía
+        if (dto.getDescription() == null || dto.getDescription().trim().isEmpty()) {
+            throw new IllegalArgumentException("La descripción del alojamiento es obligatoria");
         }
 
         // Convertir y guardar
@@ -81,16 +110,19 @@ public class AlojamientoService {
         AlojamientoEntity entity = alojamientoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Alojamiento no encontrado con id: " + id));
 
-        // RN10: Validar que no tenga reservas futuras
-        List<com.example.Alojamientos.persistenceLayer.entity.ReservaEntity> reservasFuturas =
-                reservaRepository.findByAlojamiento_IdAndFechaFinAfterAndFechaInicioBefore(
-                        id,
-                        LocalDate.now(),
-                        LocalDate.now().plusYears(10) // rango amplio
-                );
+        // RN10: Validar que no tenga reservas futuras o activas
+        List<com.example.Alojamientos.persistenceLayer.entity.ReservaEntity> reservasActivas =
+                reservaRepository.findByAlojamiento_Id(id).stream()
+                        .filter(r -> r.getFechaFin().isAfter(LocalDate.now()) || r.getFechaFin().equals(LocalDate.now()))
+                        .filter(r -> r.getEstado() == ReservaEntity.EstadoReserva.CONFIRMADA ||
+                                r.getEstado() == ReservaEntity.EstadoReserva.PENDIENTE)
+                        .collect(Collectors.toList());
 
-        if (!reservasFuturas.isEmpty()) {
-            throw new IllegalArgumentException("No se puede eliminar un alojamiento con reservas futuras");
+        if (!reservasActivas.isEmpty()) {
+            throw new IllegalArgumentException(
+                    "No se puede eliminar el alojamiento porque tiene " + reservasActivas.size() +
+                            " reserva(s) activa(s) o futura(s)"
+            );
         }
 
         // Soft delete

@@ -24,16 +24,28 @@ public class ImagenService {
      * Máximo 10 imágenes por alojamiento
      */
     public ImagenDTO crearImagen(ImagenDTO dto) {
-        // Validar límite de 10 imágenes
+        // Validar que el alojamiento exista
+        if (dto.getLodgingId() == null) {
+            throw new IllegalArgumentException("El ID del alojamiento es obligatorio");
+        }
+
+        // Validar URL no vacía
+        if (dto.getUrl() == null || dto.getUrl().trim().isEmpty()) {
+            throw new IllegalArgumentException("La URL de la imagen es obligatoria");
+        }
+
+        // RN8: Validar límite de 10 imágenes
         long cantidadImagenes = imagenRepository.countByAlojamiento_Id(dto.getLodgingId());
         if (cantidadImagenes >= 10) {
-            throw new IllegalArgumentException("El alojamiento ya tiene el máximo de 10 imágenes");
+            throw new IllegalArgumentException(
+                    "El alojamiento ya tiene el máximo de 10 imágenes permitidas"
+            );
         }
 
         ImagenEntity entity = imagenMapper.toEntity(dto);
 
         // Si no se especifica orden, asignar el siguiente disponible
-        if (entity.getOrdenVisualizacion() == null) {
+        if (entity.getOrdenVisualizacion() == null || entity.getOrdenVisualizacion() < 0) {
             entity.setOrdenVisualizacion((int) cantidadImagenes);
         }
 

@@ -1,11 +1,12 @@
 package com.example.Alojamientos.businessLayer.service;
 
 import com.example.Alojamientos.businessLayer.dto.UsuarioDTO;
+import com.example.Alojamientos.persistenceLayer.entity.AlojamientoEntity;
+import com.example.Alojamientos.persistenceLayer.entity.ReservaEntity;
 import com.example.Alojamientos.persistenceLayer.entity.UsuarioEntity;
 import com.example.Alojamientos.persistenceLayer.mapper.UsuarioDataMapper;
 import com.example.Alojamientos.persistenceLayer.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -27,7 +28,7 @@ public class UsuarioService {
     /**
      * RF1: Registrar un nuevo usuario
      * RN1: Email debe ser único
-     * RN2: Validar política de contraseñas
+     * RN2: Validar política de contraseñas (min 8 chars, 1 mayúscula, 1 número)
      * RN3: Usuario debe ser mayor de 18 años para ser anfitrión
      */
     public UsuarioDTO crearUsuario(UsuarioDTO dto) {
@@ -36,9 +37,24 @@ public class UsuarioService {
             throw new IllegalArgumentException("El email ya está registrado");
         }
 
-        // RN2: Validar contraseña (ya validada por @Size en DTO, pero reforzamos)
+        // Validar teléfono único (adicional)
+        if (usuarioRepository.existsByTelefono(dto.getPhone())) {
+            throw new IllegalArgumentException("El teléfono ya está registrado");
+        }
+
+        // RN2: Validar contraseña segura
         if (dto.getPassword() == null || dto.getPassword().length() < 8) {
             throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres");
+        }
+
+        // Validar que tenga al menos una mayúscula
+        if (!dto.getPassword().matches(".*[A-Z].*")) {
+            throw new IllegalArgumentException("La contraseña debe tener al menos una letra mayúscula");
+        }
+
+        // Validar que tenga al menos un número
+        if (!dto.getPassword().matches(".*\\d.*")) {
+            throw new IllegalArgumentException("La contraseña debe tener al menos un número");
         }
 
         // RN3: Validar edad si es anfitrión
@@ -48,6 +64,12 @@ public class UsuarioService {
             if (age < 18) {
                 throw new IllegalArgumentException("Debes ser mayor de 18 años para registrarte como anfitrión");
             }
+        }
+
+        // Validar que la fecha de nacimiento no sea futura
+        LocalDate birthDate = LocalDate.parse(dto.getBirthDate());
+        if (birthDate.isAfter(LocalDate.now())) {
+            throw new IllegalArgumentException("La fecha de nacimiento no puede ser futura");
         }
 
         // Convertir DTO a Entity
@@ -126,8 +148,8 @@ public class UsuarioService {
         UsuarioEntity entity = usuarioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado con id: " + id));
 
-        // RN4: Validar que no tenga alojamientos activos o reservas futuras
-        // TODO: Implementar validación con AlojamientoService y ReservaService
+        // RN4: Validar restricciones antes de eliminar
+        validarEliminacionUsuario(entity);
 
         entity.setActivo(false);
         usuarioRepository.save(entity);
@@ -160,5 +182,31 @@ public class UsuarioService {
     @Transactional(readOnly = true)
     public boolean existeEmail(String email) {
         return usuarioRepository.existsByCorreo(email);
+    }
+
+    /**
+     * RN4: Validar que el usuario no tenga alojamientos activos antes de eliminar
+     */
+    private void validarEliminacionUsuario(UsuarioEntity usuario) {
+        // Validar rol anfitrión
+        if (usuario.getRol() == UsuarioEntity.Rol.ANFITRION) {
+            // Verificar si tiene alojamientos activos
+            boolean tieneAlojamientosActivos = usuario.getAlojamientos().stream()
+                    .anyMatch(AlojamientoEntity::getActivo);
+
+            if (tieneAlojamientosActivos) {
+                throw new IllegalArgumentException("No se puede eliminar un anfitrión con alojamientos activos");
+            }
+
+            // Verificar si tiene reservas futuras en sus alojamientos
+            boolean tieneReservasFuturas = usuario.getAlojamientos().stream()
+                    .flatMap(a -> a.getReservas().stream())
+                    .anyMatch(r -> r.getFechaInicio().isAfter(LocalDate.now()) &&
+                            r.getEstado() != ReservaEntity.EstadoReserva.CANCELADA);
+
+            if (tieneReservasFuturas) {
+                throw new IllegalArgumentException("No se puede eliminar un anfitrión con reservas futuras");
+            }
+        }
     }
 }

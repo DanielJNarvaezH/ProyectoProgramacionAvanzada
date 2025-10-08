@@ -31,33 +31,61 @@ public class ComentarioService {
      * RN22: Máximo 500 caracteres
      */
     public ComentarioDTO crearComentario(ComentarioDTO dto) {
+        // Validar que los IDs no sean nulos
+        if (dto.getReservationId() == null) {
+            throw new IllegalArgumentException("El ID de la reserva es obligatorio");
+        }
+
+        if (dto.getUserId() == null) {
+            throw new IllegalArgumentException("El ID del usuario es obligatorio");
+        }
+
         // Obtener reserva
         ReservaEntity reserva = reservaRepository.findById(dto.getReservationId())
-                .orElseThrow(() -> new IllegalArgumentException("Reserva no encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Reserva no encontrada con id: " + dto.getReservationId()));
 
         // RN19: Validar que la reserva esté completada
         if (reserva.getEstado() != ReservaEntity.EstadoReserva.COMPLETADA) {
-            throw new IllegalArgumentException("Solo puedes comentar después de completar la estadía");
+            throw new IllegalArgumentException(
+                    "Solo puedes comentar después de completar la estadía. Estado actual: " + reserva.getEstado()
+            );
         }
 
         // Validar que la fecha de check-out haya pasado
-        if (reserva.getFechaFin().isAfter(LocalDate.now())) {
-            throw new IllegalArgumentException("Solo puedes comentar después del check-out");
+        if (reserva.getFechaFin().isAfter(LocalDate.now()) || reserva.getFechaFin().equals(LocalDate.now())) {
+            throw new IllegalArgumentException(
+                    "Solo puedes comentar después de la fecha de check-out (" + reserva.getFechaFin() + ")"
+            );
         }
 
         // RN20: Validar que no exista comentario previo para esta reserva
         if (comentarioRepository.existsByReserva_Id(dto.getReservationId())) {
-            throw new IllegalArgumentException("Ya existe un comentario para esta reserva");
+            throw new IllegalArgumentException("Ya existe un comentario para esta reserva. Solo se permite 1 comentario por reserva.");
         }
 
-        // RN21: Validar calificación (ya validada por @Min @Max en DTO, pero reforzamos)
+        // RN21: Validar calificación entre 1-5
+        if (dto.getRating() == null) {
+            throw new IllegalArgumentException("La calificación es obligatoria");
+        }
+
         if (dto.getRating() < 1 || dto.getRating() > 5) {
-            throw new IllegalArgumentException("La calificación debe estar entre 1 y 5");
+            throw new IllegalArgumentException("La calificación debe estar entre 1 y 5 estrellas");
         }
 
-        // RN22: Validar longitud texto (ya validada por @Size, pero reforzamos)
+        // RN22: Validar longitud del texto
+        if (dto.getText() == null || dto.getText().trim().isEmpty()) {
+            throw new IllegalArgumentException("El comentario no puede estar vacío");
+        }
+
         if (dto.getText().length() > 500) {
-            throw new IllegalArgumentException("El comentario no puede exceder 500 caracteres");
+            throw new IllegalArgumentException(
+                    "El comentario no puede exceder 500 caracteres. Actual: " + dto.getText().length()
+            );
+        }
+
+        // Validar que el usuario de la reserva coincida con el usuario del comentario
+        if (!reserva.getHuesped().getId().equals(dto.getUserId())) {
+            throw new IllegalArgumentException("Solo el huésped que realizó la reserva puede comentar");
         }
 
         // Crear entidad

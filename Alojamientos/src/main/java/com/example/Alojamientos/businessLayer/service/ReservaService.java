@@ -32,39 +32,75 @@ public class ReservaService {
      * RN15: Estado inicial "CONFIRMADA" (si no requiere aprobación manual)
      */
     public ReservaDTO crearReserva(ReservaDTO dto) {
+        // Validar que los IDs no sean nulos
+        if (dto.getGuestId() == null) {
+            throw new IllegalArgumentException("El ID del huésped es obligatorio");
+        }
+
+        if (dto.getLodgingId() == null) {
+            throw new IllegalArgumentException("El ID del alojamiento es obligatorio");
+        }
+
         // Parsear fechas
         LocalDate fechaInicio = LocalDate.parse(dto.getStartDate());
         LocalDate fechaFin = LocalDate.parse(dto.getEndDate());
 
         // RN13: Validar fechas futuras
         if (fechaInicio.isBefore(LocalDate.now())) {
-            throw new IllegalArgumentException("No se pueden hacer reservas con fechas pasadas");
+            throw new IllegalArgumentException("La fecha de inicio no puede ser anterior a hoy");
         }
 
         // RN13: Validar mínimo 1 noche
-        if (ChronoUnit.DAYS.between(fechaInicio, fechaFin) < 1) {
+        long noches = ChronoUnit.DAYS.between(fechaInicio, fechaFin);
+        if (noches < 1) {
             throw new IllegalArgumentException("La reserva debe ser de al menos 1 noche");
+        }
+
+        // Validar que fecha fin sea posterior a fecha inicio
+        if (!fechaFin.isAfter(fechaInicio)) {
+            throw new IllegalArgumentException("La fecha de fin debe ser posterior a la fecha de inicio");
         }
 
         // Obtener alojamiento
         AlojamientoEntity alojamiento = alojamientoRepository.findById(dto.getLodgingId())
-                .orElseThrow(() -> new IllegalArgumentException("Alojamiento no encontrado"));
+                .orElseThrow(() -> new IllegalArgumentException("Alojamiento no encontrado con id: " + dto.getLodgingId()));
 
-        // RN14: Validar capacidad máxima
-        if (dto.getNumGuests() > alojamiento.getCapacidadMaxima()) {
-            throw new IllegalArgumentException("El número de huéspedes excede la capacidad máxima del alojamiento");
+        // Validar que el alojamiento esté activo
+        if (!alojamiento.getActivo()) {
+            throw new IllegalArgumentException("El alojamiento no está disponible");
         }
 
-        // Validar disponibilidad (no solapamiento)
+        // RN14: Validar capacidad máxima
+        if (dto.getNumGuests() == null || dto.getNumGuests() < 1) {
+            throw new IllegalArgumentException("Debe haber al menos 1 huésped");
+        }
+
+        if (dto.getNumGuests() > alojamiento.getCapacidadMaxima()) {
+            throw new IllegalArgumentException(
+                    "El número de huéspedes (" + dto.getNumGuests() +
+                            ") excede la capacidad máxima del alojamiento (" + alojamiento.getCapacidadMaxima() + ")"
+            );
+        }
+
+        // Validar disponibilidad (no solapamiento) - considerar solo reservas confirmadas o pendientes
         List<ReservaEntity> reservasExistentes = reservaRepository
-                .findByAlojamiento_IdAndFechaFinAfterAndFechaInicioBefore(
-                        dto.getLodgingId(),
-                        fechaInicio,
-                        fechaFin
-                );
+                .findByAlojamiento_Id(dto.getLodgingId()).stream()
+                .filter(r -> r.getEstado() == ReservaEntity.EstadoReserva.CONFIRMADA ||
+                        r.getEstado() == ReservaEntity.EstadoReserva.PENDIENTE)
+                .filter(r -> !(fechaFin.isBefore(r.getFechaInicio()) || fechaFin.equals(r.getFechaInicio())) &&
+                        !(fechaInicio.isAfter(r.getFechaFin()) || fechaInicio.equals(r.getFechaFin())))
+                .collect(Collectors.toList());
 
         if (!reservasExistentes.isEmpty()) {
-            throw new IllegalArgumentException("El alojamiento no está disponible en las fechas seleccionadas");
+            throw new IllegalArgumentException(
+                    "El alojamiento no está disponible en las fechas seleccionadas (" +
+                            dto.getStartDate() + " a " + dto.getEndDate() + ")"
+            );
+        }
+
+        // Validar precio total positivo
+        if (dto.getTotalPrice() == null || dto.getTotalPrice() <= 0) {
+            throw new IllegalArgumentException("El precio total debe ser mayor a 0");
         }
 
         // Crear entidad
@@ -86,21 +122,32 @@ public class ReservaService {
      */
     public void cancelarReserva(Integer reservaId, String motivo) {
         ReservaEntity entity = reservaRepository.findById(reservaId)
-                .orElseThrow(() -> new IllegalArgumentException("Reserva no encontrada"));
+                .orElseThrow(() -> new IllegalArgumentException("Reserva no encontrada con id: " + reservaId));
 
-        // Validar que no esté ya cancelada o completada
+        // Validar que no esté ya cancelada
         if (entity.getEstado() == ReservaEntity.EstadoReserva.CANCELADA) {
-            throw new IllegalArgumentException("La reserva ya está cancelada");
+            throw new IllegalArgumentException("La reserva ya fue cancelada previamente");
         }
 
+        // Validar que no esté completada
         if (entity.getEstado() == ReservaEntity.EstadoReserva.COMPLETADA) {
-            throw new IllegalArgumentException("No se puede cancelar una reserva completada");
+            throw new IllegalArgumentException("No se puede cancelar una reserva que ya fue completada");
         }
 
         // RN16: Validar 48 horas antes del check-in
-        long horasHastaCheckIn = ChronoUnit.HOURS.between(LocalDateTime.now(), entity.getFechaInicio().atStartOfDay());
+        LocalDateTime checkIn = entity.getFechaInicio().atStartOfDay();
+        long horasHastaCheckIn = ChronoUnit.HOURS.between(LocalDateTime.now(), checkIn);
+
         if (horasHastaCheckIn < 48) {
-            throw new IllegalArgumentException("No se puede cancelar la reserva con menos de 48 horas de anticipación");
+            throw new IllegalArgumentException(
+                    "No se puede cancelar la reserva. La cancelación debe hacerse con al menos 48 horas de anticipación. " +
+                            "Tiempo restante: " + horasHastaCheckIn + " horas"
+            );
+        }
+
+        // Validar motivo
+        if (motivo == null || motivo.trim().isEmpty()) {
+            throw new IllegalArgumentException("Debe proporcionar un motivo de cancelación");
         }
 
         // Actualizar estado
