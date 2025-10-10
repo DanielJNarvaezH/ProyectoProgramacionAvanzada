@@ -11,6 +11,9 @@ import jakarta.validation.constraints.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class UsuarioDTO {
+
+    private Integer id; // <<--- Agregado
+
     @NotBlank
     @Size(max = 100)
     private String name;
