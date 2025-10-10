@@ -7,12 +7,6 @@ import org.springframework.stereotype.Repository;
 import java.util.List;
 import java.util.Optional;
 
-import com.example.Alojamientos.persistenceLayer.entity.PagoEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
-import java.util.Optional;
-
 @Repository
 public interface PagoRepository extends JpaRepository<PagoEntity, Integer> {
 
@@ -35,4 +29,9 @@ public interface PagoRepository extends JpaRepository<PagoEntity, Integer> {
      * Verifica si una reserva ya tiene un pago con un estado específico
      */
     boolean existsByReserva_IdAndEstado(Integer idReserva, PagoEntity.EstadoPago estado);
+
+    /**
+     * Verifica si ya existe un pago para una reserva (sin importar el estado)
+     */
+    boolean existsByReserva_Id(Integer idReserva);
 }

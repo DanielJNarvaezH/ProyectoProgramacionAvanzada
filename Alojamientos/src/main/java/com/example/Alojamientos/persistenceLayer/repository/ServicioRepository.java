@@ -37,9 +37,4 @@ public interface ServicioRepository extends JpaRepository<ServicioEntity, Intege
      */
     boolean existsByNombre(String nombre);
 
-
-    boolean existsByNombre(String nombre);
-
-    List<ServicioEntity> findByActivoTrue();
-
 }

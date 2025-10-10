@@ -24,7 +24,7 @@ public class NotificacionService {
      */
     public NotificacionDTO crearNotificacion(NotificacionDTO dto) {
         NotificacionEntity entity = notificacionMapper.toEntity(dto);
-        entity.setLeidaentity.setLeida(false);
+        entity.setLeida(false);
 
         NotificacionEntity saved = notificacionRepository.save(entity);
 
