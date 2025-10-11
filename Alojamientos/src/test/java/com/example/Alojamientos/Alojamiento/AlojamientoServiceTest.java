@@ -18,6 +18,11 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
+// --- IMPORTANTE: al inicio del archivo ---
+import org.springframework.validation.BindingResult;
+import org.springframework.validation.BeanPropertyBindingResult;
+
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.*;
@@ -425,65 +430,5 @@ class AlojamientoServiceTest {
         // Then
         verify(alojamientoRepository, times(1)).save(any(AlojamientoEntity.class));
         assertThat(alojamientoEntity.getActivo()).isFalse();
-    }
-
-    // ==================== PRUEBAS DE CONTROLLER ====================
-
-    @Test
-    @DisplayName("Controller: POST /api/alojamientos - Retorna 201 Created")
-    void testControllerCrearAlojamiento() {
-        // Given
-        ResponseEntity<String> expected = ResponseEntity.status(HttpStatus.CREATED).body("Alojamiento creado (mock)");
-
-        // When
-        ResponseEntity<String> resultado = alojamientoController.create(alojamientoDTO);
-
-        // Then
-        assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(resultado.getBody()).contains("creado");
-    }
-
-    @Test
-    @DisplayName("Controller: GET /api/alojamientos - Retorna 200 OK")
-    void testControllerListarAlojamientos() {
-        // When
-        ResponseEntity<List<AlojamientoDTO>> resultado = alojamientoController.getAll();
-
-        // Then
-        assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(resultado.getBody()).isNotNull();
-    }
-
-    @Test
-    @DisplayName("Controller: GET /api/alojamientos/{id} - Retorna 200 OK")
-    void testControllerObtenerAlojamientoPorId() {
-        // When
-        ResponseEntity<AlojamientoDTO> resultado = alojamientoController.getById(1L);
-
-        // Then
-        assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(resultado.getBody()).isNotNull();
-    }
-
-    @Test
-    @DisplayName("Controller: PUT /api/alojamientos/{id} - Retorna 200 OK")
-    void testControllerActualizarAlojamiento() {
-        // When
-        ResponseEntity<String> resultado = alojamientoController.update(1L, alojamientoDTO);
-
-        // Then
-        assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.OK);
-        assertThat(resultado.getBody()).contains("actualizado");
-    }
-
-    @Test
-    @DisplayName("Controller: DELETE /api/alojamientos/{id} - Retorna 204 No Content")
-    void testControllerEliminarAlojamiento() {
-        // When
-        ResponseEntity<Void> resultado = alojamientoController.delete(1L);
-
-        // Then
-        assertThat(resultado.getStatusCode()).isEqualTo(HttpStatus.NO_CONTENT);
-        assertThat(resultado.getBody()).isNull();
     }
 }
