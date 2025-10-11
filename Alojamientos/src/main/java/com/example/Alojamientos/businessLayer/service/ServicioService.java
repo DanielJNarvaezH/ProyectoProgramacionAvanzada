@@ -91,4 +91,14 @@ public class ServicioService {
                 .orElseThrow(() -> new IllegalArgumentException("Servicio no encontrado con nombre: " + nombre));
         return servicioMapper.toDTO(entity);
     }
+    /**
+     * Listar todos los servicios (activos e inactivos)
+     */
+    @Transactional(readOnly = true)
+    public List<ServicioDTO> listarTodos() {
+        return servicioRepository.findAll().stream()
+                .map(servicioMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
 }

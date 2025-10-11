@@ -11,9 +11,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -52,7 +50,7 @@ class ServicioServiceTest {
                 .build();
     }
 
-    // --- POST /api/servicios ---
+    // --- 1 ---
     @Test
     void crearServicio_exitoso() {
         when(servicioRepository.existsByNombre(servicioDTO.getName())).thenReturn(false);
@@ -67,15 +65,15 @@ class ServicioServiceTest {
         verify(servicioRepository, times(1)).save(servicioEntity);
     }
 
+    // --- 2 ---
     @Test
     void crearServicio_nombreDuplicado_lanzaExcepcion() {
         when(servicioRepository.existsByNombre(servicioDTO.getName())).thenReturn(true);
-
         assertThrows(IllegalArgumentException.class, () -> servicioService.crearServicio(servicioDTO));
         verify(servicioRepository, never()).save(any());
     }
 
-    // --- GET /api/servicios ---
+    // --- 3 ---
     @Test
     void listarActivos_exitoso() {
         when(servicioRepository.findByActivoTrue()).thenReturn(Arrays.asList(servicioEntity));
@@ -88,7 +86,15 @@ class ServicioServiceTest {
         assertEquals("Wifi", result.get(0).getName());
     }
 
-    // --- GET /api/servicios/{id} ---
+    // --- 4 ---
+    @Test
+    void listarActivos_listaVacia() {
+        when(servicioRepository.findByActivoTrue()).thenReturn(Collections.emptyList());
+        List<ServicioDTO> result = servicioService.listarActivos();
+        assertTrue(result.isEmpty());
+    }
+
+    // --- 5 ---
     @Test
     void obtenerPorId_exitoso() {
         when(servicioRepository.findById(1)).thenReturn(Optional.of(servicioEntity));
@@ -101,14 +107,14 @@ class ServicioServiceTest {
         verify(servicioRepository, times(1)).findById(1);
     }
 
+    // --- 6 ---
     @Test
     void obtenerPorId_noExiste_lanzaExcepcion() {
         when(servicioRepository.findById(1)).thenReturn(Optional.empty());
-
         assertThrows(IllegalArgumentException.class, () -> servicioService.obtenerPorId(1));
     }
 
-    // --- PUT /api/servicios/{id} ---
+    // --- 7 ---
     @Test
     void actualizarServicio_exitoso() {
         ServicioDTO actualizado = ServicioDTO.builder()
@@ -129,25 +135,30 @@ class ServicioServiceTest {
         verify(servicioRepository, times(1)).save(any(ServicioEntity.class));
     }
 
-    // --- DELETE /api/servicios/{id} ---
+    // --- 8 ---
+    @Test
+    void actualizarServicio_noExiste_lanzaExcepcion() {
+        when(servicioRepository.findById(1)).thenReturn(Optional.empty());
+        assertThrows(IllegalArgumentException.class, () -> servicioService.actualizarServicio(1, servicioDTO));
+    }
+
+    // --- 9 ---
     @Test
     void desactivarServicio_exitoso() {
         when(servicioRepository.findById(1)).thenReturn(Optional.of(servicioEntity));
-
         servicioService.desactivarServicio(1);
-
         assertFalse(servicioEntity.getActivo());
         verify(servicioRepository, times(1)).save(servicioEntity);
     }
 
+    // --- 10 ---
     @Test
     void desactivarServicio_noExiste_lanzaExcepcion() {
         when(servicioRepository.findById(1)).thenReturn(Optional.empty());
-
         assertThrows(IllegalArgumentException.class, () -> servicioService.desactivarServicio(1));
     }
 
-    // --- Buscar por nombre ---
+    // --- 11 ---
     @Test
     void buscarPorNombre_exitoso() {
         when(servicioRepository.findByNombre("Wifi")).thenReturn(Optional.of(servicioEntity));
@@ -159,10 +170,45 @@ class ServicioServiceTest {
         assertEquals("Wifi", result.getName());
     }
 
+    // --- 12 ---
     @Test
     void buscarPorNombre_noExiste_lanzaExcepcion() {
         when(servicioRepository.findByNombre("Piscina")).thenReturn(Optional.empty());
-
         assertThrows(IllegalArgumentException.class, () -> servicioService.buscarPorNombre("Piscina"));
+    }
+
+
+    // --- 14 ---
+    @Test
+    void actualizarServicio_sinCambiosMantieneDatos() {
+        when(servicioRepository.findById(1)).thenReturn(Optional.of(servicioEntity));
+        when(servicioRepository.save(servicioEntity)).thenReturn(servicioEntity);
+        when(servicioMapper.toDTO(servicioEntity)).thenReturn(servicioDTO);
+
+        ServicioDTO result = servicioService.actualizarServicio(1, servicioDTO);
+
+        assertEquals("Wifi", result.getName());
+        verify(servicioRepository, times(1)).save(servicioEntity);
+    }
+
+    // --- 15 ---
+    @Test
+    void listarTodos_incluyeActivosEInactivos() {
+        ServicioEntity inactivo = ServicioEntity.builder()
+                .id(2)
+                .nombre("Televisión")
+                .descripcion("TV por cable")
+                .icono("tv-icon")
+                .activo(false)
+                .build();
+
+        when(servicioRepository.findAll()).thenReturn(Arrays.asList(servicioEntity, inactivo));
+        when(servicioMapper.toDTO(any(ServicioEntity.class))).thenReturn(servicioDTO);
+
+        List<ServicioDTO> result = servicioService.listarTodos();
+
+        assertNotNull(result);
+        assertEquals(2, result.size());
+        verify(servicioRepository, times(1)).findAll();
     }
 }
