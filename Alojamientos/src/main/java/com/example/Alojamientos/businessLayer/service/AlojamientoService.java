@@ -203,6 +203,12 @@ public class AlojamientoService {
      */
     @Transactional(readOnly = true)
     public Long obtenerNumeroReservas(Integer alojamientoId) {
+        // Validar que el alojamiento exista
+        if (!alojamientoRepository.existsById(alojamientoId)) {
+            throw new IllegalArgumentException("Alojamiento no encontrado con ID: " + alojamientoId);
+        }
+
+        // Si existe, contar las reservas asociadas
         return (long) reservaRepository.findByAlojamiento_Id(alojamientoId).size();
     }
 }
