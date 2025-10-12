@@ -12,7 +12,7 @@ public class AlojamientoDTO {
     @NotNull
     private Integer hostId;
 
-    @NotBlank
+    @NotBlank(message = "El nombre del alojamiento no puede estar vacío")
     @Size(max = 150)
     private String name;
 
