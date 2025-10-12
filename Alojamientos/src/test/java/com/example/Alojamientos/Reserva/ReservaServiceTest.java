@@ -1,4 +1,4 @@
-package com.example.Alojamientos;
+package com.example.Alojamientos.Reserva;
 
 import com.example.Alojamientos.businessLayer.dto.ReservaDTO;
 import com.example.Alojamientos.businessLayer.service.ReservaService;

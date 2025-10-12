@@ -33,4 +33,7 @@ public interface AlojamientoRepository extends JpaRepository<AlojamientoEntity, 
      * Busca alojamientos por rango de precio
      */
     List<AlojamientoEntity> findByPrecioPorNocheBetween(Double precioMin, Double precioMax);
+
+    boolean existsByNombreAndAnfitrion_Id(String nombre, Integer anfitrionId);
+
 }

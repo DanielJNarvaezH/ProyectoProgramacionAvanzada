@@ -1,6 +1,7 @@
-package com.example.Alojamientos.businessLayer.service;
+package com.example.Alojamientos.Promoción;
 
 import com.example.Alojamientos.businessLayer.dto.PromocionDTO;
+import com.example.Alojamientos.businessLayer.service.PromocionService;
 import com.example.Alojamientos.persistenceLayer.entity.PromocionEntity;
 import com.example.Alojamientos.persistenceLayer.entity.AlojamientoEntity;
 import com.example.Alojamientos.persistenceLayer.mapper.PromocionDataMapper;

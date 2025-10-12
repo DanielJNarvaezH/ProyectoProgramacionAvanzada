@@ -70,6 +70,11 @@ public class AlojamientoService {
             throw new IllegalArgumentException("La descripción del alojamiento es obligatoria");
         }
 
+        boolean exists = alojamientoRepository.existsByNombreAndAnfitrion_Id(dto.getName(), dto.getHostId());
+        if (exists) {
+            throw new IllegalArgumentException("Ya existe un alojamiento con ese nombre para este anfitrión");
+        }
+
         // Convertir y guardar
         AlojamientoEntity entity = alojamientoMapper.toEntity(dto);
         entity.setActivo(true);

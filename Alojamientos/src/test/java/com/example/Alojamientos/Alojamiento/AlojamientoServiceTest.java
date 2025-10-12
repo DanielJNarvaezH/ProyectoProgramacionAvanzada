@@ -1,4 +1,4 @@
-package com.example.Alojamientos;
+package com.example.Alojamientos.Alojamiento;
 
 import com.example.Alojamientos.businessLayer.dto.AlojamientoDTO;
 import com.example.Alojamientos.businessLayer.service.AlojamientoService;

@@ -1,6 +1,7 @@
-package com.example.Alojamientos.businessLayer.service;
+package com.example.Alojamientos.Favorito;
 
 import com.example.Alojamientos.businessLayer.dto.FavoritoDTO;
+import com.example.Alojamientos.businessLayer.service.FavoritoService;
 import com.example.Alojamientos.persistenceLayer.entity.AlojamientoEntity;
 import com.example.Alojamientos.persistenceLayer.entity.FavoritoEntity;
 import com.example.Alojamientos.persistenceLayer.entity.UsuarioEntity;

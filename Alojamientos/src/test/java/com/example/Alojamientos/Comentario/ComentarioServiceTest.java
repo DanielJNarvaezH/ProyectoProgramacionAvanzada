@@ -1,6 +1,7 @@
-package com.example.Alojamientos.businessLayer.service;
+package com.example.Alojamientos.Comentario;
 
 import com.example.Alojamientos.businessLayer.dto.ComentarioDTO;
+import com.example.Alojamientos.businessLayer.service.ComentarioService;
 import com.example.Alojamientos.persistenceLayer.entity.*;
 import com.example.Alojamientos.persistenceLayer.mapper.ComentarioDataMapper;
 import com.example.Alojamientos.persistenceLayer.repository.ComentarioRepository;
