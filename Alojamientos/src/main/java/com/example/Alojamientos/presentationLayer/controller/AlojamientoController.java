@@ -255,11 +255,14 @@ public class AlojamientoController {
             return ResponseEntity.badRequest().body("El ID del alojamiento es inválido");
         }
 
+
         try {
             Long reservas = alojamientoService.obtenerNumeroReservas(id);
             return ResponseEntity.ok(Map.of("numeroReservas", reservas));
         } catch (IllegalArgumentException e) {
+
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+
     }
 }
