@@ -135,7 +135,7 @@ public class CodigoRecuperacionController {
             description = "Limpia todos los códigos de recuperación expirados del sistema.",
             responses = {
                     @ApiResponse(responseCode = "204", description = "Códigos expirados eliminados correctamente"),
-                    @ApiResponse(responseCode = "400", description = "Solicitud inválida o datos incorrectos"),
+                    @ApiResponse(responseCode = "405", description = "Method Not Allowed\n"),
                     @ApiResponse(responseCode = "500", description = "Error interno al eliminar códigos")
             }
     )
