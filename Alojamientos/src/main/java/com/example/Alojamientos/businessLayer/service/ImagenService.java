@@ -7,6 +7,9 @@ import com.example.Alojamientos.persistenceLayer.repository.ImagenRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import com.example.Alojamientos.persistenceLayer.entity.AlojamientoEntity;
+import com.example.Alojamientos.persistenceLayer.repository.AlojamientoRepository;
+
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -18,6 +21,8 @@ public class ImagenService {
 
     private final ImagenRepository imagenRepository;
     private final ImagenDataMapper imagenMapper;
+    private final AlojamientoRepository alojamientoRepository; // ← agregado
+
 
     /**
      * RF10, RN8: Crear imagen para alojamiento
@@ -42,7 +47,15 @@ public class ImagenService {
             );
         }
 
+// Buscar alojamiento real en la base de datos
+        AlojamientoEntity alojamiento = alojamientoRepository.findById(dto.getLodgingId())
+                .orElseThrow(() -> new IllegalArgumentException("Alojamiento no encontrado"));
+
+// Mapear DTO a entidad
         ImagenEntity entity = imagenMapper.toEntity(dto);
+
+// Reemplazar el objeto incompleto por el real
+        entity.setAlojamiento(alojamiento);
 
         // Si no se especifica orden, asignar el siguiente disponible
         if (entity.getOrdenVisualizacion() == null || entity.getOrdenVisualizacion() < 0) {
