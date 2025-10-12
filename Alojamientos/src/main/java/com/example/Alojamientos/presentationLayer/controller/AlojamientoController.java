@@ -17,8 +17,8 @@ import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
-@RequestMapping("/api/alojamientos")
-@Tag(name = "Alojamientos", description = "Gestión de alojamientos (casas, apartamentos, habitaciones, etc.)")
+@RequestMapping("/api/alojamiento")
+@Tag(name = "Alojamiento", description = "Gestión de alojamientos (casas, apartamentos, habitaciones, etc.)")
 @RequiredArgsConstructor
 public class AlojamientoController {
 
