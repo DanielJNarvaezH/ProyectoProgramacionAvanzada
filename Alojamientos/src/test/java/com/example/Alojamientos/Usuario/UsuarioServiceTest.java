@@ -1,7 +1,7 @@
 package com.example.Alojamientos.Usuario;
 
-import com.example.Alojamientos.businessLayer.service.UsuarioService;
 import com.example.Alojamientos.businessLayer.dto.UsuarioDTO;
+import com.example.Alojamientos.businessLayer.service.UsuarioService;
 import com.example.Alojamientos.persistenceLayer.entity.UsuarioEntity;
 import com.example.Alojamientos.persistenceLayer.mapper.UsuarioDataMapper;
 import com.example.Alojamientos.persistenceLayer.repository.UsuarioRepository;
@@ -12,9 +12,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 import java.time.LocalDate;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -38,6 +36,7 @@ class UsuarioServiceTest {
         MockitoAnnotations.openMocks(this);
 
         usuarioDTO = UsuarioDTO.builder()
+                .id(1)
                 .name("Juan Perez")
                 .email("juan@correo.com")
                 .phone("123456789")
@@ -58,7 +57,7 @@ class UsuarioServiceTest {
                 .build();
     }
 
-    // --- GET /api/usuarios ---
+    // --- 1 ---
     @Test
     void listarUsuarios_exitoso() {
         when(usuarioRepository.findAll()).thenReturn(Arrays.asList(usuarioEntity));
@@ -72,7 +71,16 @@ class UsuarioServiceTest {
         verify(usuarioRepository, times(1)).findAll();
     }
 
-    // --- POST /api/usuarios ---
+    // --- 2 ---
+    @Test
+    void listarUsuarios_vacio() {
+        when(usuarioRepository.findAll()).thenReturn(Collections.emptyList());
+        List<UsuarioDTO> result = usuarioService.listarTodos();
+        assertTrue(result.isEmpty());
+        verify(usuarioRepository, times(1)).findAll();
+    }
+
+    // --- 3 ---
     @Test
     void crearUsuario_exitoso() {
         when(usuarioRepository.existsByCorreo(usuarioDTO.getEmail())).thenReturn(false);
@@ -88,7 +96,24 @@ class UsuarioServiceTest {
         verify(usuarioRepository, times(1)).save(usuarioEntity);
     }
 
-    // --- GET /api/usuarios/{id} ---
+    // --- 4 ---
+    @Test
+    void crearUsuario_fallaPorCorreoExistente() {
+        when(usuarioRepository.existsByCorreo(usuarioDTO.getEmail())).thenReturn(true);
+        assertThrows(RuntimeException.class, () -> usuarioService.crearUsuario(usuarioDTO));
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    // --- 5 ---
+    @Test
+    void crearUsuario_fallaPorTelefonoExistente() {
+        when(usuarioRepository.existsByCorreo(usuarioDTO.getEmail())).thenReturn(false);
+        when(usuarioRepository.existsByTelefono(usuarioDTO.getPhone())).thenReturn(true);
+        assertThrows(RuntimeException.class, () -> usuarioService.crearUsuario(usuarioDTO));
+        verify(usuarioRepository, never()).save(any());
+    }
+
+    // --- 6 ---
     @Test
     void obtenerUsuarioPorId_exitoso() {
         when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuarioEntity));
@@ -101,7 +126,14 @@ class UsuarioServiceTest {
         verify(usuarioRepository, times(1)).findById(1);
     }
 
-    // --- PUT /api/usuarios/{id} ---
+    // --- 7 ---
+    @Test
+    void obtenerUsuarioPorId_noExiste() {
+        when(usuarioRepository.findById(99)).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> usuarioService.obtenerPorId(99));
+    }
+
+    // --- 8 ---
     @Test
     void actualizarUsuario_exitoso() {
         UsuarioDTO actualizado = UsuarioDTO.builder()
@@ -125,7 +157,14 @@ class UsuarioServiceTest {
         verify(usuarioRepository, times(1)).save(any(UsuarioEntity.class));
     }
 
-    // --- DELETE /api/usuarios/{id} ---
+    // --- 9 ---
+    @Test
+    void actualizarUsuario_noExiste() {
+        when(usuarioRepository.findById(1)).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> usuarioService.actualizarUsuario(1, usuarioDTO));
+    }
+
+    // --- 10 ---
     @Test
     void eliminarUsuario_exitoso() {
         when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuarioEntity));
@@ -133,7 +172,76 @@ class UsuarioServiceTest {
 
         usuarioService.eliminarUsuario(1);
 
-        assertFalse(usuarioEntity.getActivo()); // se debe marcar como inactivo
+        assertFalse(usuarioEntity.getActivo());
         verify(usuarioRepository, times(1)).save(usuarioEntity);
+    }
+
+    // --- 11 ---
+    @Test
+    void eliminarUsuario_noExiste() {
+        when(usuarioRepository.findById(99)).thenReturn(Optional.empty());
+        assertThrows(RuntimeException.class, () -> usuarioService.eliminarUsuario(99));
+    }
+
+    // --- 12 ---
+    @Test
+    void crearUsuario_conDatosInvalidosDebeFallar() {
+        UsuarioDTO invalido = UsuarioDTO.builder()
+                .name("")
+                .email("correo_invalido")
+                .build();
+
+        assertThrows(RuntimeException.class, () -> usuarioService.crearUsuario(invalido));
+    }
+
+    // --- 13 ---
+    @Test
+    void actualizarUsuario_sinCambiosDebeMantenerDatos() {
+        when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuarioEntity));
+        when(usuarioRepository.save(usuarioEntity)).thenReturn(usuarioEntity);
+        when(usuarioMapper.toDTO(usuarioEntity)).thenReturn(usuarioDTO);
+
+        UsuarioDTO result = usuarioService.actualizarUsuario(1, usuarioDTO);
+
+        assertEquals("Juan Perez", result.getName());
+        verify(usuarioRepository, times(1)).save(usuarioEntity);
+    }
+
+    // --- 14 ---
+    @Test
+    void listarUsuarios_devuelveMultiples() {
+        UsuarioEntity otro = UsuarioEntity.builder()
+                .id(2)
+                .nombre("Maria Lopez")
+                .correo("maria@correo.com")
+                .telefono("5555555")
+                .rol(UsuarioEntity.Rol.USUARIO)
+                .fechaNacimiento(LocalDate.of(1995, 5, 10))
+                .activo(true)
+                .build();
+
+        when(usuarioRepository.findAll()).thenReturn(Arrays.asList(usuarioEntity, otro));
+        when(usuarioMapper.toDTO(any(UsuarioEntity.class))).thenReturn(usuarioDTO);
+
+        List<UsuarioDTO> result = usuarioService.listarTodos();
+
+        assertEquals(2, result.size());
+    }
+
+    // --- 15 ---
+    @Test
+    void crearUsuario_conRolAdminDebeMantenerlo() {
+        usuarioDTO.setRole("ADMIN");
+        usuarioEntity.setRol(UsuarioEntity.Rol.ADMIN);
+
+        when(usuarioRepository.existsByCorreo(usuarioDTO.getEmail())).thenReturn(false);
+        when(usuarioRepository.existsByTelefono(usuarioDTO.getPhone())).thenReturn(false);
+        when(usuarioMapper.toEntity(usuarioDTO)).thenReturn(usuarioEntity);
+        when(usuarioRepository.save(usuarioEntity)).thenReturn(usuarioEntity);
+        when(usuarioMapper.toDTO(usuarioEntity)).thenReturn(usuarioDTO);
+
+        UsuarioDTO result = usuarioService.crearUsuario(usuarioDTO);
+
+        assertEquals("ADMIN", result.getRole());
     }
 }
