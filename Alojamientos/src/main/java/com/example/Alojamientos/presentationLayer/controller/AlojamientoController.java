@@ -216,38 +216,27 @@ public class AlojamientoController {
     }
 
     // ============================================================
-// RF18, RN26: Listar todos los alojamientos activos
-// ============================================================
+    // RF18, RN26: Listar todos los alojamientos activos
+    // ============================================================
     @GetMapping("/activos")
     @Operation(summary = "Listar todos los alojamientos activos",
             responses = {
                     @ApiResponse(responseCode = "200", description = "Lista obtenida correctamente",
                             content = @Content(array = @ArraySchema(schema = @Schema(implementation = AlojamientoDTO.class)))),
-                    @ApiResponse(responseCode = "204", description = "No hay alojamientos activos"),
-                    @ApiResponse(responseCode = "409", description = "Conflicto al recuperar la información de alojamientos activos")
+                    @ApiResponse(responseCode = "204", description = "No hay alojamientos activos")
             })
     public ResponseEntity<?> listarActivos() {
-        try {
-            List<AlojamientoDTO> activos = alojamientoService.listarActivos();
+        List<AlojamientoDTO> activos = alojamientoService.listarActivos();
 
-            if (activos.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            }
-
-            return ResponseEntity.ok(activos);
-
-        } catch (IllegalStateException e) {
-            // Error controlado por conflicto o inconsistencia de datos
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                    Map.of("error", "No fue posible listar los alojamientos activos: " + e.getMessage())
-            );
-        } catch (Exception e) {
-            // Error genérico también tratado como conflicto (por política del dominio)
-            return ResponseEntity.status(HttpStatus.CONFLICT).body(
-                    Map.of("error", "Error inesperado al obtener alojamientos activos")
-            );
+        if (activos.isEmpty()) {
+            return ResponseEntity.noContent().build();
         }
+
+        return ResponseEntity.ok(activos);
     }
+
+
+
 
 
     // ============================================================
