@@ -90,7 +90,10 @@ public class ComentarioService {
 
         // Crear entidad
         ComentarioEntity entity = comentarioMapper.toEntity(dto);
+        entity.setAlojamiento(reserva.getAlojamiento());
         ComentarioEntity saved = comentarioRepository.save(entity);
+
+
 
         // TODO: RF28 - Enviar notificación al anfitrión de nuevo comentario
 
