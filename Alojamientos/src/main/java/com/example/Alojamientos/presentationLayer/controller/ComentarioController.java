@@ -20,6 +20,7 @@ public class ComentarioController {
 
     private final ComentarioService comentarioService;
 
+    // -------------------- CREAR COMENTARIO --------------------
     @PostMapping
     @Operation(
             summary = "Crear un nuevo comentario",
@@ -34,7 +35,7 @@ public class ComentarioController {
             responses = {
                     @ApiResponse(responseCode = "201", description = "Comentario creado exitosamente"),
                     @ApiResponse(responseCode = "400", description = "Datos inválidos o reserva no completada"),
-                    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+                    @ApiResponse(responseCode = "404", description = "Reserva o usuario no encontrado")
             }
     )
     public ResponseEntity<?> crearComentario(@RequestBody ComentarioDTO dto) {
@@ -42,13 +43,17 @@ public class ComentarioController {
             ComentarioDTO creado = comentarioService.crearComentario(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(creado);
         } catch (IllegalArgumentException e) {
+            if (e.getMessage().toLowerCase().contains("no encontrada")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+            }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al crear el comentario: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("No fue posible procesar la creación del comentario: " + e.getMessage());
         }
     }
 
+    // -------------------- LISTAR POR ALOJAMIENTO --------------------
     @GetMapping("/alojamiento/{alojamientoId}")
     @Operation(
             summary = "Listar comentarios de un alojamiento",
@@ -57,7 +62,7 @@ public class ComentarioController {
                     @ApiResponse(responseCode = "200", description = "Lista de comentarios obtenida",
                             content = @Content(array = @ArraySchema(schema = @Schema(implementation = ComentarioDTO.class)))),
                     @ApiResponse(responseCode = "404", description = "No se encontraron comentarios para este alojamiento"),
-                    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+                    @ApiResponse(responseCode = "400", description = "Error al procesar la solicitud de comentarios")
             }
     )
     public ResponseEntity<?> listarPorAlojamiento(@PathVariable Integer alojamientoId) {
@@ -69,11 +74,12 @@ public class ComentarioController {
             }
             return ResponseEntity.ok(comentarios);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al listar comentarios: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Error al procesar la solicitud de comentarios: " + e.getMessage());
         }
     }
 
+    // -------------------- OBTENER POR ID --------------------
     @GetMapping("/{id}")
     @Operation(
             summary = "Obtener un comentario por ID",
@@ -82,7 +88,7 @@ public class ComentarioController {
                     @ApiResponse(responseCode = "200", description = "Comentario encontrado",
                             content = @Content(schema = @Schema(implementation = ComentarioDTO.class))),
                     @ApiResponse(responseCode = "404", description = "Comentario no encontrado"),
-                    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+                    @ApiResponse(responseCode = "400", description = "Error al procesar la búsqueda del comentario")
             }
     )
     public ResponseEntity<?> obtenerPorId(@PathVariable Integer id) {
@@ -92,11 +98,12 @@ public class ComentarioController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al obtener comentario: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("Error al procesar la búsqueda del comentario: " + e.getMessage());
         }
     }
 
+    // -------------------- OBTENER PROMEDIO --------------------
     @GetMapping("/alojamiento/{alojamientoId}/promedio")
     @Operation(
             summary = "Obtener promedio de calificaciones",
@@ -105,7 +112,7 @@ public class ComentarioController {
                     @ApiResponse(responseCode = "200", description = "Promedio calculado exitosamente",
                             content = @Content(schema = @Schema(example = "4.5"))),
                     @ApiResponse(responseCode = "404", description = "Alojamiento sin comentarios"),
-                    @ApiResponse(responseCode = "500", description = "Error interno del servidor")
+                    @ApiResponse(responseCode = "400", description = "No se pudo calcular el promedio de calificaciones")
             }
     )
     public ResponseEntity<?> obtenerPromedio(@PathVariable Integer alojamientoId) {
@@ -117,11 +124,12 @@ public class ComentarioController {
             }
             return ResponseEntity.ok(promedio);
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al calcular el promedio: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("No se pudo calcular el promedio de calificaciones: " + e.getMessage());
         }
     }
 
+    // -------------------- ACTUALIZAR --------------------
     @PutMapping("/{id}")
     @Operation(
             summary = "Actualizar un comentario existente",
@@ -141,9 +149,8 @@ public class ComentarioController {
     public ResponseEntity<?> actualizarComentario(@PathVariable Integer id, @RequestBody ComentarioDTO dto) {
         try {
             ComentarioDTO actualizado = comentarioService.actualizarComentario(id, dto.getText());
-            return ResponseEntity.ok(actualizado); // ✅ ÉXITO (200)
+            return ResponseEntity.ok(actualizado);
         } catch (IllegalArgumentException e) {
-            // 404 o 400 según el mensaje
             if (e.getMessage().toLowerCase().contains("no encontrado")) {
                 return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
             }
@@ -151,7 +158,7 @@ public class ComentarioController {
         }
     }
 
-
+    // -------------------- ELIMINAR --------------------
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Eliminar un comentario",
@@ -159,7 +166,7 @@ public class ComentarioController {
             responses = {
                     @ApiResponse(responseCode = "204", description = "Comentario eliminado correctamente"),
                     @ApiResponse(responseCode = "404", description = "Comentario no encontrado"),
-                    @ApiResponse(responseCode = "500", description = "Error interno al eliminar el comentario")
+                    @ApiResponse(responseCode = "400", description = "No fue posible eliminar el comentario")
             }
     )
     public ResponseEntity<?> eliminarComentario(@PathVariable Integer id) {
@@ -169,8 +176,9 @@ public class ComentarioController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
-                    .body("Error al eliminar comentario: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body("No fue posible eliminar el comentario: " + e.getMessage());
         }
     }
 }
+
