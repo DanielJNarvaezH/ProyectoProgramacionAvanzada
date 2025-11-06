@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input } from '@angular/core';
 
 @Component({
   selector: 'app-input',
@@ -6,6 +6,9 @@ import { Component } from '@angular/core';
   templateUrl: './input.html',
   styleUrl: './input.scss',
 })
-export class Input {
-
+export class InputComponent {
+  @Input() type: string = 'text';
+  @Input() placeholder: string = '';
+  @Input() id: string = '';
+  @Input() value: string = '';
 }

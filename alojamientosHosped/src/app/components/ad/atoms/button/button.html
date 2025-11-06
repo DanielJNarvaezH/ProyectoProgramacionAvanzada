@@ -1,1 +1,11 @@
-<p>button works!</p>
+<button
+  [disabled]="disabled"
+  [ngClass]="[
+    'w-full py-2 rounded-xl font-semibold transition duration-200',
+    variant === 'primary' ? 'bg-primary-500 text-white hover:bg-primary-600' :
+    variant === 'secondary' ? 'bg-gray-200 text-gray-700 hover:bg-gray-300' :
+    'bg-transparent border border-gray-400 text-gray-600 hover:bg-gray-100'
+  ]"
+>
+  <ng-content></ng-content>
+</button>
