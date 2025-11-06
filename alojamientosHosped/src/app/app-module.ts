@@ -1,15 +1,19 @@
-import { NgModule, provideBrowserGlobalErrorListeners } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule } from '@angular/forms';
+import { RouterModule } from '@angular/router';
 
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 
-// ✅ Importaciones correctas
+// ✅ Importaciones correctas de tus átomos
 import { ButtonComponent } from './components/ad/atoms/button/button';
 import { LabelComponent } from './components/ad/atoms/label/label';
 import { InputComponent } from './components/ad/atoms/input/input';
 import { IconComponent } from './components/ad/atoms/icon/icon';
+
+// ⚙️ Si en algún momento quieres manejar errores globales, puedes dejar esto:
+import { provideBrowserGlobalErrorListeners } from '@angular/core';
 
 @NgModule({
   declarations: [
@@ -22,7 +26,8 @@ import { IconComponent } from './components/ad/atoms/icon/icon';
   imports: [
     BrowserModule,
     AppRoutingModule,
-    FormsModule // necesario por el ngModel del input
+    FormsModule, // necesario para ngModel
+    RouterModule.forRoot([]) // necesario para <router-outlet>
   ],
   providers: [
     provideBrowserGlobalErrorListeners()
@@ -30,4 +35,3 @@ import { IconComponent } from './components/ad/atoms/icon/icon';
   bootstrap: [App]
 })
 export class AppModule { }
-
