@@ -18,6 +18,7 @@ import { InputFieldComponent } from './components/ad/molecules/input-field/input
 import { PasswordFieldComponent } from './components/ad/molecules/password-field/password-field';
 import { LoginFormComponent } from './components/ad/molecules/login-form/login-form';
 import { LoginCardComponent } from './components/ad/organisms/login-card/login-card';
+import { LoginTemplateComponent } from './components/ad/templates/login-template/login-template';
 
 @NgModule({
   declarations: [
@@ -29,7 +30,8 @@ import { LoginCardComponent } from './components/ad/organisms/login-card/login-c
     InputFieldComponent,
     PasswordFieldComponent,
     LoginFormComponent,
-    LoginCardComponent
+    LoginCardComponent,
+    LoginTemplateComponent
   ],
   imports: [
     BrowserModule,
