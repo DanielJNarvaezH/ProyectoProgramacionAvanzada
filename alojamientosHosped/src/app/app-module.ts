@@ -17,6 +17,7 @@ import { provideBrowserGlobalErrorListeners } from '@angular/core';
 import { InputFieldComponent } from './components/ad/molecules/input-field/input-field';
 import { PasswordFieldComponent } from './components/ad/molecules/password-field/password-field';
 import { LoginFormComponent } from './components/ad/molecules/login-form/login-form';
+import { LoginCardComponent } from './components/ad/organisms/login-card/login-card';
 
 @NgModule({
   declarations: [
@@ -27,7 +28,8 @@ import { LoginFormComponent } from './components/ad/molecules/login-form/login-f
     IconComponent,
     InputFieldComponent,
     PasswordFieldComponent,
-    LoginFormComponent
+    LoginFormComponent,
+    LoginCardComponent
   ],
   imports: [
     BrowserModule,
