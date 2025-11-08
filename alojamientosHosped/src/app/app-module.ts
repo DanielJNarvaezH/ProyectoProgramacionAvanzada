@@ -14,6 +14,9 @@ import { IconComponent } from './components/ad/atoms/icon/icon';
 
 // ⚙️ Si en algún momento quieres manejar errores globales, puedes dejar esto:
 import { provideBrowserGlobalErrorListeners } from '@angular/core';
+import { InputFieldComponent } from './components/ad/molecules/input-field/input-field';
+import { PasswordFieldComponent } from './components/ad/molecules/password-field/password-field';
+import { LoginFormComponent } from './components/ad/molecules/login-form/login-form';
 
 @NgModule({
   declarations: [
@@ -21,7 +24,10 @@ import { provideBrowserGlobalErrorListeners } from '@angular/core';
     ButtonComponent,
     LabelComponent,
     InputComponent,
-    IconComponent
+    IconComponent,
+    InputFieldComponent,
+    PasswordFieldComponent,
+    LoginFormComponent
   ],
   imports: [
     BrowserModule,
