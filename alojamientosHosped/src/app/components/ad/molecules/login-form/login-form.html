@@ -1,1 +1,27 @@
-<p>login-form works!</p>
+<form
+  (ngSubmit)="onSubmit()"
+  class="bg-white dark:bg-gray-900 shadow-lg rounded-2xl p-8 w-full max-w-md mx-auto"
+>
+  <h2 class="text-2xl font-bold text-center text-primary-600 mb-6">
+    Iniciar Sesión
+  </h2>
+
+  <app-input-field
+    id="email"
+    label="Correo Electrónico"
+    placeholder="usuario@ejemplo.com"
+    type="email"
+    [(ngModel)]="email"
+  ></app-input-field>
+
+  <app-password-field
+    id="password"
+    label="Contraseña"
+    placeholder="••••••••"
+    [(ngModel)]="password"
+  ></app-password-field>
+
+  <app-button variant="primary" class="mt-4 w-full">
+    Ingresar
+  </app-button>
+</form>
