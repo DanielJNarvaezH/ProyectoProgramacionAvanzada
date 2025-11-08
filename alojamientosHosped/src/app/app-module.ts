@@ -19,7 +19,7 @@ import { PasswordFieldComponent } from './components/ad/molecules/password-field
 import { LoginFormComponent } from './components/ad/molecules/login-form/login-form';
 import { LoginCardComponent } from './components/ad/organisms/login-card/login-card';
 import { LoginTemplateComponent } from './components/ad/templates/login-template/login-template';
-import { LoginPageComponent } from './pages/login/login';
+import { LoginPageComponent } from './components/ad/pages/login/login';
 
 @NgModule({
   declarations: [

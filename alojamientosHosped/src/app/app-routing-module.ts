@@ -1,6 +1,6 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { LoginPageComponent } from './pages/login/login'; // ✅ ruta corregida
+import { LoginPageComponent } from './components/ad/pages/login/login'; // ✅ ruta corregida
 
 const routes: Routes = [
   { path: '', redirectTo: 'login', pathMatch: 'full' }, // redirige a login

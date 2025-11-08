@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400">
+  <rect width="600" height="400" fill="#f9f6ff"/>
+  <circle cx="450" cy="200" r="90" fill="#9B5CFF" opacity="0.1"/>
+  <path d="M400 260 L460 180 L520 260 Z" fill="#cdb6ff" />
+  <rect x="420" y="240" width="80" height="50" rx="10" fill="#fff" stroke="#9B5CFF" stroke-width="2"/>
+  <circle cx="460" cy="220" r="6" fill="#9B5CFF"/>
+  <text x="200" y="210" font-family="'Poppins', sans-serif" font-size="28" fill="#7B4DFF">Bienvenido a Hosped</text>
+  <text x="200" y="245" font-family="'Poppins', sans-serif" font-size="18" fill="#555">Tu espacio confiable de alojamiento</text>
+</svg>

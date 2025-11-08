@@ -4,13 +4,17 @@ import { Component } from '@angular/core';
   selector: 'app-login-form',
   standalone: false,
   templateUrl: './login-form.html',
-  styleUrl: './login-form.scss',
+  styleUrls: ['./login-form.scss'],
 })
 export class LoginFormComponent {
   email: string = '';
   password: string = '';
 
   onSubmit() {
-    console.log('Datos de login:', { email: this.email, password: this.password });
+    if (this.email === 'admin@example.com' && this.password === '123456') {
+      alert('✅ Inicio de sesión exitoso');
+    } else {
+      alert('❌ Credenciales incorrectas');
+    }
   }
 }

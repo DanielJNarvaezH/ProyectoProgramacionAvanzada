@@ -1,0 +1,41 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+:host {
+  font-family: 'Poppins', sans-serif;
+}
+
+.bg-neutral-50 {
+  background: linear-gradient(120deg, #f9f6ff, #ffffff);
+}
+
+.text-primary-600 {
+  color: #9B5CFF;
+}
+
+.bg-primary-500 {
+  background-color: #9B5CFF;
+}
+
+.bg-primary-600 {
+  background-color: #7B4DFF;
+}
+
+.focus\:ring-primary-500:focus {
+  box-shadow: 0 0 0 3px rgba(155, 92, 255, 0.4);
+}
+
+/* Animaciones suaves */
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-in-out;
+}
