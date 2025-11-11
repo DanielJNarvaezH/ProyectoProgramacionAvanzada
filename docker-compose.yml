@@ -1,6 +1,7 @@
 version: "3.9"
 
 services:
+  # 🐬 Servicio de Base de Datos MySQL
   db:
     image: mysql:8
     container_name: alojamientos-db
@@ -11,20 +12,21 @@ services:
       MYSQL_USER: alojamientos_user
       MYSQL_PASSWORD: familia727230228
     ports:
-      - "3307:3306"   # 👈 Puerto externo cambiado a 3307 para evitar conflicto
+      - "3307:3306"   # Puerto local 3307 -> puerto interno 3306
     volumes:
       - db_data:/var/lib/mysql
 
+  # ⚙️ Servicio Backend (Spring Boot)
   backend:
     build:
-      context: ./Alojamientos        # 👈 Ruta de tu backend
-      dockerfile: Dockerfile         # 👈 Dockerfile dentro de esa carpeta
+      context: ./Alojamientos          # Ruta del backend (carpeta con el Dockerfile)
+      dockerfile: Dockerfile
     container_name: alojamientos-backend
     restart: always
     depends_on:
       - db
     ports:
-      - "8080:8080"
+      - "8080:8080"                    # Puerto local 8080 -> backend
     environment:
       SPRING_PROFILES_ACTIVE: docker
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/alojamientos_db
@@ -32,6 +34,18 @@ services:
       SPRING_DATASOURCE_PASSWORD: familia727230228
       SPRING_JPA_HIBERNATE_DDL_AUTO: update
       SPRING_JPA_SHOW_SQL: "true"
+
+  # 🌐 Servicio Frontend (Angular con Nginx)
+  frontend:
+    build:
+      context: ./alojamientosHosped     # Ruta de tu frontend Angular
+      dockerfile: Dockerfile
+    container_name: alojamientos-frontend
+    restart: always
+    depends_on:
+      - backend
+    ports:
+      - "4200:80"                       # Puerto local 4200 -> Nginx 80 interno
 
 volumes:
   db_data:
