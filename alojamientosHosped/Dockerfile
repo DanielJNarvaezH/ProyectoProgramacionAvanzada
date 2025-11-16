@@ -7,8 +7,8 @@ RUN npm install
 
 COPY . .
 
-# Build Angular
-RUN ng build --configuration production --project alojamientosHosped
+# Build Angular con npx
+RUN npx ng build --configuration production --project alojamientosHosped
 
 # Etapa 2: Servidor Nginx
 FROM nginx:alpine
