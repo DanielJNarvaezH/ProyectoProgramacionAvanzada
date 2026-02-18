@@ -7,6 +7,7 @@ import com.example.Alojamientos.persistenceLayer.entity.UsuarioEntity;
 import com.example.Alojamientos.persistenceLayer.mapper.UsuarioDataMapper;
 import com.example.Alojamientos.persistenceLayer.repository.UsuarioRepository;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.crypto.password.PasswordEncoder; // ← CAMBIO 1: import agregado
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,8 +23,7 @@ public class UsuarioService {
 
     private final UsuarioRepository usuarioRepository;
     private final UsuarioDataMapper usuarioMapper;
-    // Descomentar cuando agregues Spring Security
-    // private final PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder; // ← CAMBIO 2: inyectado (ya existe el bean en SecurityConfig)
 
     /**
      * RF1: Registrar un nuevo usuario
@@ -75,8 +75,8 @@ public class UsuarioService {
         // Convertir DTO a Entity
         UsuarioEntity entity = usuarioMapper.toEntity(dto);
 
-        // RN2: Encriptar contraseña (por ahora comentado, activar con Spring Security)
-        // entity.setContrasena(passwordEncoder.encode(dto.getPassword()));
+        // ← CAMBIO 3: hashear la contraseña antes de guardar
+        entity.setContrasena(passwordEncoder.encode(dto.getPassword()));
 
         // Guardar
         UsuarioEntity saved = usuarioRepository.save(entity);
@@ -111,9 +111,6 @@ public class UsuarioService {
         if (dto.getPhone() != null) {
             entity.setTelefono(dto.getPhone());
         }
-        // Foto y descripción se actualizan si vienen
-        // entity.setFoto(dto.getFoto());
-        // entity.setDescripcion(dto.getDescripcion());
 
         UsuarioEntity updated = usuarioRepository.save(entity);
         return usuarioMapper.toDTO(updated);
@@ -126,18 +123,18 @@ public class UsuarioService {
         UsuarioEntity entity = usuarioRepository.findById(userId)
                 .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
 
-        // Validar contraseña actual
-        // if (!passwordEncoder.matches(oldPassword, entity.getContrasena())) {
-        //     throw new IllegalArgumentException("Contraseña actual incorrecta");
-        // }
+        // ← CAMBIO 4: validar contraseña actual con BCrypt
+        if (!passwordEncoder.matches(oldPassword, entity.getContrasena())) {
+            throw new IllegalArgumentException("Contraseña actual incorrecta");
+        }
 
         // RN2: Validar nueva contraseña
         if (newPassword.length() < 8) {
             throw new IllegalArgumentException("La contraseña debe tener al menos 8 caracteres");
         }
 
-        // Encriptar y guardar
-        // entity.setContrasena(passwordEncoder.encode(newPassword));
+        // ← CAMBIO 5: hashear y guardar nueva contraseña
+        entity.setContrasena(passwordEncoder.encode(newPassword));
         usuarioRepository.save(entity);
     }
 
@@ -188,9 +185,7 @@ public class UsuarioService {
      * RN4: Validar que el usuario no tenga alojamientos activos antes de eliminar
      */
     private void validarEliminacionUsuario(UsuarioEntity usuario) {
-        // Validar rol anfitrión
         if (usuario.getRol() == UsuarioEntity.Rol.ANFITRION) {
-            // Verificar si tiene alojamientos activos
             boolean tieneAlojamientosActivos = usuario.getAlojamientos().stream()
                     .anyMatch(AlojamientoEntity::getActivo);
 
@@ -198,7 +193,6 @@ public class UsuarioService {
                 throw new IllegalArgumentException("No se puede eliminar un anfitrión con alojamientos activos");
             }
 
-            // Verificar si tiene reservas futuras en sus alojamientos
             boolean tieneReservasFuturas = usuario.getAlojamientos().stream()
                     .flatMap(a -> a.getReservas().stream())
                     .anyMatch(r -> r.getFechaInicio().isAfter(LocalDate.now()) &&
