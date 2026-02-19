@@ -7,15 +7,18 @@ import com.example.Alojamientos.persistenceLayer.mapper.UsuarioDataMapper;
 import com.example.Alojamientos.persistenceLayer.repository.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.time.LocalDate;
 import java.util.*;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.eq;
 
 class UsuarioServiceTest {
 
@@ -24,6 +27,9 @@ class UsuarioServiceTest {
 
     @Mock
     private UsuarioDataMapper usuarioMapper;
+
+    @Mock
+    private PasswordEncoder passwordEncoder; // ← AGREGADO: mock del encoder
 
     @InjectMocks
     private UsuarioService usuarioService;
@@ -55,6 +61,9 @@ class UsuarioServiceTest {
                 .fechaNacimiento(LocalDate.of(1990, 1, 1))
                 .activo(true)
                 .build();
+
+        // ← AGREGADO: comportamiento por defecto del encoder en tests
+        when(passwordEncoder.encode(anyString())).thenReturn("$2a$10$hashedPassword");
     }
 
     // --- 1 ---
@@ -86,14 +95,14 @@ class UsuarioServiceTest {
         when(usuarioRepository.existsByCorreo(usuarioDTO.getEmail())).thenReturn(false);
         when(usuarioRepository.existsByTelefono(usuarioDTO.getPhone())).thenReturn(false);
         when(usuarioMapper.toEntity(usuarioDTO)).thenReturn(usuarioEntity);
-        when(usuarioRepository.save(usuarioEntity)).thenReturn(usuarioEntity);
+        when(usuarioRepository.save(any(UsuarioEntity.class))).thenReturn(usuarioEntity);
         when(usuarioMapper.toDTO(usuarioEntity)).thenReturn(usuarioDTO);
 
         UsuarioDTO result = usuarioService.crearUsuario(usuarioDTO);
 
         assertNotNull(result);
         assertEquals("Juan Perez", result.getName());
-        verify(usuarioRepository, times(1)).save(usuarioEntity);
+        verify(usuarioRepository, times(1)).save(any(UsuarioEntity.class));
     }
 
     // --- 4 ---
@@ -237,11 +246,79 @@ class UsuarioServiceTest {
         when(usuarioRepository.existsByCorreo(usuarioDTO.getEmail())).thenReturn(false);
         when(usuarioRepository.existsByTelefono(usuarioDTO.getPhone())).thenReturn(false);
         when(usuarioMapper.toEntity(usuarioDTO)).thenReturn(usuarioEntity);
-        when(usuarioRepository.save(usuarioEntity)).thenReturn(usuarioEntity);
+        when(usuarioRepository.save(any(UsuarioEntity.class))).thenReturn(usuarioEntity);
         when(usuarioMapper.toDTO(usuarioEntity)).thenReturn(usuarioDTO);
 
         UsuarioDTO result = usuarioService.crearUsuario(usuarioDTO);
 
         assertEquals("ADMIN", result.getRole());
+    }
+
+    // ─────────────────────────────────────────────────────────────────
+    // TESTS DE ENCRIPTACIÓN ← NUEVOS
+    // ─────────────────────────────────────────────────────────────────
+
+    // --- 16 ---
+    @Test
+    void crearUsuario_contrasenaDebeSerHasheadaAntesDeGuardar() {
+        when(usuarioRepository.existsByCorreo(usuarioDTO.getEmail())).thenReturn(false);
+        when(usuarioRepository.existsByTelefono(usuarioDTO.getPhone())).thenReturn(false);
+        when(usuarioMapper.toEntity(usuarioDTO)).thenReturn(usuarioEntity);
+        when(usuarioRepository.save(any(UsuarioEntity.class))).thenReturn(usuarioEntity);
+        when(usuarioMapper.toDTO(any(UsuarioEntity.class))).thenReturn(usuarioDTO);
+
+        usuarioService.crearUsuario(usuarioDTO);
+
+        // Verifica que encode() fue llamado con la contraseña original
+        verify(passwordEncoder, times(1)).encode("Abc12345");
+
+        // Captura la entidad que se pasó al save() y verifica que la contraseña ya no es texto plano
+        ArgumentCaptor<UsuarioEntity> captor = ArgumentCaptor.forClass(UsuarioEntity.class);
+        verify(usuarioRepository).save(captor.capture());
+        String contrasenаGuardada = captor.getValue().getContrasena();
+        assertNotEquals("Abc12345", contrasenаGuardada);
+        assertTrue(contrasenаGuardada.startsWith("$2a$") || contrasenаGuardada.equals("$2a$10$hashedPassword"));
+    }
+
+    // --- 17 ---
+    @Test
+    void crearUsuario_passwordEncoderEsInvocadoUnaVez() {
+        when(usuarioRepository.existsByCorreo(usuarioDTO.getEmail())).thenReturn(false);
+        when(usuarioRepository.existsByTelefono(usuarioDTO.getPhone())).thenReturn(false);
+        when(usuarioMapper.toEntity(usuarioDTO)).thenReturn(usuarioEntity);
+        when(usuarioRepository.save(any(UsuarioEntity.class))).thenReturn(usuarioEntity);
+        when(usuarioMapper.toDTO(any(UsuarioEntity.class))).thenReturn(usuarioDTO);
+
+        usuarioService.crearUsuario(usuarioDTO);
+
+        // El encoder debe llamarse exactamente una vez por registro
+        verify(passwordEncoder, times(1)).encode(anyString());
+    }
+
+    // --- 18 ---
+        @Test
+        void cambiarContrasena_validaContrasenaActualConBCrypt() {
+            when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuarioEntity));
+            // Usar any() para el hash porque el valor exacto depende del estado de la entidad
+            when(passwordEncoder.matches(eq("Abc12345"), any())).thenReturn(true);
+            when(passwordEncoder.encode("NuevaPass99")).thenReturn("$2a$10$nuevoHash");
+            when(usuarioRepository.save(any(UsuarioEntity.class))).thenReturn(usuarioEntity);
+
+            assertDoesNotThrow(() -> usuarioService.cambiarContrasena(1, "Abc12345", "NuevaPass99"));
+            verify(passwordEncoder, times(1)).matches(eq("Abc12345"), any());
+            verify(passwordEncoder, times(1)).encode("NuevaPass99");
+        }
+
+    // --- 19 ---
+    @Test
+    void cambiarContrasena_fallaSiContrasenaActualEsIncorrecta() {
+        when(usuarioRepository.findById(1)).thenReturn(Optional.of(usuarioEntity));
+        when(passwordEncoder.matches("PasswordErrada", usuarioEntity.getContrasena())).thenReturn(false);
+
+        assertThrows(IllegalArgumentException.class,
+                () -> usuarioService.cambiarContrasena(1, "PasswordErrada", "NuevaPass99"));
+
+        // No debe guardarse nada si la contraseña actual es incorrecta
+        verify(usuarioRepository, never()).save(any());
     }
 }

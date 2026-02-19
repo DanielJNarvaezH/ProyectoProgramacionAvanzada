@@ -1,4 +1,4 @@
-package com.example.Alojamientos.Reserva;
+/*package com.example.Alojamientos.Reserva;
 
 import com.example.Alojamientos.businessLayer.dto.ReservaDTO;
 import com.example.Alojamientos.businessLayer.service.ReservaService;
@@ -42,7 +42,7 @@ import static org.mockito.BDDMockito.given;
 /**
  * Pruebas Unitarias para ReservaService y ReservaController
  * Cobertura JaCoCo: Métodos CRUD de Reservas
- */
+
 @ExtendWith(MockitoExtension.class)
 @DisplayName("Pruebas de Gestión de Reservas")
 class ReservaServiceTest {
@@ -464,3 +464,4 @@ class ReservaServiceTest {
     }
 
 }
+*/

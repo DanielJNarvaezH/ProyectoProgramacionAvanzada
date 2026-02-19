@@ -27,7 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
  * <ul>
  *   <li>Rutas públicas (auth, Swagger/OpenAPI) y rutas protegidas por rol.</li>
  *   <li>Política de sesión stateless (JWT).</li>
- *   <li>Integración del filtro JWT antes del filtro estándar de Spring.</li>
+ *   <li>Integración del filtro JWT antes del filtro estándar de Spring.</li>C
  *   <li>PasswordEncoder BCrypt y AuthenticationProvider para login.</li>
  * </ul>
  */
@@ -58,7 +58,10 @@ public class SecurityConfig {
             "/api/auth/register",
             "/api/auth/refresh",
             "/api/auth/recuperar-contrasena",
-            "/api/auth/reset-contrasena"
+            "/api/auth/reset-contrasena",
+            "/api/usuarios"
+
+
     };
 
     // ─────────────────────────────────────────────────────────────────
