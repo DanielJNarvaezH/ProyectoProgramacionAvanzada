@@ -36,20 +36,26 @@ public class JwtService {
                 .compact();
     }
 
-    /**
-     * Genera un token JWT básico (solo con el email)
-     */
     public String generarToken(String email) {
         return generarToken(email, new HashMap<>());
     }
 
-    /**
-     * Genera un token incluyendo el rol del usuario como claim
-     */
     public String generarTokenConRol(String email, String rol) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("rol", rol);
         return generarToken(email, claims);
+    }
+
+    public String generarRefreshToken(String email) {
+        Map<String, Object> claims = new HashMap<>();
+        claims.put("type", "refresh");
+        return Jwts.builder()
+                .setClaims(claims)
+                .setSubject(email)
+                .setIssuedAt(new Date(System.currentTimeMillis()))
+                .setExpiration(new Date(System.currentTimeMillis() + 7L * 24 * 60 * 60 * 1000))
+                .signWith(getSigningKey(), SignatureAlgorithm.HS256)
+                .compact();
     }
 
     // ─────────────────────────────────────────
