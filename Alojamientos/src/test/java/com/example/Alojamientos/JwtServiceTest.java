@@ -74,6 +74,19 @@ class JwtServiceTest {
             claims -> claims.get("userId", Integer.class));
         assertEquals(42, userId);
     }
+    @Test
+    void estaExpirado_debeRetornarTrueParaTokenExpirado() {
+        ReflectionTestUtils.setField(jwtService, "expirationMs", -1000L);
+        String token = jwtService.generarToken("juan@correo.com");
+        assertThrows(io.jsonwebtoken.ExpiredJwtException.class,
+                () -> jwtService.estaExpirado(token));
+    }
+
+    @Test
+    void esTokenEstructuralmenteValido_debeRetornarTrueParaTokenValido() {
+        String token = jwtService.generarToken("juan@correo.com");
+        assertTrue(jwtService.esTokenEstructuralmenteValido(token));
+    }
 }
 
 
