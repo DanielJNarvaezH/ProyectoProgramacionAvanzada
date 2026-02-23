@@ -1,6 +1,8 @@
 package com.example.Alojamientos.businessLayer.service;
 
-import com.example.Alojamientos.businessLayer.dto.auth.*;
+import com.example.Alojamientos.businessLayer.dto.AuthResponse;
+import com.example.Alojamientos.businessLayer.dto.LoginRequest;
+import com.example.Alojamientos.businessLayer.dto.RegisterRequest;
 import com.example.Alojamientos.persistenceLayer.entity.UsuarioEntity;
 import com.example.Alojamientos.persistenceLayer.repository.UsuarioRepository;
 import com.example.Alojamientos.securityLayer.JwtService;
@@ -58,10 +60,14 @@ public class AuthService {
 
         UsuarioEntity guardado = usuarioRepository.save(usuario);
 
-        String accessToken  = jwtService.generarTokenConRol(guardado.getCorreo(), guardado.getRol().name());
-        String refreshToken = jwtService.generarRefreshToken(guardado.getCorreo());
+        String token = jwtService.generarTokenConRol(guardado.getCorreo(), guardado.getRol().name());
 
-        return buildAuthResponse(guardado, accessToken, refreshToken);
+        return AuthResponse.builder()
+                .token(token)
+                .email(guardado.getCorreo())
+                .rol(guardado.getRol().name())
+                .mensaje("Registro exitoso")
+                .build();
     }
 
     public AuthResponse login(LoginRequest request) {
@@ -76,48 +82,13 @@ public class AuthService {
             throw new IllegalArgumentException("La cuenta está desactivada");
         }
 
-        String accessToken  = jwtService.generarTokenConRol(usuario.getCorreo(), usuario.getRol().name());
-        String refreshToken = jwtService.generarRefreshToken(usuario.getCorreo());
+        String token = jwtService.generarTokenConRol(usuario.getCorreo(), usuario.getRol().name());
 
-        return buildAuthResponse(usuario, accessToken, refreshToken);
-    }
-
-    @Transactional(readOnly = true)
-    public AuthResponse refresh(RefreshTokenRequest request) {
-        String token = request.getRefreshToken();
-
-        if (!jwtService.esTokenEstructuralmenteValido(token)) {
-            throw new IllegalArgumentException("Refresh token inválido");
-        }
-
-        if (jwtService.estaExpirado(token)) {
-            throw new IllegalArgumentException("El refresh token ha expirado. Inicia sesión nuevamente");
-        }
-
-        String email = jwtService.extraerEmail(token);
-
-        UsuarioEntity usuario = usuarioRepository.findByCorreo(email)
-                .orElseThrow(() -> new IllegalArgumentException("Usuario no encontrado"));
-
-        if (Boolean.FALSE.equals(usuario.getActivo())) {
-            throw new IllegalArgumentException("La cuenta está desactivada");
-        }
-
-        String nuevoAccessToken = jwtService.generarTokenConRol(usuario.getCorreo(), usuario.getRol().name());
-
-        return buildAuthResponse(usuario, nuevoAccessToken, token);
-    }
-
-    private AuthResponse buildAuthResponse(UsuarioEntity usuario, String accessToken, String refreshToken) {
         return AuthResponse.builder()
-                .accessToken(accessToken)
-                .refreshToken(refreshToken)
-                .tokenType("Bearer")
-                .expiresIn(jwtService.extraerExpiracion(accessToken).getTime() - System.currentTimeMillis())
-                .userId(usuario.getId())
-                .name(usuario.getNombre())
+                .token(token)
                 .email(usuario.getCorreo())
-                .role(usuario.getRol().name())
+                .rol(usuario.getRol().name())
+                .mensaje("Login exitoso")
                 .build();
     }
 
