@@ -1,10 +1,12 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { LoginPageComponent } from './components/ad/pages/login/login'; // ✅ ruta corregida
+import { LoginPageComponent } from './components/ad/pages/login/login';
+import { authGuard } from './guards/auth.guard';
 
 const routes: Routes = [
-  { path: '', redirectTo: 'login', pathMatch: 'full' }, // redirige a login
-  { path: 'login', component: LoginPageComponent }      // carga tu página de login
+  { path: '', redirectTo: 'login', pathMatch: 'full' },
+  { path: 'login', component: LoginPageComponent },
+  { path: 'home', component: LoginPageComponent, canActivate: [authGuard] } // ← ruta protegida de ejemplo
 ];
 
 @NgModule({
