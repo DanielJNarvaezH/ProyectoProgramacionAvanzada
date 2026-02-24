@@ -1,6 +1,5 @@
 <div class="min-h-screen flex items-center justify-center bg-neutral-50">
 
-  <!-- 💡 Panel centrado con el formulario -->
   <div class="flex flex-col items-center justify-center p-4 animate-fade-in-up w-full max-w-md bg-white shadow-2xl rounded-2xl p-8">
 
     <!-- Logo y título -->
@@ -15,8 +14,8 @@
       Inicia sesión para continuar en el sistema
     </p>
 
-    <!-- 🧾 Formulario -->
-    <form class="space-y-4" (ngSubmit)="onSubmit()">
+    <!-- Formulario -->
+    <form class="space-y-4 w-full" (ngSubmit)="onSubmit()">
       <div>
         <label class="block text-sm font-medium text-neutral-700">Correo electrónico</label>
         <input
@@ -48,6 +47,21 @@
         Ingresar
       </button>
     </form>
+
+    <!-- Separador -->
+    <div class="flex items-center gap-3 w-full my-4">
+      <hr class="flex-1 border-neutral-200" />
+      <span class="text-xs text-neutral-400">¿No tienes cuenta?</span>
+      <hr class="flex-1 border-neutral-200" />
+    </div>
+
+    <!-- Botón de registro -->
+    <a
+      routerLink="/register"
+      class="w-full text-center py-2 border-2 border-primary-500 text-primary-600 font-semibold rounded-md hover:bg-primary-50 transition"
+    >
+      Crear cuenta nueva
+    </a>
 
     <!-- Pie de página -->
     <footer class="text-center text-sm text-neutral-500 mt-6">
