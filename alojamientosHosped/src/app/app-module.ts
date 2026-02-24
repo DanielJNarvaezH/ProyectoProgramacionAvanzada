@@ -1,8 +1,8 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule } from '@angular/forms';  // ← ReactiveFormsModule agregado
 import { RouterModule } from '@angular/router';
-import { provideHttpClient } from '@angular/common/http';  
+import { provideHttpClient } from '@angular/common/http';
 
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
@@ -47,11 +47,12 @@ import { LoginPageComponent } from './components/ad/pages/login/login';
     BrowserModule,
     AppRoutingModule,
     FormsModule,
+    ReactiveFormsModule,          // ← NUEVO: necesario para formGroup y formControlName
     RouterModule.forRoot([])
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient()     
+    provideHttpClient()
   ],
   bootstrap: [App]
 })
