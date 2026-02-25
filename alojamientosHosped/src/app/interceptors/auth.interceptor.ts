@@ -3,26 +3,30 @@ import {
   HttpInterceptor,
   HttpRequest,
   HttpHandler,
-  HttpEvent
+  HttpEvent,
+  HttpErrorResponse
 } from '@angular/common/http';
-import { Observable } from 'rxjs';
+import { Observable, throwError, switchMap, catchError } from 'rxjs';
 import { AuthService } from '../../services/AuthService';
+import { Router } from '@angular/router';
 
 /**
  * AuthInterceptor — Interceptor HTTP
  *
- * Agrega automáticamente el token JWT en el header Authorization
- * de todas las peticiones HTTP salientes.
- *
- * Formato: Authorization: Bearer <token>
- *
- * Si no hay token activo (usuario no autenticado), la petición
- * se deja pasar sin modificar.
+ * Responsabilidades (AUTH-18 + AUTH-19):
+ * 1. Agrega automáticamente el token JWT en el header Authorization.
+ * 2. Si el token está próximo a expirar (< 5 min), lo renueva antes
+ *    de enviar la petición usando el refresh token.
+ * 3. Si el backend responde 401, intenta renovar el token una vez.
+ *    Si falla, redirige al login.
  */
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  constructor(private authService: AuthService) {}
+  constructor(
+    private authService: AuthService,
+    private router: Router
+  ) {}
 
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = this.authService.getToken();
@@ -32,13 +36,49 @@ export class AuthInterceptor implements HttpInterceptor {
       return next.handle(req);
     }
 
-    // Clonar la petición y agregar el header Authorization
-    const authReq = req.clone({
+    // Si el token está próximo a expirar y hay refresh token, renovar primero
+    if (this.authService.estaProximoAExpirar() && this.authService.getRefreshToken()) {
+      return this.authService.refreshAccessToken().pipe(
+        switchMap(() => {
+          const nuevoToken = this.authService.getToken();
+          return next.handle(this.agregarToken(req, nuevoToken!));
+        }),
+        catchError(() => {
+          this.router.navigate(['/login']);
+          return throwError(() => new Error('Sesión expirada'));
+        })
+      );
+    }
+
+    // Caso normal: agregar el token actual
+    return next.handle(this.agregarToken(req, token)).pipe(
+      catchError((error: HttpErrorResponse) => {
+        // Si el backend responde 401 e hay refresh token, intentar renovar
+        if (error.status === 401 && this.authService.getRefreshToken()) {
+          return this.authService.refreshAccessToken().pipe(
+            switchMap(() => {
+              const nuevoToken = this.authService.getToken();
+              return next.handle(this.agregarToken(req, nuevoToken!));
+            }),
+            catchError(() => {
+              this.router.navigate(['/login']);
+              return throwError(() => new Error('Sesión expirada'));
+            })
+          );
+        }
+        return throwError(() => error);
+      })
+    );
+  }
+
+  /**
+   * Clona la request agregando el header Authorization con el token.
+   */
+  private agregarToken(req: HttpRequest<unknown>, token: string): HttpRequest<unknown> {
+    return req.clone({
       setHeaders: {
         Authorization: `Bearer ${token}`
       }
     });
-
-    return next.handle(authReq);
   }
 }

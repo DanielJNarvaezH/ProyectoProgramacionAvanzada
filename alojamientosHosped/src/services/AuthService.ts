@@ -15,13 +15,21 @@ import {
  * Gestiona:
  * - login()               → POST /api/auth/login
  * - register()            → POST /api/auth/register
- * - logout()              → Limpia el token y datos del usuario en localStorage
- * - isAuthenticated()     → Verifica si hay un token válido almacenado
+ * - logout()              → Limpia todos los datos de sesión en localStorage
+ * - isAuthenticated()     → Verifica si hay un token de acceso válido
  * - solicitarCodigo()     → POST /api/auth/recuperar-contrasena
  * - resetContrasena()     → POST /api/auth/reset-contrasena
  *
- * El token JWT y los datos del usuario se almacenan en localStorage
- * para persistir la sesión entre recargas de página.
+ * Gestión de tokens (AUTH-19):
+ * - getToken()            → Obtiene el access token
+ * - getRefreshToken()     → Obtiene el refresh token
+ * - guardarToken()        → Guarda solo el access token
+ * - guardarRefreshToken() → Guarda solo el refresh token
+ * - eliminarToken()       → Elimina solo el access token
+ * - eliminarRefreshToken()→ Elimina solo el refresh token
+ * - refreshAccessToken()  → POST /api/auth/refresh usando el refresh token
+ * - getTokenExpiracion()  → Retorna la fecha de expiración del access token
+ * - estaProximoAExpirar() → true si el token expira en menos de 5 minutos
  */
 @Injectable({
   providedIn: 'root'
@@ -29,8 +37,9 @@ import {
 export class AuthService {
 
   // ── Claves de localStorage ────────────────────────────────────────
-  private readonly TOKEN_KEY = 'hosped_token';
-  private readonly USER_KEY  = 'hosped_user';
+  private readonly TOKEN_KEY         = 'hosped_token';
+  private readonly REFRESH_TOKEN_KEY = 'hosped_refresh_token';
+  private readonly USER_KEY          = 'hosped_user';
 
   // ── URL base del backend ──────────────────────────────────────────
   private readonly apiUrl = `${environment.apiUrl}/auth`;
@@ -41,19 +50,9 @@ export class AuthService {
   // LOGIN
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Inicia sesión con email y contraseña.
-   * Al recibir respuesta exitosa, guarda el token JWT y los datos
-   * del usuario en localStorage automáticamente.
-   *
-   * @param credentials - Email y contraseña del usuario
-   * @returns Observable<AuthResponse> con token, email, rol y mensaje
-   */
   login(credentials: LoginRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
-      tap(response => {
-        this.guardarSesion(response);
-      }),
+      tap(response => this.guardarSesion(response)),
       catchError(error => {
         const mensaje = error.error?.mensaje || 'Credenciales incorrectas';
         return throwError(() => new Error(mensaje));
@@ -65,18 +64,9 @@ export class AuthService {
   // REGISTER
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Registra un nuevo usuario en la plataforma.
-   * Permite registrar usuarios con rol USUARIO o ANFITRION.
-   *
-   * @param datos - Datos de registro: nombre, email, teléfono, contraseña, fecha nacimiento, rol
-   * @returns Observable<AuthResponse> con token y datos del usuario registrado
-   */
   register(datos: RegisterRequest): Observable<AuthResponse> {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, datos).pipe(
-      tap(response => {
-        this.guardarSesion(response);
-      }),
+      tap(response => this.guardarSesion(response)),
       catchError(error => {
         const mensaje = error.error?.mensaje || 'Error al registrar usuario';
         return throwError(() => new Error(mensaje));
@@ -89,11 +79,12 @@ export class AuthService {
   // ─────────────────────────────────────────────────────────────────
 
   /**
-   * Cierra la sesión del usuario eliminando el token JWT
-   * y los datos almacenados en localStorage.
+   * Cierra la sesión eliminando todos los datos de autenticación
+   * del localStorage: access token, refresh token y datos del usuario.
    */
   logout(): void {
-    localStorage.removeItem(this.TOKEN_KEY);
+    this.eliminarToken();
+    this.eliminarRefreshToken();
     localStorage.removeItem(this.USER_KEY);
   }
 
@@ -102,21 +93,19 @@ export class AuthService {
   // ─────────────────────────────────────────────────────────────────
 
   /**
-   * Verifica si el usuario tiene una sesión activa válida.
-   * Comprueba que exista un token en localStorage y que no haya expirado.
-   *
-   * @returns true si el usuario está autenticado, false en caso contrario
+   * Verifica si el usuario tiene una sesión activa con token válido.
+   * Si el access token expiró pero hay refresh token disponible,
+   * retorna false para que el interceptor pueda renovarlo.
    */
   isAuthenticated(): boolean {
     const token = this.getToken();
     if (!token) return false;
 
-    // Verificar expiración decodificando el payload del JWT
     try {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const expirado = payload.exp * 1000 < Date.now();
       if (expirado) {
-        this.logout(); // Limpiar sesión expirada automáticamente
+        this.eliminarToken(); // Solo elimina el access token, mantiene el refresh
         return false;
       }
       return true;
@@ -127,15 +116,137 @@ export class AuthService {
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // RECUPERAR CONTRASEÑA
+  // GESTIÓN DE ACCESS TOKEN
   // ─────────────────────────────────────────────────────────────────
 
   /**
-   * Envía un código de recuperación al email del usuario.
-   *
-   * @param email - Correo del usuario registrado
-   * @returns Observable<string> con mensaje de confirmación
+   * Retorna el access token JWT almacenado o null si no existe.
    */
+  getToken(): string | null {
+    return localStorage.getItem(this.TOKEN_KEY);
+  }
+
+  /**
+   * Guarda únicamente el access token en localStorage.
+   * Útil cuando el backend renueva solo el access token.
+   *
+   * @param token - Nuevo access token JWT
+   */
+  guardarToken(token: string): void {
+    localStorage.setItem(this.TOKEN_KEY, token);
+  }
+
+  /**
+   * Elimina únicamente el access token del localStorage.
+   * No afecta el refresh token ni los datos del usuario.
+   */
+  eliminarToken(): void {
+    localStorage.removeItem(this.TOKEN_KEY);
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // GESTIÓN DE REFRESH TOKEN
+  // ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Retorna el refresh token almacenado o null si no existe.
+   * El refresh token tiene mayor duración que el access token.
+   */
+  getRefreshToken(): string | null {
+    return localStorage.getItem(this.REFRESH_TOKEN_KEY);
+  }
+
+  /**
+   * Guarda únicamente el refresh token en localStorage.
+   *
+   * @param refreshToken - Refresh token recibido del backend
+   */
+  guardarRefreshToken(refreshToken: string): void {
+    localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
+  }
+
+  /**
+   * Elimina únicamente el refresh token del localStorage.
+   * Se usa cuando el refresh token expira o es inválido.
+   */
+  eliminarRefreshToken(): void {
+    localStorage.removeItem(this.REFRESH_TOKEN_KEY);
+  }
+
+  /**
+   * Solicita al backend un nuevo access token usando el refresh token.
+   * Si el refresh token no existe o el backend lo rechaza, hace logout.
+   *
+   * Endpoint: POST /api/auth/refresh
+   * Body: { refreshToken: string }
+   * Response: { token: string, refreshToken: string, ... }
+   *
+   * @returns Observable<AuthResponse> con el nuevo access token
+   */
+  refreshAccessToken(): Observable<AuthResponse> {
+    const refreshToken = this.getRefreshToken();
+
+    if (!refreshToken) {
+      this.logout();
+      return throwError(() => new Error('No hay refresh token disponible'));
+    }
+
+    return this.http.post<AuthResponse>(`${this.apiUrl}/refresh`, { refreshToken }).pipe(
+      tap(response => {
+        // Actualizar solo los tokens, mantener datos del usuario
+        this.guardarToken(response.token);
+        if (response.refreshToken) {
+          this.guardarRefreshToken(response.refreshToken);
+        }
+      }),
+      catchError(error => {
+        // Si el refresh falla, cerrar sesión completamente
+        this.logout();
+        const mensaje = error.error?.mensaje || 'Sesión expirada, inicia sesión nuevamente';
+        return throwError(() => new Error(mensaje));
+      })
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // UTILIDADES DE EXPIRACIÓN
+  // ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Retorna la fecha de expiración del access token actual.
+   * Útil para mostrar al usuario cuánto tiempo le queda de sesión.
+   *
+   * @returns Date de expiración o null si no hay token
+   */
+  getTokenExpiracion(): Date | null {
+    const token = this.getToken();
+    if (!token) return null;
+
+    try {
+      const payload = JSON.parse(atob(token.split('.')[1]));
+      return new Date(payload.exp * 1000);
+    } catch {
+      return null;
+    }
+  }
+
+  /**
+   * Retorna true si el access token expira en menos de 5 minutos.
+   * El interceptor puede usar esto para renovar el token de forma proactiva
+   * antes de que expire y evitar errores 401.
+   */
+  estaProximoAExpirar(): boolean {
+    const expiracion = this.getTokenExpiracion();
+    if (!expiracion) return false;
+
+    const cincoMinutos = 5 * 60 * 1000;
+    return expiracion.getTime() - Date.now() < cincoMinutos;
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // RECUPERAR CONTRASEÑA
+  // ─────────────────────────────────────────────────────────────────
+
   solicitarCodigo(email: string): Observable<string> {
     return this.http.post(
       `${this.apiUrl}/recuperar-contrasena`,
@@ -149,14 +260,6 @@ export class AuthService {
     );
   }
 
-  /**
-   * Restablece la contraseña usando el código recibido por email.
-   *
-   * @param email           - Correo del usuario
-   * @param codigo          - Código recibido por email
-   * @param nuevaContrasena - Nueva contraseña
-   * @returns Observable<string> con mensaje de confirmación
-   */
   resetContrasena(email: string, codigo: string, nuevaContrasena: string): Observable<string> {
     return this.http.post(
       `${this.apiUrl}/reset-contrasena`,
@@ -174,39 +277,19 @@ export class AuthService {
   // GETTERS DE SESIÓN
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Retorna el token JWT almacenado o null si no existe.
-   */
-  getToken(): string | null {
-    return localStorage.getItem(this.TOKEN_KEY);
-  }
-
-  /**
-   * Retorna los datos del usuario autenticado o null si no existe sesión.
-   */
   getUsuario(): Partial<User> | null {
     const data = localStorage.getItem(this.USER_KEY);
     return data ? JSON.parse(data) : null;
   }
 
-  /**
-   * Retorna el rol del usuario autenticado o null si no existe sesión.
-   * Posibles valores: 'USUARIO' | 'ANFITRION' | 'ADMIN'
-   */
   getRol(): string | null {
     return this.getUsuario()?.rol ?? null;
   }
 
-  /**
-   * Retorna true si el usuario autenticado tiene rol ANFITRION.
-   */
   esAnfitrion(): boolean {
     return this.getRol() === 'ANFITRION';
   }
 
-  /**
-   * Retorna true si el usuario autenticado tiene rol ADMIN.
-   */
   esAdmin(): boolean {
     return this.getRol() === 'ADMIN';
   }
@@ -216,10 +299,14 @@ export class AuthService {
   // ─────────────────────────────────────────────────────────────────
 
   /**
-   * Guarda el token JWT y los datos básicos del usuario en localStorage.
+   * Guarda access token, refresh token y datos del usuario en localStorage.
+   * Se llama automáticamente tras login y register exitosos.
    */
   private guardarSesion(response: AuthResponse): void {
-    localStorage.setItem(this.TOKEN_KEY, response.token);
+    this.guardarToken(response.token);
+    if (response.refreshToken) {
+      this.guardarRefreshToken(response.refreshToken);
+    }
     localStorage.setItem(this.USER_KEY, JSON.stringify({
       correo: response.email,
       rol:    response.rol

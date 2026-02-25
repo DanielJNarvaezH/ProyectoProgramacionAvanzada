@@ -14,6 +14,11 @@
       Inicia sesión para continuar en el sistema
     </p>
 
+    <!-- Mensaje de error -->
+    <div *ngIf="errorMessage" class="w-full mb-4 px-4 py-2 bg-red-50 border border-red-300 text-red-600 text-sm rounded-md">
+      {{ errorMessage }}
+    </div>
+
     <!-- Formulario -->
     <form class="space-y-4 w-full" (ngSubmit)="onSubmit()">
       <div>
@@ -29,7 +34,12 @@
       </div>
 
       <div>
-        <label class="block text-sm font-medium text-neutral-700">Contraseña</label>
+        <div class="flex justify-between items-center">
+          <label class="block text-sm font-medium text-neutral-700">Contraseña</label>
+          <a routerLink="/recuperar-contrasena" class="text-xs text-primary-600 hover:underline">
+            ¿Olvidaste tu contraseña?
+          </a>
+        </div>
         <input
           [(ngModel)]="password"
           name="password"
@@ -42,9 +52,11 @@
 
       <button
         type="submit"
-        class="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 rounded-md transition"
+        [disabled]="isLoading"
+        class="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 rounded-md transition disabled:opacity-60 disabled:cursor-not-allowed flex items-center justify-center gap-2"
       >
-        Ingresar
+        <span *ngIf="isLoading">Iniciando sesión...</span>
+        <span *ngIf="!isLoading">Ingresar</span>
       </button>
     </form>
 
