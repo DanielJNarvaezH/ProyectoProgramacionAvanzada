@@ -1,0 +1,57 @@
+<div class="recuperar-container">
+
+  <!-- PASO 1: Email -->
+  <div *ngIf="paso === 'email'">
+    <h2>Recuperar contraseña</h2>
+    <p>Ingresa tu correo y te enviaremos un código de recuperación.</p>
+
+    <div *ngIf="error" class="mensaje error">{{ error }}</div>
+    <div *ngIf="exito" class="mensaje exito">{{ exito }}</div>
+
+    <input
+      type="email"
+      [(ngModel)]="email"
+      placeholder="Correo electrónico"
+    />
+
+    <button (click)="solicitarCodigo()" [disabled]="cargando">
+      {{ cargando ? 'Enviando...' : 'Enviar código' }}
+    </button>
+
+    <button class="link" (click)="volverAlLogin()">Volver al login</button>
+  </div>
+
+  <!-- PASO 2: Código + nueva contraseña -->
+  <div *ngIf="paso === 'codigo'">
+    <h2>Nueva contraseña</h2>
+    <p>Ingresa el código que recibiste en <strong>{{ email }}</strong></p>
+
+    <div *ngIf="error" class="mensaje error">{{ error }}</div>
+    <div *ngIf="exito" class="mensaje exito">{{ exito }}</div>
+
+    <input
+      type="text"
+      [(ngModel)]="codigo"
+      placeholder="Código de verificación"
+    />
+
+    <input
+      type="password"
+      [(ngModel)]="nuevaContrasena"
+      placeholder="Nueva contraseña"
+    />
+
+    <input
+      type="password"
+      [(ngModel)]="confirmarContrasena"
+      placeholder="Confirmar contraseña"
+    />
+
+    <button (click)="resetContrasena()" [disabled]="cargando">
+      {{ cargando ? 'Guardando...' : 'Cambiar contraseña' }}
+    </button>
+
+    <button class="link" (click)="paso = 'email'">← Cambiar email</button>
+  </div>
+
+</div>

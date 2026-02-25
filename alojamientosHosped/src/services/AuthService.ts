@@ -13,10 +13,12 @@ import {
  * AuthService — Servicio central de autenticación para la plataforma Hosped.
  *
  * Gestiona:
- * - login()          → POST /api/auth/login
- * - register()       → POST /api/auth/register
- * - logout()         → Limpia el token y datos del usuario en localStorage
- * - isAuthenticated() → Verifica si hay un token válido almacenado
+ * - login()               → POST /api/auth/login
+ * - register()            → POST /api/auth/register
+ * - logout()              → Limpia el token y datos del usuario en localStorage
+ * - isAuthenticated()     → Verifica si hay un token válido almacenado
+ * - solicitarCodigo()     → POST /api/auth/recuperar-contrasena
+ * - resetContrasena()     → POST /api/auth/reset-contrasena
  *
  * El token JWT y los datos del usuario se almacenan en localStorage
  * para persistir la sesión entre recargas de página.
@@ -122,6 +124,50 @@ export class AuthService {
       this.logout();
       return false;
     }
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // RECUPERAR CONTRASEÑA
+  // ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Envía un código de recuperación al email del usuario.
+   *
+   * @param email - Correo del usuario registrado
+   * @returns Observable<string> con mensaje de confirmación
+   */
+  solicitarCodigo(email: string): Observable<string> {
+    return this.http.post(
+      `${this.apiUrl}/recuperar-contrasena`,
+      { email },
+      { responseType: 'text' }
+    ).pipe(
+      catchError(error => {
+        const mensaje = error.error || 'Error al enviar el código';
+        return throwError(() => new Error(mensaje));
+      })
+    );
+  }
+
+  /**
+   * Restablece la contraseña usando el código recibido por email.
+   *
+   * @param email           - Correo del usuario
+   * @param codigo          - Código recibido por email
+   * @param nuevaContrasena - Nueva contraseña
+   * @returns Observable<string> con mensaje de confirmación
+   */
+  resetContrasena(email: string, codigo: string, nuevaContrasena: string): Observable<string> {
+    return this.http.post(
+      `${this.apiUrl}/reset-contrasena`,
+      { email, codigo, nuevaContrasena },
+      { responseType: 'text' }
+    ).pipe(
+      catchError(error => {
+        const mensaje = error.error || 'Error al restablecer la contraseña';
+        return throwError(() => new Error(mensaje));
+      })
+    );
   }
 
   // ─────────────────────────────────────────────────────────────────
