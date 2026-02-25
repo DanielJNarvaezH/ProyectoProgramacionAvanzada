@@ -1,57 +1,147 @@
-<div class="recuperar-container">
+<div class="min-h-screen flex items-center justify-center bg-neutral-50">
 
-  <!-- PASO 1: Email -->
-  <div *ngIf="paso === 'email'">
-    <h2>Recuperar contraseña</h2>
-    <p>Ingresa tu correo y te enviaremos un código de recuperación.</p>
+  <div class="flex flex-col items-center justify-center animate-fade-in-up w-full max-w-md bg-white shadow-2xl rounded-2xl p-8">
 
-    <div *ngIf="error" class="mensaje error">{{ error }}</div>
-    <div *ngIf="exito" class="mensaje exito">{{ exito }}</div>
+    <!-- Logo y título -->
+    <div class="flex flex-col items-center mb-6">
+      <h1 class="text-3xl font-heading text-primary-600 text-center">Hosped</h1>
+      <p class="text-neutral-500 text-sm text-center">Gestión moderna de alojamientos</p>
+    </div>
 
-    <input
-      type="email"
-      [(ngModel)]="email"
-      placeholder="Correo electrónico"
-    />
+    <!-- PASO 1: Solicitar código -->
+    <ng-container *ngIf="paso === 'email'">
 
-    <button (click)="solicitarCodigo()" [disabled]="cargando">
-      {{ cargando ? 'Enviando...' : 'Enviar código' }}
-    </button>
+      <h2 class="text-2xl font-heading text-primary-600 text-center mb-2">Recuperar contraseña</h2>
+      <p class="text-center text-neutral-500 mb-6">
+        Ingresa tu correo y te enviaremos un código de recuperación.
+      </p>
 
-    <button class="link" (click)="volverAlLogin()">Volver al login</button>
+      <!-- Mensajes -->
+      <div *ngIf="error" class="w-full mb-4 px-4 py-2 bg-red-50 border border-red-300 text-red-600 text-sm rounded-md">
+        {{ error }}
+      </div>
+      <div *ngIf="exito" class="w-full mb-4 px-4 py-2 bg-green-50 border border-green-300 text-green-600 text-sm rounded-md">
+        {{ exito }}
+      </div>
+
+      <!-- Formulario paso 1 -->
+      <div class="space-y-4 w-full">
+        <div>
+          <label class="block text-sm font-medium text-neutral-700">Correo electrónico</label>
+          <input
+            [(ngModel)]="email"
+            name="email"
+            type="email"
+            placeholder="usuario@ejemplo.com"
+            class="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+
+        <button
+          (click)="solicitarCodigo()"
+          [disabled]="cargando"
+          class="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 rounded-md transition disabled:opacity-50"
+        >
+          {{ cargando ? 'Enviando...' : 'Enviar código' }}
+        </button>
+      </div>
+
+      <!-- Volver al login -->
+      <div class="flex items-center gap-3 w-full my-4">
+        <hr class="flex-1 border-neutral-200" />
+        <span class="text-xs text-neutral-400">¿Ya tienes cuenta?</span>
+        <hr class="flex-1 border-neutral-200" />
+      </div>
+
+      <a
+        routerLink="/login"
+        class="w-full text-center py-2 border-2 border-primary-500 text-primary-600 font-semibold rounded-md hover:bg-primary-50 transition"
+      >
+        Volver al login
+      </a>
+
+    </ng-container>
+
+    <!-- PASO 2: Código + nueva contraseña -->
+    <ng-container *ngIf="paso === 'codigo'">
+
+      <h2 class="text-2xl font-heading text-primary-600 text-center mb-2">Nueva contraseña</h2>
+      <p class="text-center text-neutral-500 mb-6">
+        Ingresa el código enviado a <strong>{{ email }}</strong>
+      </p>
+
+      <!-- Mensajes -->
+      <div *ngIf="error" class="w-full mb-4 px-4 py-2 bg-red-50 border border-red-300 text-red-600 text-sm rounded-md">
+        {{ error }}
+      </div>
+      <div *ngIf="exito" class="w-full mb-4 px-4 py-2 bg-green-50 border border-green-300 text-green-600 text-sm rounded-md">
+        {{ exito }}
+      </div>
+
+      <!-- Formulario paso 2 -->
+      <div class="space-y-4 w-full">
+        <div>
+          <label class="block text-sm font-medium text-neutral-700">Código de verificación</label>
+          <input
+            [(ngModel)]="codigo"
+            name="codigo"
+            type="text"
+            placeholder="Ej: 483920"
+            class="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-700">Nueva contraseña</label>
+          <input
+            [(ngModel)]="nuevaContrasena"
+            name="nuevaContrasena"
+            type="password"
+            placeholder="Mínimo 8 caracteres"
+            class="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+
+        <div>
+          <label class="block text-sm font-medium text-neutral-700">Confirmar contraseña</label>
+          <input
+            [(ngModel)]="confirmarContrasena"
+            name="confirmarContrasena"
+            type="password"
+            placeholder="Repite la contraseña"
+            class="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+          />
+        </div>
+
+        <button
+          (click)="resetContrasena()"
+          [disabled]="cargando"
+          class="w-full bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 rounded-md transition disabled:opacity-50"
+        >
+          {{ cargando ? 'Guardando...' : 'Cambiar contraseña' }}
+        </button>
+      </div>
+
+      <!-- Volver al paso 1 -->
+      <div class="flex items-center gap-3 w-full my-4">
+        <hr class="flex-1 border-neutral-200" />
+        <span class="text-xs text-neutral-400">¿Email incorrecto?</span>
+        <hr class="flex-1 border-neutral-200" />
+      </div>
+
+      <button
+        (click)="paso = 'email'"
+        class="w-full text-center py-2 border-2 border-primary-500 text-primary-600 font-semibold rounded-md hover:bg-primary-50 transition"
+      >
+        ← Cambiar email
+      </button>
+
+    </ng-container>
+
+    <!-- Pie de página -->
+    <footer class="text-center text-sm text-neutral-500 mt-6">
+      © 2025 Hosped | Sistema de Alojamiento Inteligente
+    </footer>
+
   </div>
-
-  <!-- PASO 2: Código + nueva contraseña -->
-  <div *ngIf="paso === 'codigo'">
-    <h2>Nueva contraseña</h2>
-    <p>Ingresa el código que recibiste en <strong>{{ email }}</strong></p>
-
-    <div *ngIf="error" class="mensaje error">{{ error }}</div>
-    <div *ngIf="exito" class="mensaje exito">{{ exito }}</div>
-
-    <input
-      type="text"
-      [(ngModel)]="codigo"
-      placeholder="Código de verificación"
-    />
-
-    <input
-      type="password"
-      [(ngModel)]="nuevaContrasena"
-      placeholder="Nueva contraseña"
-    />
-
-    <input
-      type="password"
-      [(ngModel)]="confirmarContrasena"
-      placeholder="Confirmar contraseña"
-    />
-
-    <button (click)="resetContrasena()" [disabled]="cargando">
-      {{ cargando ? 'Guardando...' : 'Cambiar contraseña' }}
-    </button>
-
-    <button class="link" (click)="paso = 'email'">← Cambiar email</button>
-  </div>
-
 </div>
