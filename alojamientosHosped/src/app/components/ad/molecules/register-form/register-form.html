@@ -1,4 +1,36 @@
-<form [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-4 w-full">
+<!-- ── PANTALLA DE ÉXITO (se muestra tras registro exitoso) ───────── -->
+<div *ngIf="registroExitoso" class="flex flex-col items-center justify-center text-center space-y-4 py-4 w-full">
+
+  <!-- Ícono de éxito animado -->
+  <div class="w-20 h-20 rounded-full bg-green-100 flex items-center justify-center">
+    <app-icon icon="fa-solid fa-circle-check" class="text-5xl text-green-500"></app-icon>
+  </div>
+
+  <h3 class="text-2xl font-bold text-neutral-700">
+    ¡Bienvenido, {{ successMessage }}!
+  </h3>
+
+  <p class="text-neutral-500 text-sm">
+    Tu cuenta fue creada exitosamente.<br/>
+    Serás redirigido al inicio de sesión en unos segundos...
+  </p>
+
+  <!-- Barra de progreso -->
+  <div class="w-full bg-neutral-200 rounded-full h-1.5 overflow-hidden">
+    <div class="bg-green-500 h-1.5 rounded-full animate-[shrink_3s_linear_forwards]"
+         style="width: 100%; animation: progress-bar 3s linear forwards;">
+    </div>
+  </div>
+
+  <button
+    (click)="irAlLogin()"
+    class="w-full py-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-md transition">
+    Ir al inicio de sesión ahora
+  </button>
+</div>
+
+<!-- ── FORMULARIO DE REGISTRO (se oculta tras éxito) ─────────────── -->
+<form *ngIf="!registroExitoso" [formGroup]="registerForm" (ngSubmit)="onSubmit()" class="space-y-4 w-full">
 
   <!-- ── Nombre completo ─────────────────────────────────────────── -->
   <div>
@@ -11,9 +43,9 @@
       placeholder="Juan Pérez"
       class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 transition"
       [ngClass]="{
-        'border-red-400 bg-red-50':   name?.invalid && name?.touched,
+        'border-red-400 bg-red-50':    name?.invalid && name?.touched,
         'border-green-400 bg-green-50': name?.valid  && name?.touched,
-        'border-neutral-300':          !name?.touched
+        'border-neutral-300':           !name?.touched
       }"
     />
     <div *ngIf="name?.invalid && name?.touched" class="mt-1 text-xs text-red-500">
@@ -36,7 +68,7 @@
       [ngClass]="{
         'border-red-400 bg-red-50':    email?.invalid && email?.touched,
         'border-green-400 bg-green-50': email?.valid  && email?.touched,
-        'border-neutral-300':           !email?.touched
+        'border-neutral-300':          !email?.touched
       }"
     />
     <div *ngIf="email?.invalid && email?.touched" class="mt-1 text-xs text-red-500">
@@ -106,11 +138,8 @@
           'border-neutral-300':           !password?.touched
         }"
       />
-      <button
-        type="button"
-        (click)="togglePassword()"
-        class="absolute right-3 top-2.5 text-gray-500 hover:text-primary-500"
-      >
+      <button type="button" (click)="togglePassword()"
+        class="absolute right-3 top-2.5 text-gray-500 hover:text-primary-500">
         <app-icon [icon]="showPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></app-icon>
       </button>
     </div>
@@ -140,11 +169,8 @@
           'border-neutral-300':           !confirmPassword?.touched
         }"
       />
-      <button
-        type="button"
-        (click)="toggleConfirmPassword()"
-        class="absolute right-3 top-2.5 text-gray-500 hover:text-primary-500"
-      >
+      <button type="button" (click)="toggleConfirmPassword()"
+        class="absolute right-3 top-2.5 text-gray-500 hover:text-primary-500">
         <app-icon [icon]="showConfirmPassword ? 'fa-solid fa-eye-slash' : 'fa-solid fa-eye'"></app-icon>
       </button>
     </div>
@@ -160,7 +186,6 @@
       Tipo de cuenta <span class="text-red-500">*</span>
     </label>
     <div class="grid grid-cols-2 gap-3">
-      <!-- USUARIO -->
       <label
         class="flex flex-col items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition"
         [ngClass]="{
@@ -173,8 +198,6 @@
         <span class="text-sm font-medium">Huésped</span>
         <span class="text-xs text-neutral-500 text-center">Buscar y reservar alojamientos</span>
       </label>
-
-      <!-- ANFITRION -->
       <label
         class="flex flex-col items-center justify-center p-3 border-2 rounded-xl cursor-pointer transition"
         [ngClass]="{
@@ -190,7 +213,7 @@
     </div>
   </div>
 
-  <!-- ── Mensaje de error global ───────────────────────────────────── -->
+  <!-- ── Error global ──────────────────────────────────────────────── -->
   <div *ngIf="errorMessage" class="flex items-center gap-2 p-3 bg-red-50 border border-red-200 rounded-md">
     <app-icon icon="fa-solid fa-circle-exclamation" class="text-red-500"></app-icon>
     <span class="text-sm text-red-600">{{ errorMessage }}</span>

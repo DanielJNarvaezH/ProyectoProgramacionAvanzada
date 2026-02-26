@@ -10,18 +10,6 @@ import { Router } from '@angular/router';
 import { AuthService } from '../../../../../services/AuthService';
 import { RegisterRequest } from '../../../../models';
 
-/**
- * RegisterFormComponent — Molécula
- *
- * Formulario reactivo de registro con validaciones para:
- * - Nombre completo
- * - Email válido
- * - Teléfono colombiano (10 dígitos)
- * - Contraseña segura (mín. 8 chars, mayúscula, número, especial)
- * - Confirmar contraseña
- * - Fecha de nacimiento
- * - Rol (USUARIO o ANFITRION)
- */
 @Component({
   selector: 'app-register-form',
   standalone: false,
@@ -31,9 +19,11 @@ import { RegisterRequest } from '../../../../models';
 export class RegisterFormComponent implements OnInit {
 
   registerForm!: FormGroup;
-  isLoading = false;
-  errorMessage = '';
-  showPassword = false;
+  isLoading           = false;
+  errorMessage        = '';
+  successMessage      = '';      // ← nuevo: nombre del usuario registrado
+  registroExitoso     = false;   // ← nuevo: controla si mostrar pantalla de éxito
+  showPassword        = false;
   showConfirmPassword = false;
 
   constructor(
@@ -57,7 +47,7 @@ export class RegisterFormComponent implements OnInit {
       ]],
       phone: ['', [
         Validators.required,
-        Validators.pattern(/^[3][0-9]{9}$/)   // Teléfono colombiano: empieza en 3, 10 dígitos
+        Validators.pattern(/^[3][0-9]{9}$/)
       ]],
       password: ['', [
         Validators.required,
@@ -74,54 +64,36 @@ export class RegisterFormComponent implements OnInit {
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // VALIDADORES PERSONALIZADOS
+  // VALIDADORES
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Valida que la contraseña tenga al menos:
-   * - 1 letra mayúscula
-   * - 1 número
-   * - 1 carácter especial
-   */
   private passwordSeguraValidator(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
     if (!value) return null;
-
-    const tieneMayuscula  = /[A-Z]/.test(value);
-    const tieneNumero     = /[0-9]/.test(value);
-    const tieneEspecial   = /[!@#$%^&*(),.?":{}|<>]/.test(value);
-
+    const tieneMayuscula = /[A-Z]/.test(value);
+    const tieneNumero    = /[0-9]/.test(value);
+    const tieneEspecial  = /[!@#$%^&*(),.?":{}|<>]/.test(value);
     if (!tieneMayuscula || !tieneNumero || !tieneEspecial) {
       return { passwordInsegura: true };
     }
     return null;
   }
 
-  /**
-   * Valida que el usuario sea mayor de 18 años
-   */
   private mayorDeEdadValidator(control: AbstractControl): ValidationErrors | null {
     const value = control.value;
     if (!value) return null;
-
     const hoy = new Date();
     const nacimiento = new Date(value);
     const edad = hoy.getFullYear() - nacimiento.getFullYear();
     const mes = hoy.getMonth() - nacimiento.getMonth();
     const edadReal = mes < 0 || (mes === 0 && hoy.getDate() < nacimiento.getDate())
-      ? edad - 1
-      : edad;
-
+      ? edad - 1 : edad;
     return edadReal < 18 ? { menorDeEdad: true } : null;
   }
 
-  /**
-   * Valida que password y confirmPassword coincidan (validador de grupo)
-   */
   private passwordsCoincidentesValidator(group: AbstractControl): ValidationErrors | null {
     const password        = group.get('password')?.value;
     const confirmPassword = group.get('confirmPassword')?.value;
-
     if (password && confirmPassword && password !== confirmPassword) {
       group.get('confirmPassword')?.setErrors({ noCoinciden: true });
       return { noCoinciden: true };
@@ -130,7 +102,7 @@ export class RegisterFormComponent implements OnInit {
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // GETTERS para acceso fácil en el template
+  // GETTERS
   // ─────────────────────────────────────────────────────────────────
 
   get name()            { return this.registerForm.get('name'); }
@@ -147,6 +119,8 @@ export class RegisterFormComponent implements OnInit {
 
   togglePassword():        void { this.showPassword        = !this.showPassword; }
   toggleConfirmPassword(): void { this.showConfirmPassword = !this.showConfirmPassword; }
+
+  irAlLogin(): void { this.router.navigate(['/login']); }
 
   onSubmit(): void {
     if (this.registerForm.invalid) {
@@ -168,8 +142,11 @@ export class RegisterFormComponent implements OnInit {
 
     this.authService.register(datos).subscribe({
       next: () => {
-        this.isLoading = false;
-        this.router.navigate(['/home']);
+        this.isLoading      = false;
+        this.registroExitoso = true;
+        this.successMessage  = this.registerForm.value.name.trim().split(' ')[0]; // primer nombre
+        // Redirigir al login después de 10 segundos
+        setTimeout(() => this.router.navigate(['/login']), 10000);
       },
       error: (err: Error) => {
         this.isLoading    = false;
