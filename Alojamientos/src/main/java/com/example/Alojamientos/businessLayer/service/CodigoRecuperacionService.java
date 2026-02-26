@@ -111,7 +111,7 @@ public class CodigoRecuperacionService {
      * Obtener código por ID
      */
     @Transactional(readOnly = true)
-    public CodigoRecuperacionDTO obtenerPorId(Integer id) {
+    public CodigoRecuperacionDTO obtenerPorId(Long id) {
         CodigoRecuperacionEntity entity = codigoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Código no encontrado con id: " + id));
         return codigoMapper.toDTO(entity);

@@ -169,7 +169,7 @@ export class RegisterFormComponent implements OnInit {
     this.authService.register(datos).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/dashboard']);
+        this.router.navigate(['/home']);
       },
       error: (err: Error) => {
         this.isLoading    = false;

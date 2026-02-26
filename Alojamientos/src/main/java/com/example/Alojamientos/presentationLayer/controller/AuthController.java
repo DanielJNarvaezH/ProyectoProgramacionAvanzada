@@ -7,7 +7,6 @@ import com.example.Alojamientos.businessLayer.service.AuthService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.ExampleObject;
-import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
@@ -16,12 +15,11 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Map;
+
 @RestController
 @RequestMapping("/api/auth")
-@Tag(
-        name = "Autenticación",
-        description = "Endpoints públicos para registro e inicio de sesión en la plataforma."
-)
+@Tag(name = "Autenticación", description = "Endpoints públicos para registro, login y recuperación de contraseña.")
 @RequiredArgsConstructor
 public class AuthController {
 
@@ -32,68 +30,11 @@ public class AuthController {
     // ─────────────────────────────────────────────────────────────
 
     @PostMapping("/register")
-    @Operation(
-            summary = "Registrar un nuevo usuario",
-            description = """
-                    Crea una nueva cuenta y devuelve un token JWT listo para usar.
-                    
-                    **Reglas de negocio:**
-                    - El correo electrónico debe ser único en el sistema.
-                    - La contraseña debe tener mínimo 8 caracteres, al menos una mayúscula y un número.
-                    - Los anfitriones (ANFITRION) deben ser mayores de 18 años.
-                    - Roles permitidos: `USUARIO`, `ANFITRION`.
-                    """,
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = RegisterRequest.class),
-                            examples = {
-                                    @ExampleObject(
-                                            name = "Usuario normal",
-                                            summary = "Registro como usuario",
-                                            value = """
-                                                    {
-                                                      "name": "Juan Pérez",
-                                                      "email": "juan@example.com",
-                                                      "password": "Abc12345",
-                                                      "phone": "3001234567",
-                                                      "birthDate": "2000-05-15",
-                                                      "role": "USUARIO"
-                                                    }
-                                                    """
-                                    ),
-                                    @ExampleObject(
-                                            name = "Anfitrión",
-                                            summary = "Registro como anfitrión",
-                                            value = """
-                                                    {
-                                                      "name": "María García",
-                                                      "email": "maria@example.com",
-                                                      "password": "Xyz98765",
-                                                      "phone": "3109876543",
-                                                      "birthDate": "1990-03-20",
-                                                      "role": "ANFITRION"
-                                                    }
-                                                    """
-                                    )
-                            }
-                    )
-            )
-    )
+    @Operation(summary = "Registrar un nuevo usuario")
     @ApiResponses({
-            @ApiResponse(
-                    responseCode = "201",
-                    description = "Usuario registrado exitosamente.",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = AuthResponse.class))
-            ),
-            @ApiResponse(responseCode = "400", description = "Datos inválidos.",
-                    content = @Content(mediaType = "text/plain")),
-            @ApiResponse(responseCode = "409", description = "El email ya está registrado.",
-                    content = @Content(mediaType = "text/plain")),
-            @ApiResponse(responseCode = "500", description = "Error interno del servidor.",
-                    content = @Content(mediaType = "text/plain"))
+            @ApiResponse(responseCode = "201", description = "Usuario registrado exitosamente."),
+            @ApiResponse(responseCode = "400", description = "Datos inválidos."),
+            @ApiResponse(responseCode = "409", description = "El email ya está registrado.")
     })
     public ResponseEntity<?> register(@RequestBody RegisterRequest request) {
         try {
@@ -115,40 +56,10 @@ public class AuthController {
     // ─────────────────────────────────────────────────────────────
 
     @PostMapping("/login")
-    @Operation(
-            summary = "Iniciar sesión",
-            description = """
-                    Autentica las credenciales del usuario y devuelve un token JWT válido por 24h.
-                    
-                    **Uso del token:**
-                    Incluye el token en el header de las peticiones protegidas:
-                    `Authorization: Bearer <token>`
-                    """,
-            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
-                    required = true,
-                    content = @Content(
-                            mediaType = "application/json",
-                            schema = @Schema(implementation = LoginRequest.class),
-                            examples = @ExampleObject(
-                                    name = "Ejemplo de login",
-                                    value = """
-                                            {
-                                              "email": "juan@example.com",
-                                              "password": "Abc12345"
-                                            }
-                                            """
-                            )
-                    )
-            )
-    )
+    @Operation(summary = "Iniciar sesión")
     @ApiResponses({
-            @ApiResponse(responseCode = "200", description = "Login exitoso.",
-                    content = @Content(mediaType = "application/json",
-                            schema = @Schema(implementation = AuthResponse.class))),
-            @ApiResponse(responseCode = "401", description = "Credenciales incorrectas o cuenta desactivada.",
-                    content = @Content(mediaType = "text/plain")),
-            @ApiResponse(responseCode = "500", description = "Error interno del servidor.",
-                    content = @Content(mediaType = "text/plain"))
+            @ApiResponse(responseCode = "200", description = "Login exitoso."),
+            @ApiResponse(responseCode = "401", description = "Credenciales incorrectas.")
     })
     public ResponseEntity<?> login(@RequestBody LoginRequest request) {
         try {
@@ -161,6 +72,88 @@ public class AuthController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
                     .body("Error interno al iniciar sesión");
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // POST /api/auth/recuperar-contrasena
+    // ─────────────────────────────────────────────────────────────
+
+    @PostMapping("/recuperar-contrasena")
+    @Operation(
+            summary = "Solicitar código de recuperación",
+            description = "Envía un código de 6 dígitos al correo del usuario. Válido por 15 minutos.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(value = """
+                                    { "email": "usuario@ejemplo.com" }
+                                    """)
+                    )
+            )
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Código enviado exitosamente."),
+            @ApiResponse(responseCode = "400", description = "El correo no está registrado.")
+    })
+    public ResponseEntity<?> recuperarContrasena(@RequestBody Map<String, String> body) {
+        try {
+            String correo = body.get("email");
+            if (correo == null || correo.isBlank()) {
+                return ResponseEntity.badRequest().body("El campo email es obligatorio");
+            }
+            String resultado = authService.solicitarRecuperacion(correo);
+            return ResponseEntity.ok(resultado);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al enviar el código de recuperación");
+        }
+    }
+
+    // ─────────────────────────────────────────────────────────────
+    // POST /api/auth/reset-contrasena
+    // ─────────────────────────────────────────────────────────────
+
+    @PostMapping("/reset-contrasena")
+    @Operation(
+            summary = "Restablecer contraseña con código",
+            description = "Valida el código recibido por email y actualiza la contraseña del usuario.",
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    content = @Content(
+                            mediaType = "application/json",
+                            examples = @ExampleObject(value = """
+                                    {
+                                      "email": "usuario@ejemplo.com",
+                                      "codigo": "483920",
+                                      "nuevaContrasena": "NuevaClave1"
+                                    }
+                                    """)
+                    )
+            )
+    )
+    @ApiResponses({
+            @ApiResponse(responseCode = "200", description = "Contraseña restablecida exitosamente."),
+            @ApiResponse(responseCode = "400", description = "Código incorrecto, expirado o contraseña inválida.")
+    })
+    public ResponseEntity<?> resetContrasena(@RequestBody Map<String, String> body) {
+        try {
+            String correo          = body.get("email");
+            String codigo          = body.get("codigo");
+            String nuevaContrasena = body.get("nuevaContrasena");
+
+            if (correo == null || codigo == null || nuevaContrasena == null) {
+                return ResponseEntity.badRequest().body("Los campos email, codigo y nuevaContrasena son obligatorios");
+            }
+
+            String resultado = authService.resetContrasena(correo, codigo, nuevaContrasena);
+            return ResponseEntity.ok(resultado);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+                    .body("Error al restablecer la contraseña");
         }
     }
 }

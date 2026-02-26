@@ -4,43 +4,22 @@ import com.example.Alojamientos.persistenceLayer.entity.CodigoRecuperacionEntity
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
-import java.util.List;
-
-import com.example.Alojamientos.persistenceLayer.entity.CodigoRecuperacionEntity;
-import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.stereotype.Repository;
-
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CodigoRecuperacionRepository extends JpaRepository<CodigoRecuperacionEntity, Integer> {
+public interface CodigoRecuperacionRepository extends JpaRepository<CodigoRecuperacionEntity, Long> {
 
-    /**
-     * Busca un código activo y no usado por su valor
-     * @param codigo código de recuperación
-     * @return Optional<CodigoRecuperacion>
-     */
-    Optional<CodigoRecuperacionEntity> findByCodigoAndUsadoFalse(String codigo);
-
-    /**
-     * Lista los códigos de un usuario que aún no han sido usados
-     * @param idUsuario id del usuario
-     * @return List<CodigoRecuperacion>
-     */
-    List<CodigoRecuperacionEntity> findByUsuario_IdAndUsadoFalse(Integer idUsuario);
-
-    /**
-     * Elimina los códigos expirados
-     * @param fechaActual fecha actual (usualmente NOW() en SQL)
-     */
-    void deleteByFechaExpiracionBefore(java.time.LocalDateTime fechaActual);
-
-
+    // Usado por CodigoRecuperacionService
+    List<CodigoRecuperacionEntity> findByUsuario_IdAndUsadoFalse(Integer usuarioId);
 
     Optional<CodigoRecuperacionEntity> findByCodigoAndUsuario_IdAndUsadoFalse(String codigo, Integer usuarioId);
 
-    List<CodigoRecuperacionEntity> findByFechaExpiracionBeforeAndUsadoFalse(Timestamp fecha);
+    List<CodigoRecuperacionEntity> findByFechaExpiracionBeforeAndUsadoFalse(Timestamp fechaExpiracion);
+
+    // Usado por AuthService
+    Optional<CodigoRecuperacionEntity> findTopByCorreoAndUsadoFalseOrderByFechaExpiracionDesc(String correo);
+
+    void deleteAllByCorreo(String correo);
 }

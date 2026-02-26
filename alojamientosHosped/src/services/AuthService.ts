@@ -254,7 +254,16 @@ export class AuthService {
       { responseType: 'text' }
     ).pipe(
       catchError(error => {
-        const mensaje = error.error || 'Error al enviar el código';
+        let mensaje: string;
+
+        if (error.status === 0) {
+          mensaje = 'No se puede conectar con el servidor. Verifica que el backend esté corriendo.';
+        } else if (error.status === 404) {
+          mensaje = 'El correo no está registrado en el sistema.';
+        } else {
+          mensaje = error.error || 'Error al enviar el código';
+        }
+
         return throwError(() => new Error(mensaje));
       })
     );

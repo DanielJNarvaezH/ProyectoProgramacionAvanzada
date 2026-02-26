@@ -59,7 +59,7 @@ public class CodigoRecuperacionController {
                     @ApiResponse(responseCode = "500", description = "Error interno del servidor")
             }
     )
-    public ResponseEntity<?> obtenerPorId(@PathVariable Integer id) {
+    public ResponseEntity<?> obtenerPorId(@PathVariable Long id) {
         try {
             CodigoRecuperacionDTO dto = codigoService.obtenerPorId(id);
             return ResponseEntity.ok(dto);
