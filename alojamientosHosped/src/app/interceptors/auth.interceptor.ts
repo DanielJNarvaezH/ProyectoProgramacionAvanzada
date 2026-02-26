@@ -15,13 +15,23 @@ import { Router } from '@angular/router';
  *
  * Responsabilidades (AUTH-18 + AUTH-19):
  * 1. Agrega automáticamente el token JWT en el header Authorization.
- * 2. Si el token está próximo a expirar (< 5 min), lo renueva antes
+ * 2. Excluye las rutas públicas (/auth/login, /auth/register, etc.)
+ *    para evitar conflictos cuando hay una sesión activa en localStorage.
+ * 3. Si el token está próximo a expirar (< 5 min), lo renueva antes
  *    de enviar la petición usando el refresh token.
- * 3. Si el backend responde 401, intenta renovar el token una vez.
+ * 4. Si el backend responde 401, intenta renovar el token una vez.
  *    Si falla, redirige al login.
  */
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
+
+  // Rutas que no requieren token aunque haya sesión activa
+  private readonly rutasPublicas = [
+    '/auth/login',
+    '/auth/register',
+    '/auth/recuperar-contrasena',
+    '/auth/reset-contrasena'
+  ];
 
   constructor(
     private authService: AuthService,
@@ -31,8 +41,9 @@ export class AuthInterceptor implements HttpInterceptor {
   intercept(req: HttpRequest<unknown>, next: HttpHandler): Observable<HttpEvent<unknown>> {
     const token = this.authService.getToken();
 
-    // Si no hay token, pasar la petición sin modificar
-    if (!token) {
+    // Si no hay token o es una ruta pública, pasar sin modificar
+    const esRutaPublica = this.rutasPublicas.some(ruta => req.url.includes(ruta));
+    if (!token || esRutaPublica) {
       return next.handle(req);
     }
 
@@ -53,7 +64,7 @@ export class AuthInterceptor implements HttpInterceptor {
     // Caso normal: agregar el token actual
     return next.handle(this.agregarToken(req, token)).pipe(
       catchError((error: HttpErrorResponse) => {
-        // Si el backend responde 401 e hay refresh token, intentar renovar
+        // Si el backend responde 401 y hay refresh token, intentar renovar
         if (error.status === 401 && this.authService.getRefreshToken()) {
           return this.authService.refreshAccessToken().pipe(
             switchMap(() => {
