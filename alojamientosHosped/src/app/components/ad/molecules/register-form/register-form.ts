@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import {
   FormBuilder,
   FormGroup,
@@ -9,6 +9,7 @@ import {
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../../services/AuthService';
 import { RegisterRequest } from '../../../../models';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-register-form',
@@ -16,15 +17,21 @@ import { RegisterRequest } from '../../../../models';
   templateUrl: './register-form.html',
   styleUrls: ['./register-form.scss']
 })
-export class RegisterFormComponent implements OnInit {
+export class RegisterFormComponent implements OnInit, OnDestroy {
 
   registerForm!: FormGroup;
   isLoading           = false;
   errorMessage        = '';
-  successMessage      = '';      // ← nuevo: nombre del usuario registrado
-  registroExitoso     = false;   // ← nuevo: controla si mostrar pantalla de éxito
+  successMessage      = '';
+  registroExitoso     = false;
   showPassword        = false;
   showConfirmPassword = false;
+
+  // Errores de backend por campo para mostrarlos inline
+  emailBackendError   = '';
+  phoneBackendError   = '';
+
+  private sub?: Subscription;
 
   constructor(
     private fb: FormBuilder,
@@ -61,6 +68,20 @@ export class RegisterFormComponent implements OnInit {
       ]],
       role: ['USUARIO', Validators.required]
     }, { validators: this.passwordsCoincidentesValidator });
+
+    // Limpiar errores del backend al editar campos afectados
+    this.sub = this.registerForm.get('email')!.valueChanges.subscribe(() => {
+      if (this.emailBackendError) this.emailBackendError = '';
+      if (this.errorMessage)      this.errorMessage = '';
+    });
+    this.registerForm.get('phone')!.valueChanges.subscribe(() => {
+      if (this.phoneBackendError) this.phoneBackendError = '';
+      if (this.errorMessage)      this.errorMessage = '';
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 
   // ─────────────────────────────────────────────────────────────────
@@ -128,8 +149,10 @@ export class RegisterFormComponent implements OnInit {
       return;
     }
 
-    this.isLoading    = true;
-    this.errorMessage = '';
+    this.isLoading         = true;
+    this.errorMessage      = '';
+    this.emailBackendError = '';
+    this.phoneBackendError = '';
 
     const datos: RegisterRequest = {
       name:      this.registerForm.value.name.trim(),
@@ -142,15 +165,26 @@ export class RegisterFormComponent implements OnInit {
 
     this.authService.register(datos).subscribe({
       next: () => {
-        this.isLoading      = false;
+        this.isLoading       = false;
         this.registroExitoso = true;
-        this.successMessage  = this.registerForm.value.name.trim().split(' ')[0]; // primer nombre
-        // Redirigir al login después de 10 segundos
+        this.successMessage  = this.registerForm.value.name.trim().split(' ')[0];
         setTimeout(() => this.router.navigate(['/login']), 10000);
       },
-      error: (err: Error) => {
-        this.isLoading    = false;
-        this.errorMessage = err.message || 'Error al registrar usuario';
+      error: (err: any) => {
+        this.isLoading = false;
+
+        // Si el backend indicó el campo afectado, marcar inline
+        if (err.campo === 'email') {
+          this.emailBackendError = err.message;
+          this.email?.setErrors({ backendError: true });
+          this.email?.markAsTouched();
+        } else if (err.campo === 'phone') {
+          this.phoneBackendError = err.message;
+          this.phone?.setErrors({ backendError: true });
+          this.phone?.markAsTouched();
+        } else {
+          this.errorMessage = err.message || 'Error al registrar usuario';
+        }
       }
     });
   }

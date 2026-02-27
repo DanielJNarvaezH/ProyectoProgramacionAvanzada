@@ -66,14 +66,21 @@
       placeholder="usuario@ejemplo.com"
       class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 transition"
       [ngClass]="{
-        'border-red-400 bg-red-50':    email?.invalid && email?.touched,
-        'border-green-400 bg-green-50': email?.valid  && email?.touched,
-        'border-neutral-300':          !email?.touched
+        'border-red-400 bg-red-50':    (email?.invalid && email?.touched) || emailBackendError,
+        'border-green-400 bg-green-50': email?.valid  && email?.touched && !emailBackendError,
+        'border-neutral-300':          !email?.touched && !emailBackendError
       }"
     />
-    <div *ngIf="email?.invalid && email?.touched" class="mt-1 text-xs text-red-500">
-      <span *ngIf="email?.errors?.['required']">El correo es obligatorio</span>
-      <span *ngIf="email?.errors?.['email']">Ingresa un correo válido</span>
+    <div *ngIf="(email?.invalid && email?.touched) || emailBackendError" class="mt-1 text-xs text-red-500">
+      <span *ngIf="emailBackendError" class="flex items-center gap-1">
+        <i class="fa-solid fa-circle-exclamation text-xs"></i>
+        {{ emailBackendError }}
+        <a routerLink="/login" class="underline font-medium">Inicia sesión</a>
+        o
+        <a routerLink="/recuperar-contrasena" class="underline font-medium">recupera tu contraseña.</a>
+      </span>
+      <span *ngIf="!emailBackendError && email?.errors?.['required']">El correo es obligatorio</span>
+      <span *ngIf="!emailBackendError && email?.errors?.['email']">Ingresa un correo válido (ej: usuario@ejemplo.com)</span>
     </div>
   </div>
 
@@ -93,9 +100,10 @@
         'border-neutral-300':           !phone?.touched
       }"
     />
-    <div *ngIf="phone?.invalid && phone?.touched" class="mt-1 text-xs text-red-500">
-      <span *ngIf="phone?.errors?.['required']">El teléfono es obligatorio</span>
-      <span *ngIf="phone?.errors?.['pattern']">Ingresa un número colombiano válido (ej: 3001234567)</span>
+    <div *ngIf="(phone?.invalid && phone?.touched) || phoneBackendError" class="mt-1 text-xs text-red-500">
+      <span *ngIf="phoneBackendError">{{ phoneBackendError }}</span>
+      <span *ngIf="!phoneBackendError && phone?.errors?.['required']">El teléfono es obligatorio</span>
+      <span *ngIf="!phoneBackendError && phone?.errors?.['pattern']">Ingresa un número colombiano válido (ej: 3001234567)</span>
     </div>
   </div>
 

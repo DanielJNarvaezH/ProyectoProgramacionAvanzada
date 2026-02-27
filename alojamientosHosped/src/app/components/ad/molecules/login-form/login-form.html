@@ -72,7 +72,14 @@
            dark:text-red-300"
   >
     <i class="fa-solid fa-triangle-exclamation mt-0.5 shrink-0"></i>
-    <span>{{ errorMessage }}</span>
+    <span>
+      {{ errorMessage }}
+      <a
+        *ngIf="errorMessage.includes('contraseña') || errorMessage.includes('incorrectos')"
+        routerLink="/recuperar-contrasena"
+        class="ml-1 underline font-medium hover:text-red-900 dark:hover:text-red-100"
+      >¿Olvidaste tu contraseña?</a>
+    </span>
   </div>
 
   <!-- ── Botón de envío ─────────────────────────────────────────── -->

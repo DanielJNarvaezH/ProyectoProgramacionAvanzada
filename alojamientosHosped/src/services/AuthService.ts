@@ -54,10 +54,34 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/login`, credentials).pipe(
       tap(response => this.guardarSesion(response)),
       catchError(error => {
-        const mensaje = error.error?.mensaje || 'Credenciales incorrectas';
+        const mensaje = this.resolverErrorLogin(error);
         return throwError(() => new Error(mensaje));
       })
     );
+  }
+
+  private resolverErrorLogin(error: any): string {
+    if (error.status === 0) {
+      return 'No se puede conectar con el servidor. Verifica tu conexión a internet.';
+    }
+    // El back manda String plano en el body — leerlo directo
+    const backendMsg: string = typeof error.error === 'string'
+      ? error.error
+      : (error.error?.mensaje || error.error?.message || '');
+
+    if (error.status === 401) {
+      return backendMsg || 'Correo o contraseña incorrectos. Verifica tus datos e intenta de nuevo.';
+    }
+    if (error.status === 403) {
+      return backendMsg || 'Tu cuenta está desactivada o bloqueada. Contacta al soporte.';
+    }
+    if (error.status === 429) {
+      return 'Demasiados intentos fallidos. Espera unos minutos antes de intentar de nuevo.';
+    }
+    if (error.status >= 500) {
+      return 'Error interno del servidor. Intenta de nuevo más tarde.';
+    }
+    return backendMsg || 'Correo o contraseña incorrectos.';
   }
 
   // ─────────────────────────────────────────────────────────────────
@@ -68,10 +92,38 @@ export class AuthService {
     return this.http.post<AuthResponse>(`${this.apiUrl}/register`, datos).pipe(
       tap(response => this.guardarSesion(response)),
       catchError(error => {
-        const mensaje = error.error?.mensaje || 'Error al registrar usuario';
-        return throwError(() => new Error(mensaje));
+        const { mensaje, campo } = this.resolverErrorRegister(error);
+        const err: any = new Error(mensaje);
+        err.campo = campo; // campo afectado para marcar inline en el formulario
+        return throwError(() => err);
       })
     );
+  }
+
+  private resolverErrorRegister(error: any): { mensaje: string; campo?: string } {
+    if (error.status === 0) {
+      return { mensaje: 'No se puede conectar con el servidor. Verifica tu conexión a internet.' };
+    }
+    // El back manda String plano en el body — leerlo directo
+    const backendMsg: string = typeof error.error === 'string'
+      ? error.error
+      : (error.error?.mensaje || error.error?.message || '');
+
+    if (error.status === 409) {
+      // Email duplicado — el back responde "El email ya está registrado"
+      return { mensaje: 'Este correo electrónico ya está registrado. ¿Olvidaste tu contraseña?', campo: 'email' };
+    }
+    if (error.status === 400) {
+      // Detectar si es error de teléfono
+      if (backendMsg.toLowerCase().includes('teléfono') || backendMsg.toLowerCase().includes('telefono')) {
+        return { mensaje: backendMsg, campo: 'phone' };
+      }
+      return { mensaje: backendMsg || 'Algunos datos son inválidos. Revisa el formulario.' };
+    }
+    if (error.status >= 500) {
+      return { mensaje: 'Error interno del servidor. Intenta de nuevo más tarde.' };
+    }
+    return { mensaje: backendMsg || 'Error al registrar usuario. Intenta de nuevo.' };
   }
 
   // ─────────────────────────────────────────────────────────────────

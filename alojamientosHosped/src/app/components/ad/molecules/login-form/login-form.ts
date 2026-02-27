@@ -1,7 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
 import { AuthService } from '../../../../../services/AuthService';
+import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-login-form',
@@ -9,12 +10,13 @@ import { AuthService } from '../../../../../services/AuthService';
   templateUrl: './login-form.html',
   styleUrls: ['./login-form.scss'],
 })
-export class LoginFormComponent implements OnInit {
+export class LoginFormComponent implements OnInit, OnDestroy {
 
   loginForm!: FormGroup;
   isLoading: boolean = false;
   errorMessage: string = '';
   showPassword: boolean = false;
+  private sub?: Subscription;
 
   constructor(
     private fb: FormBuilder,
@@ -41,6 +43,17 @@ export class LoginFormComponent implements OnInit {
         ]
       ]
     });
+
+    // Limpiar el error del backend cuando el usuario empiece a corregir
+    this.sub = this.loginForm.valueChanges.subscribe(() => {
+      if (this.errorMessage) {
+        this.errorMessage = '';
+      }
+    });
+  }
+
+  ngOnDestroy(): void {
+    this.sub?.unsubscribe();
   }
 
   get emailCtrl() {
@@ -55,7 +68,7 @@ export class LoginFormComponent implements OnInit {
     const ctrl = this.emailCtrl;
     if (ctrl.untouched || ctrl.valid) return null;
     if (ctrl.hasError('required'))  return 'El correo electrónico es obligatorio.';
-    if (ctrl.hasError('email'))     return 'Ingresa un correo electrónico válido.';
+    if (ctrl.hasError('email'))     return 'Ingresa un correo electrónico válido (ej: usuario@ejemplo.com).';
     if (ctrl.hasError('maxlength')) return 'El correo no puede superar 100 caracteres.';
     return null;
   }
