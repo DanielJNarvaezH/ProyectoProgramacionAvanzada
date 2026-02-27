@@ -1,0 +1,187 @@
+<div class="min-h-screen flex items-center justify-center bg-neutral-50">
+  <div class="w-full max-w-lg bg-white shadow-2xl rounded-2xl p-8 animate-fade-in-up">
+
+    <!-- ── Encabezado ──────────────────────────────────────── -->
+    <div class="flex flex-col items-center mb-6">
+      <h1 class="text-3xl font-heading text-primary-600 text-center">Hosped</h1>
+      <p class="text-neutral-500 text-sm text-center">Gestión moderna de alojamientos</p>
+    </div>
+
+    <!-- ── Estado de carga ─────────────────────────────────── -->
+    <div *ngIf="isLoading" class="flex flex-col items-center py-12 gap-3 text-neutral-400">
+      <app-icon icon="fa-solid fa-spinner fa-spin fa-2x"></app-icon>
+      <span class="text-sm">Cargando perfil...</span>
+    </div>
+
+    <!-- ── Contenido principal ─────────────────────────────── -->
+    <ng-container *ngIf="!isLoading">
+
+      <!-- Error global -->
+      <div *ngIf="errorMessage"
+           class="w-full mb-4 flex items-center gap-2 px-4 py-2 bg-red-50 border border-red-300 text-red-600 text-sm rounded-md">
+        <app-icon icon="fa-solid fa-circle-exclamation"></app-icon>
+        <span>{{ errorMessage }}</span>
+      </div>
+
+      <!-- Éxito -->
+      <div *ngIf="successMessage"
+           class="w-full mb-4 flex items-center gap-2 px-4 py-2 bg-green-50 border border-green-300 text-green-700 text-sm rounded-md">
+        <app-icon icon="fa-solid fa-circle-check"></app-icon>
+        <span>{{ successMessage }}</span>
+      </div>
+
+      <!-- ── Avatar e información básica ─────────────────── -->
+      <div class="flex flex-col items-center mb-6">
+        <div class="avatar-circle mb-3">
+          <span class="text-3xl font-bold text-white">
+            {{ usuario?.nombre?.charAt(0)?.toUpperCase() ?? '?' }}
+          </span>
+        </div>
+        <span [ngClass]="['badge', getRolColor(usuario?.rol)]">
+          {{ getRolLabel(usuario?.rol) }}
+        </span>
+      </div>
+
+      <!-- ── Vista de solo lectura ──────────────────────── -->
+      <div *ngIf="!modoEdicion" class="space-y-4">
+
+        <div class="info-row">
+          <span class="info-label">
+            <app-icon icon="fa-solid fa-user"></app-icon> Nombre
+          </span>
+          <span class="info-value">{{ usuario?.nombre }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">
+            <app-icon icon="fa-solid fa-envelope"></app-icon> Correo
+          </span>
+          <span class="info-value">{{ usuario?.correo }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">
+            <app-icon icon="fa-solid fa-phone"></app-icon> Teléfono
+          </span>
+          <span class="info-value">{{ usuario?.telefono || '—' }}</span>
+        </div>
+
+        <div class="info-row">
+          <span class="info-label">
+            <app-icon icon="fa-solid fa-cake-candles"></app-icon> Nacimiento
+          </span>
+          <span class="info-value">{{ usuario?.fechaNacimiento || '—' }}</span>
+        </div>
+
+        <!-- Botón editar -->
+        <button
+          (click)="activarEdicion()"
+          class="w-full mt-2 py-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-md transition duration-200 flex items-center justify-center gap-2">
+          <app-icon icon="fa-solid fa-pen"></app-icon>
+          <span>Editar perfil</span>
+        </button>
+
+      </div>
+
+      <!-- ── Formulario de edición ───────────────────────── -->
+      <form *ngIf="modoEdicion" [formGroup]="perfilForm" (ngSubmit)="guardarCambios()" class="space-y-4">
+
+        <!-- Nombre -->
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 mb-1">
+            Nombre <span class="text-red-500">*</span>
+          </label>
+          <input
+            formControlName="nombre"
+            type="text"
+            placeholder="Tu nombre completo"
+            class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 transition"
+            [ngClass]="{
+              'border-red-400 bg-red-50':     nombre?.invalid && nombre?.touched,
+              'border-green-400 bg-green-50': nombre?.valid   && nombre?.touched,
+              'border-neutral-300':           !nombre?.touched
+            }"
+          />
+          <div *ngIf="nombre?.invalid && nombre?.touched" class="mt-1 text-xs text-red-500">
+            <span *ngIf="nombre?.errors?.['required']">El nombre es obligatorio</span>
+            <span *ngIf="nombre?.errors?.['maxlength']">Máximo 100 caracteres</span>
+          </div>
+        </div>
+
+        <!-- Teléfono -->
+        <div>
+          <label class="block text-sm font-medium text-neutral-700 mb-1">
+            Teléfono <span class="text-red-500">*</span>
+          </label>
+          <input
+            formControlName="telefono"
+            type="tel"
+            placeholder="3001234567"
+            class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 transition"
+            [ngClass]="{
+              'border-red-400 bg-red-50':     telefono?.invalid && telefono?.touched,
+              'border-green-400 bg-green-50': telefono?.valid   && telefono?.touched,
+              'border-neutral-300':           !telefono?.touched
+            }"
+          />
+          <div *ngIf="telefono?.invalid && telefono?.touched" class="mt-1 text-xs text-red-500">
+            <span *ngIf="telefono?.errors?.['required']">El teléfono es obligatorio</span>
+            <span *ngIf="telefono?.errors?.['pattern']">Debe tener exactamente 10 dígitos</span>
+          </div>
+        </div>
+
+        <!-- Correo (solo lectura en edición) -->
+        <div>
+          <label class="block text-sm font-medium text-neutral-400 mb-1">
+            <app-icon icon="fa-solid fa-lock"></app-icon> Correo electrónico
+          </label>
+          <input
+            type="email"
+            [value]="usuario?.correo"
+            disabled
+            class="w-full px-4 py-2 border border-neutral-200 bg-neutral-100 text-neutral-400 rounded-md cursor-not-allowed"
+          />
+          <p class="mt-1 text-xs text-neutral-400">El correo no puede modificarse.</p>
+        </div>
+
+        <!-- Botones -->
+        <div class="flex gap-3 mt-2">
+          <button
+            type="button"
+            (click)="cancelarEdicion()"
+            class="flex-1 py-2 border-2 border-neutral-300 text-neutral-600 font-semibold rounded-md hover:bg-neutral-50 transition">
+            Cancelar
+          </button>
+          <button
+            type="submit"
+            [disabled]="isSaving"
+            class="flex-1 py-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold rounded-md transition duration-200 flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed">
+            <app-icon *ngIf="isSaving" icon="fa-solid fa-spinner fa-spin"></app-icon>
+            <span>{{ isSaving ? 'Guardando...' : 'Guardar cambios' }}</span>
+          </button>
+        </div>
+
+      </form>
+
+      <!-- ── Separador + cerrar sesión ───────────────────── -->
+      <div class="flex items-center gap-3 w-full my-4">
+        <hr class="flex-1 border-neutral-200" />
+        <span class="text-xs text-neutral-400">Sesión</span>
+        <hr class="flex-1 border-neutral-200" />
+      </div>
+
+      <button
+        (click)="cerrarSesion()"
+        class="w-full py-2 border-2 border-red-300 text-red-500 font-semibold rounded-md hover:bg-red-50 transition flex items-center justify-center gap-2">
+        <app-icon icon="fa-solid fa-right-from-bracket"></app-icon>
+        <span>Cerrar sesión</span>
+      </button>
+
+    </ng-container>
+
+    <footer class="text-center text-sm text-neutral-500 mt-6">
+      © 2025 Hosped | Sistema de Alojamiento Inteligente
+    </footer>
+
+  </div>
+</div>

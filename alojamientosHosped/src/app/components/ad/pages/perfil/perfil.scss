@@ -1,0 +1,99 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
+
+:host {
+  font-family: 'Poppins', sans-serif;
+}
+
+// ─── Fondo con gradiente (igual que login) ─────────────────────
+.bg-neutral-50 {
+  background: linear-gradient(120deg, #f9f6ff, #ffffff);
+}
+
+// ─── Colores primarios ─────────────────────────────────────────
+.text-primary-600     { color: #9B5CFF; }
+.bg-primary-500       { background-color: #9B5CFF; }
+.bg-primary-600       { background-color: #7B4DFF; }
+.border-primary-500   { border-color: #9B5CFF; }
+.hover\:bg-primary-50:hover { background-color: #f5f0ff; }
+
+.focus\:ring-primary-500:focus {
+  box-shadow: 0 0 0 3px rgba(155, 92, 255, 0.4);
+}
+
+// ─── Avatar circular con inicial ──────────────────────────────
+.avatar-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #9B5CFF, #7B4DFF);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 16px rgba(155, 92, 255, 0.35);
+}
+
+// ─── Badges de rol ─────────────────────────────────────────────
+.badge {
+  display: inline-block;
+  padding: 2px 12px;
+  border-radius: 999px;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.03em;
+}
+
+.badge-guest {
+  background-color: #ede9fe;
+  color: #7c3aed;
+}
+
+.badge-host {
+  background-color: #fef3c7;
+  color: #b45309;
+}
+
+.badge-admin {
+  background-color: #fee2e2;
+  color: #b91c1c;
+}
+
+// ─── Filas de información (modo vista) ────────────────────────
+.info-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 0;
+  border-bottom: 1px solid #f0f0f0;
+}
+
+.info-label {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 0.85rem;
+  color: #9ca3af;
+  min-width: 130px;
+}
+
+.info-value {
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: #374151;
+  text-align: right;
+}
+
+// ─── Animación de entrada ──────────────────────────────────────
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-in-up {
+  animation: fade-in-up 0.8s ease-in-out;
+}

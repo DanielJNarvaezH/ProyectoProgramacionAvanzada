@@ -49,7 +49,7 @@ export class LoginPageComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/home']);
+        this.router.navigate(['/perfil']); // ← único cambio
       },
       error: (err: Error) => {
         this.isLoading    = false;
@@ -58,5 +58,3 @@ export class LoginPageComponent implements OnInit {
     });
   }
 }
-
-

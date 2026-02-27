@@ -5,10 +5,13 @@ import com.example.Alojamientos.businessLayer.service.UsuarioService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -20,6 +23,66 @@ import java.util.List;
 public class UsuarioController {
 
     private final UsuarioService usuarioService;
+
+    // ============================================================
+    // AUTH-21: Obtener perfil del usuario autenticado
+    // ============================================================
+    @GetMapping("/me")
+    @Operation(
+            summary = "Obtener perfil del usuario autenticado",
+            security = @SecurityRequirement(name = "bearerAuth"),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Perfil obtenido correctamente",
+                            content = @Content(schema = @Schema(implementation = UsuarioDTO.class))),
+                    @ApiResponse(responseCode = "401", description = "No autenticado"),
+                    @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+            }
+    )
+    public ResponseEntity<?> getMe() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName(); // el subject del JWT es el correo
+            UsuarioDTO usuario = usuarioService.buscarPorEmail(email);
+            return ResponseEntity.ok(usuario);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No autenticado");
+        }
+    }
+
+    // ============================================================
+    // AUTH-21: Actualizar perfil del usuario autenticado
+    // ============================================================
+    @PutMapping("/me")
+    @Operation(
+            summary = "Actualizar perfil del usuario autenticado",
+            security = @SecurityRequirement(name = "bearerAuth"),
+            requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
+                    required = true,
+                    content = @Content(mediaType = "application/json",
+                            schema = @Schema(implementation = UsuarioDTO.class))
+            ),
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Perfil actualizado correctamente"),
+                    @ApiResponse(responseCode = "401", description = "No autenticado"),
+                    @ApiResponse(responseCode = "404", description = "Usuario no encontrado"),
+                    @ApiResponse(responseCode = "400", description = "Datos inválidos")
+            }
+    )
+    public ResponseEntity<?> updateMe(@RequestBody UsuarioDTO dto) {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName();
+            UsuarioDTO usuarioActual = usuarioService.buscarPorEmail(email);
+            UsuarioDTO actualizado = usuarioService.actualizarUsuario(usuarioActual.getId(), dto);
+            return ResponseEntity.ok(actualizado);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Datos inválidos");
+        }
+    }
 
     // ============================================================
     // Listar todos los usuarios activos
@@ -235,26 +298,20 @@ public class UsuarioController {
             })
     public ResponseEntity<?> isActive(@PathVariable Integer id) {
         try {
-            // Obtener usuario
             UsuarioDTO usuario = usuarioService.obtenerPorId(id);
 
-            // Lógica del servicio: validar si tiene alojamientos activos o reservas futuras
-            // Intentamos simular la llamada a validarEliminacionUsuario
-            // Ya que es private, hacemos una llamada indirecta usando eliminarUsuario con captura
             try {
-                usuarioService.eliminarUsuario(id); // Intentamos "eliminar" solo para validar
+                usuarioService.eliminarUsuario(id);
                 return ResponseEntity.ok("Usuario puede ser eliminado");
             } catch (IllegalArgumentException e) {
-                return ResponseEntity.badRequest().body(e.getMessage()); // escenario 400
+                return ResponseEntity.badRequest().body(e.getMessage());
             }
 
         } catch (IllegalArgumentException e) {
-            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); // escenario 404
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         } catch (Exception e) {
-            return ResponseEntity.badRequest().body("ID inválido"); // escenario 400 general
+            return ResponseEntity.badRequest().body("ID inválido");
         }
     }
 
 }
-
-

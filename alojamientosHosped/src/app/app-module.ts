@@ -11,7 +11,7 @@ import { App } from './app';
 import { provideBrowserGlobalErrorListeners } from '@angular/core';
 
 // ── Interceptores ──────────────────────────────────────────────────
-import { AuthInterceptor } from './interceptors/auth.interceptor';  // ← NUEVO
+import { AuthInterceptor } from './interceptors/auth.interceptor';
 
 // ── Átomos ────────────────────────────────────────────────────────
 import { ButtonComponent }   from './components/ad/atoms/button/button';
@@ -36,6 +36,8 @@ import { RegisterTemplateComponent } from './components/ad/templates/register-te
 // ── Páginas ───────────────────────────────────────────────────────
 import { LoginPageComponent }    from './components/ad/pages/login/login';
 import { RegisterPageComponent } from './components/ad/pages/register/register';
+import { RecuperarContrasenaComponent } from './components/ad/pages/recuperar-contrasena/recuperar-contrasena';
+import { PerfilPageComponent }   from './components/ad/pages/perfil/perfil'; // ← AUTH-21
 
 @NgModule({
   declarations: [
@@ -58,22 +60,24 @@ import { RegisterPageComponent } from './components/ad/pages/register/register';
     RegisterTemplateComponent,
     // Páginas
     LoginPageComponent,
-    RegisterPageComponent
+    RegisterPageComponent,
+    PerfilPageComponent          // ← AUTH-21
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     FormsModule,
     ReactiveFormsModule,
-    RouterModule.forRoot([])
+    RouterModule.forRoot([]),
+    RecuperarContrasenaComponent  // ← standalone: va en imports, no en declarations
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),
-    provideHttpClient(withInterceptorsFromDi()),   // ← cambiado: necesario para interceptores de clase
+    provideHttpClient(withInterceptorsFromDi()),
     {
       provide:  HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
-      multi:    true                               // ← permite múltiples interceptores en cadena
+      multi:    true
     }
   ],
   bootstrap: [App]
