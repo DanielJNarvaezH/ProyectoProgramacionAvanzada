@@ -20,10 +20,11 @@ import { InputComponent }    from './components/ad/atoms/input/input';
 import { IconComponent }     from './components/ad/atoms/icon/icon';
 
 // ── Moléculas ─────────────────────────────────────────────────────
-import { InputFieldComponent }    from './components/ad/molecules/input-field/input-field';
-import { PasswordFieldComponent } from './components/ad/molecules/password-field/password-field';
-import { LoginFormComponent }     from './components/ad/molecules/login-form/login-form';
-import { RegisterFormComponent }  from './components/ad/molecules/register-form/register-form';
+import { InputFieldComponent }       from './components/ad/molecules/input-field/input-field';
+import { PasswordFieldComponent }    from './components/ad/molecules/password-field/password-field';
+import { LoginFormComponent }        from './components/ad/molecules/login-form/login-form';
+import { RegisterFormComponent }     from './components/ad/molecules/register-form/register-form';
+import { AlojamientoCardComponent }  from './components/ad/molecules/alojamiento-card/alojamiento-card'; // ← ALOJ-3
 
 // ── Organismos ────────────────────────────────────────────────────
 import { LoginCardComponent }    from './components/ad/organisms/login-card/login-card';
@@ -52,6 +53,7 @@ import { PerfilPageComponent }   from './components/ad/pages/perfil/perfil'; // 
     PasswordFieldComponent,
     LoginFormComponent,
     RegisterFormComponent,
+    AlojamientoCardComponent,        // ← ALOJ-3
     // Organismos
     LoginCardComponent,
     RegisterCardComponent,

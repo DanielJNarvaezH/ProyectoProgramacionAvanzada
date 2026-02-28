@@ -1,0 +1,15 @@
+// AlojamientoCardComponent — ALOJ-3
+// Los estilos principales están en Tailwind (alojamiento-card.html).
+// Aquí solo van utilidades que Tailwind no cubre.
+
+:host {
+  display: block;
+}
+
+// line-clamp utilitario por si Tailwind no lo incluye en la versión del proyecto
+.line-clamp-1 {
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
