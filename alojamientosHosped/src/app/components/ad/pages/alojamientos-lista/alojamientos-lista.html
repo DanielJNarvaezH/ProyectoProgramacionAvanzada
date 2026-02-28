@@ -1,0 +1,111 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     AlojamientosListaPageComponent — ALOJ-4
+     Grid de tarjetas con loading states, filtro por ciudad y empty state
+     ───────────────────────────────────────────────────────────────────────── -->
+<main class="lista-page">
+
+  <!-- ── Header de la sección ──────────────────────────────────────────── -->
+  <section class="lista-header">
+    <div class="lista-header__text">
+      <h1 class="lista-header__title">Alojamientos disponibles</h1>
+      <p class="lista-header__subtitle" *ngIf="!cargando && !error">
+        <span *ngIf="!hayFiltroActivo">{{ totalMostrados }} lugares para hospedarte</span>
+        <span *ngIf="hayFiltroActivo">
+          {{ totalMostrados }} resultado{{ totalMostrados !== 1 ? 's' : '' }}
+          para <strong>"{{ filtroCiudad }}"</strong>
+        </span>
+      </p>
+    </div>
+
+    <!-- Buscador por ciudad -->
+    <div class="lista-header__search">
+      <div class="search-box">
+        <i class="fa-solid fa-magnifying-glass search-box__icon"></i>
+        <input
+          type="text"
+          [(ngModel)]="filtroCiudad"
+          (ngModelChange)="filtrarPorCiudad()"
+          placeholder="Buscar por ciudad..."
+          class="search-box__input"
+          autocomplete="off"
+        />
+        <button
+          *ngIf="hayFiltroActivo"
+          (click)="limpiarFiltro()"
+          class="search-box__clear"
+          aria-label="Limpiar búsqueda"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Loading skeleton ───────────────────────────────────────────────── -->
+  <section *ngIf="cargando" class="lista-grid" aria-label="Cargando alojamientos">
+    <div *ngFor="let i of [1,2,3,4,5,6]" class="skeleton-card">
+      <div class="skeleton-card__img skeleton-pulse"></div>
+      <div class="skeleton-card__body">
+        <div class="skeleton-line skeleton-pulse" style="width: 70%"></div>
+        <div class="skeleton-line skeleton-pulse" style="width: 45%"></div>
+        <div class="skeleton-line skeleton-pulse" style="width: 55%"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Error state ────────────────────────────────────────────────────── -->
+  <section *ngIf="!cargando && error" class="lista-empty">
+    <div class="lista-empty__icon lista-empty__icon--error">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    <h2 class="lista-empty__title">No pudimos cargar los alojamientos</h2>
+    <p class="lista-empty__msg">{{ error }}</p>
+    <button (click)="cargarAlojamientos()" class="btn-retry">
+      <i class="fa-solid fa-rotate-right"></i>
+      Intentar de nuevo
+    </button>
+  </section>
+
+  <!-- ── Empty state (sin resultados de filtro) ─────────────────────────── -->
+  <section
+    *ngIf="!cargando && !error && totalMostrados === 0 && hayFiltroActivo"
+    class="lista-empty"
+  >
+    <div class="lista-empty__icon">
+      <i class="fa-solid fa-map-location-dot"></i>
+    </div>
+    <h2 class="lista-empty__title">Sin resultados en "{{ filtroCiudad }}"</h2>
+    <p class="lista-empty__msg">Intenta con otra ciudad o limpia el filtro.</p>
+    <button (click)="limpiarFiltro()" class="btn-retry">
+      <i class="fa-solid fa-xmark"></i>
+      Limpiar filtro
+    </button>
+  </section>
+
+  <!-- ── Empty state (sin alojamientos en BD) ───────────────────────────── -->
+  <section
+    *ngIf="!cargando && !error && totalMostrados === 0 && !hayFiltroActivo"
+    class="lista-empty"
+  >
+    <div class="lista-empty__icon">
+      <i class="fa-solid fa-house-circle-xmark"></i>
+    </div>
+    <h2 class="lista-empty__title">Aún no hay alojamientos</h2>
+    <p class="lista-empty__msg">Pronto encontrarás lugares increíbles aquí.</p>
+  </section>
+
+  <!-- ── Grid de tarjetas ───────────────────────────────────────────────── -->
+  <section
+    *ngIf="!cargando && !error && totalMostrados > 0"
+    class="lista-grid"
+    aria-label="Lista de alojamientos"
+  >
+    <app-alojamiento-card
+      *ngFor="let alojamiento of alojamientosFiltrados; trackBy: trackById"
+      [alojamiento]="alojamiento"
+      class="lista-grid__item"
+    >
+    </app-alojamiento-card>
+  </section>
+
+</main>

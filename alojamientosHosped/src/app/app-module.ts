@@ -4,11 +4,13 @@ import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
-
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
+import { AlojamientosListaPageComponent } from './components/ad/pages/alojamientos-lista/alojamientos-lista';
+
 
 import { provideBrowserGlobalErrorListeners } from '@angular/core';
+
 
 // ── Interceptores ──────────────────────────────────────────────────
 import { AuthInterceptor } from './interceptors/auth.interceptor';
@@ -63,6 +65,7 @@ import { PerfilPageComponent }   from './components/ad/pages/perfil/perfil'; // 
     // Páginas
     LoginPageComponent,
     RegisterPageComponent,
+    AlojamientosListaPageComponent,
     PerfilPageComponent          // ← AUTH-21
   ],
   imports: [

@@ -1,0 +1,270 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// AlojamientosListaPageComponent — ALOJ-4
+// Estilos del grid, header, loading skeleton y estados vacíos
+// ─────────────────────────────────────────────────────────────────────────────
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+// ── Variables ────────────────────────────────────────────────────────────────
+$primary:      #9B5CFF;
+$primary-light:#C4A0FF;
+$primary-dark: #7B3FE4;
+$text-dark:    #1a1a2e;
+$text-mid:     #64748b;
+$text-light:   #94a3b8;
+$bg-page:      #f9f6ff;
+$white:        #ffffff;
+$error:        #ef4444;
+$radius-card:  1.25rem;
+$radius-input: 0.875rem;
+$shadow-sm:    0 2px 8px rgba(155, 92, 255, 0.08);
+$shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
+
+// ── Página ───────────────────────────────────────────────────────────────────
+.lista-page {
+  min-height: 100vh;
+  background: $bg-page;
+  font-family: 'Poppins', sans-serif;
+  padding: 2.5rem 1.5rem 4rem;
+  max-width: 1280px;
+  margin: 0 auto;
+  animation: fadeIn 0.4s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(12px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Header ───────────────────────────────────────────────────────────────────
+.lista-header {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1.25rem;
+  margin-bottom: 2rem;
+
+  &__title {
+    font-size: clamp(1.5rem, 3vw, 2.25rem);
+    font-weight: 700;
+    color: $text-dark;
+    line-height: 1.2;
+    margin: 0 0 0.25rem;
+  }
+
+  &__subtitle {
+    font-size: 0.9rem;
+    color: $text-mid;
+    margin: 0;
+
+    strong {
+      color: $primary;
+      font-weight: 600;
+    }
+  }
+
+  &__search {
+    flex-shrink: 0;
+  }
+}
+
+// ── Search box ───────────────────────────────────────────────────────────────
+.search-box {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: $white;
+  border: 1.5px solid #e2d9f3;
+  border-radius: $radius-input;
+  padding: 0.6rem 1rem;
+  box-shadow: $shadow-sm;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  min-width: 260px;
+
+  &:focus-within {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(155, 92, 255, 0.12);
+  }
+
+  &__icon {
+    color: $primary-light;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+  }
+
+  &__input {
+    border: none;
+    outline: none;
+    background: transparent;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    color: $text-dark;
+    flex: 1;
+    min-width: 0;
+
+    &::placeholder {
+      color: $text-light;
+    }
+  }
+
+  &__clear {
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: $text-light;
+    font-size: 0.875rem;
+    padding: 0;
+    line-height: 1;
+    transition: color 0.15s;
+    flex-shrink: 0;
+
+    &:hover {
+      color: $error;
+    }
+  }
+}
+
+// ── Grid de tarjetas ─────────────────────────────────────────────────────────
+.lista-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+
+  &__item {
+    animation: cardIn 0.35s ease both;
+
+    @for $i from 1 through 12 {
+      &:nth-child(#{$i}) {
+        animation-delay: #{($i - 1) * 0.05}s;
+      }
+    }
+  }
+}
+
+@keyframes cardIn {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Skeleton loading ─────────────────────────────────────────────────────────
+.skeleton-card {
+  background: $white;
+  border-radius: $radius-card;
+  overflow: hidden;
+  box-shadow: $shadow-sm;
+
+  &__img {
+    width: 100%;
+    height: 208px;
+    background: #e8e0f5;
+  }
+
+  &__body {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 8px;
+  background: #e8e0f5;
+}
+
+.skeleton-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+// ── Empty / Error states ──────────────────────────────────────────────────────
+.lista-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 5rem 1.5rem;
+  gap: 1rem;
+  animation: fadeIn 0.4s ease;
+
+  &__icon {
+    width: 72px;
+    height: 72px;
+    border-radius: 50%;
+    background: rgba(155, 92, 255, 0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.75rem;
+    color: $primary-light;
+
+    &--error {
+      background: rgba(239, 68, 68, 0.08);
+      color: $error;
+    }
+  }
+
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0;
+  }
+
+  &__msg {
+    font-size: 0.9rem;
+    color: $text-mid;
+    margin: 0;
+    max-width: 360px;
+  }
+}
+
+.btn-retry {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.5rem;
+  border: none;
+  border-radius: 999px;
+  background: $primary;
+  color: $white;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, transform 0.15s, box-shadow 0.2s;
+  box-shadow: $shadow-sm;
+
+  &:hover {
+    background: $primary-dark;
+    transform: translateY(-1px);
+    box-shadow: $shadow-md;
+  }
+
+  &:active {
+    transform: translateY(0);
+  }
+}
+
+// ── Responsive ───────────────────────────────────────────────────────────────
+@media (max-width: 640px) {
+  .lista-page {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .lista-header {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .search-box {
+    min-width: unset;
+  }
+}

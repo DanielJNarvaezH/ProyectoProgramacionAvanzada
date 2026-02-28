@@ -5,6 +5,8 @@ import { RegisterPageComponent }        from './components/ad/pages/register/reg
 import { RecuperarContrasenaComponent } from './components/ad/pages/recuperar-contrasena/recuperar-contrasena';
 import { PerfilPageComponent }          from './components/ad/pages/perfil/perfil'; // ← AUTH-21
 import { authGuard }                    from './guards/auth.guard';
+import { AlojamientosListaPageComponent } from './components/ad/pages/alojamientos-lista/alojamientos-lista';
+
 
 const routes: Routes = [
   { path: '',                    redirectTo: 'login', pathMatch: 'full' },
@@ -13,6 +15,7 @@ const routes: Routes = [
   { path: 'recuperar-contrasena', component: RecuperarContrasenaComponent },
   // AUTH-21: ruta protegida del perfil
   { path: 'perfil',              component: PerfilPageComponent, canActivate: [authGuard] },
+  { path: 'alojamientos', component: AlojamientosListaPageComponent, canActivate: [authGuard] },
   // home protegido (pendiente de implementación futura)
   { path: 'home',                component: LoginPageComponent,  canActivate: [authGuard] }
 ];

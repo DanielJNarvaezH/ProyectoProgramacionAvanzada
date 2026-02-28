@@ -33,6 +33,7 @@ export class AlojamientoService {
    * Obtiene todos los alojamientos activos de la plataforma.
    */
   getAll(): Observable<Alojamiento[]> {
+    return this.http.get<Alojamiento[]>(`${this.apiUrl}/activos`)
     return this.http.get<Alojamiento[]>(this.apiUrl).pipe(
       catchError(error => {
         const mensaje = error.error?.mensaje || 'Error al obtener los alojamientos';
