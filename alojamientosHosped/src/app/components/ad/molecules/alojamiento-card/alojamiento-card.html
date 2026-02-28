@@ -7,7 +7,7 @@
   (keydown.enter)="verDetalle()"
   tabindex="0"
   role="button"
-  [attr.aria-label]="'Ver detalle de ' + alojamiento?.nombre"
+  [attr.aria-label]="'Ver detalle de ' + alojamiento.name"
   class="group relative flex flex-col bg-white dark:bg-gray-800 rounded-2xl
          shadow-sm hover:shadow-md border border-neutral-100 dark:border-gray-700
          overflow-hidden cursor-pointer transition-all duration-200
@@ -17,15 +17,15 @@
   <!-- ── Imagen principal ────────────────────────────────────────── -->
   <div class="relative w-full h-52 overflow-hidden bg-neutral-100 dark:bg-gray-700">
     <img
-      [src]="alojamiento?.imagenPrincipal || placeholderImg"
-      [alt]="'Foto de ' + alojamiento?.nombre"
+      [src]="alojamiento.mainImage || placeholderImg"
+      [alt]="'Foto de ' + alojamiento.name"
       (error)="$any($event.target).src = placeholderImg"
       class="w-full h-full object-cover transition-transform duration-300
              group-hover:scale-105"
       loading="lazy"
     />
 
-    <!-- Badge: precio por noche (superpuesto sobre la imagen) -->
+    <!-- Badge: precio por noche -->
     <div class="absolute bottom-3 left-3
                 bg-white/90 dark:bg-gray-900/90 backdrop-blur-sm
                 px-3 py-1 rounded-xl shadow-sm">
@@ -39,23 +39,23 @@
   <!-- ── Cuerpo de la card ────────────────────────────────────────── -->
   <div class="flex flex-col gap-1 p-4">
 
-    <!-- Nombre del alojamiento -->
+    <!-- Nombre -->
     <h3 class="text-base font-semibold text-neutral-800 dark:text-white
                line-clamp-1 group-hover:text-primary-600 dark:group-hover:text-primary-400
                transition-colors">
-      {{ alojamiento?.nombre }}
+      {{ alojamiento.name }}
     </h3>
 
-    <!-- Ciudad con ícono de ubicación -->
+    <!-- Ciudad -->
     <p class="flex items-center gap-1 text-sm text-neutral-500 dark:text-gray-400">
       <app-icon icon="fa-solid fa-location-dot" class="text-xs text-primary-400"></app-icon>
-      <span class="line-clamp-1">{{ alojamiento?.ciudad }}</span>
+      <span class="line-clamp-1">{{ alojamiento.city }}</span>
     </p>
 
     <!-- Capacidad -->
     <p class="flex items-center gap-1 text-xs text-neutral-400 dark:text-gray-500">
       <app-icon icon="fa-solid fa-users" class="text-xs"></app-icon>
-      <span>Hasta {{ alojamiento?.capacidadMaxima }} huéspedes</span>
+      <span>Hasta {{ alojamiento.maxCapacity }} huéspedes</span>
     </p>
 
     <!-- Separador -->
@@ -64,9 +64,7 @@
     <!-- Calificación y reseñas -->
     <div class="flex items-center justify-between">
 
-      <!-- Estrellas + número -->
       <div class="flex items-center gap-1.5">
-        <!-- Estrellas visuales -->
         <div class="flex items-center gap-0.5">
           <ng-container *ngFor="let estrella of estrellas">
             <app-icon
@@ -86,14 +84,11 @@
             </app-icon>
           </ng-container>
         </div>
-
-        <!-- Valor numérico -->
         <span class="text-sm font-semibold text-neutral-700 dark:text-gray-200">
           {{ calificacionLabel }}
         </span>
       </div>
 
-      <!-- Total de reseñas -->
       <span class="text-xs text-neutral-400 dark:text-gray-500">
         {{ resenasLabel }}
       </span>

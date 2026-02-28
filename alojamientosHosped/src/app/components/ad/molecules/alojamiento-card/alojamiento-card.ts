@@ -14,10 +14,6 @@ import { Alojamiento } from '../../../../models';
  *   [calificacion]="4.8"
  *   [totalResenas]="32">
  * </app-alojamiento-card>
- *
- * @Input alojamiento     - Objeto Alojamiento con los datos a mostrar
- * @Input calificacion    - Promedio de calificación (0-5). Opcional, default 0
- * @Input totalResenas    - Número total de reseñas. Opcional, default 0
  */
 @Component({
   selector: 'app-alojamiento-card',
@@ -31,32 +27,24 @@ export class AlojamientoCardComponent {
   @Input() calificacion: number = 0;
   @Input() totalResenas: number = 0;
 
-  /** Imagen placeholder cuando el alojamiento no tiene imagenPrincipal */
   readonly placeholderImg = 'https://placehold.co/400x260/e2e8f0/94a3b8?text=Sin+imagen';
 
   constructor(private router: Router) {}
 
-  /** Navega al detalle del alojamiento */
   verDetalle(): void {
     if (this.alojamiento?.id) {
       this.router.navigate(['/alojamientos', this.alojamiento.id]);
     }
   }
 
-  /**
-   * Formatea el precio con separador de miles colombiano.
-   * Ej: 150000 → "150.000"
-   */
+  /** Formatea el precio con separador de miles colombiano. Ej: 180000 → "180.000" */
   get precioFormateado(): string {
-    return this.alojamiento?.precioPorNoche
-      ? this.alojamiento.precioPorNoche.toLocaleString('es-CO')
+    return this.alojamiento?.pricePerNight
+      ? this.alojamiento.pricePerNight.toLocaleString('es-CO')
       : '0';
   }
 
-  /**
-   * Genera array de 5 elementos para renderizar las estrellas.
-   * Cada elemento es 'full', 'half' o 'empty' según la calificación.
-   */
+  /** Genera array de 5 elementos: 'full' | 'half' | 'empty' según la calificación */
   get estrellas(): Array<'full' | 'half' | 'empty'> {
     return Array.from({ length: 5 }, (_, i) => {
       const pos = i + 1;
@@ -66,14 +54,12 @@ export class AlojamientoCardComponent {
     });
   }
 
-  /** Muestra la calificación con un decimal o "Nuevo" si no tiene reseñas */
   get calificacionLabel(): string {
     return this.totalResenas > 0
       ? this.calificacion.toFixed(1)
       : 'Nuevo';
   }
 
-  /** Texto de reseñas: "32 reseñas" o "Sin reseñas" */
   get resenasLabel(): string {
     if (this.totalResenas === 0) return 'Sin reseñas';
     if (this.totalResenas === 1) return '1 reseña';

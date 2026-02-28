@@ -73,7 +73,7 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
       return;
     }
     this.alojamientosFiltrados = this.alojamientos.filter(a =>
-      a.ciudad.toLowerCase().includes(termino)
+      a.city.toLowerCase().includes(termino)
     );
   }
 

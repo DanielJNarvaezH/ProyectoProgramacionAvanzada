@@ -8,13 +8,13 @@ import { Alojamiento } from '../app/models/alojamiento.model';
  * AlojamientoService — Servicio para gestión de alojamientos en la plataforma Hosped.
  *
  * Gestiona:
- * - getAll()        → GET    /api/alojamientos
- * - getById()       → GET    /api/alojamientos/:id
- * - create()        → POST   /api/alojamientos
- * - update()        → PUT    /api/alojamientos/:id
- * - delete()        → DELETE /api/alojamientos/:id
- * - getByAnfitrion() → GET   /api/alojamientos/anfitrion/:id
- * - getByCiudad()   → GET    /api/alojamientos/ciudad/:ciudad
+ * - getAll()          → GET    /api/alojamiento/activos
+ * - getById()         → GET    /api/alojamiento/:id
+ * - create()          → POST   /api/alojamiento
+ * - update()          → PUT    /api/alojamiento/:id
+ * - delete()          → DELETE /api/alojamiento/:id
+ * - getByAnfitrion()  → GET    /api/alojamiento/anfitrion/:hostId
+ * - getByCiudad()     → GET    /api/alojamiento/buscar?ciudad=:ciudad
  */
 @Injectable({
   providedIn: 'root'
@@ -26,17 +26,15 @@ export class AlojamientoService {
   constructor(private http: HttpClient) {}
 
   // ─────────────────────────────────────────────────────────────────
-  // GET ALL
+  // GET ALL ACTIVOS
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Obtiene todos los alojamientos activos de la plataforma.
-   */
   getAll(): Observable<Alojamiento[]> {
-    return this.http.get<Alojamiento[]>(`${this.apiUrl}/activos`)
-    return this.http.get<Alojamiento[]>(this.apiUrl).pipe(
+    return this.http.get<Alojamiento[]>(`${this.apiUrl}/activos`).pipe(
       catchError(error => {
-        const mensaje = error.error?.mensaje || 'Error al obtener los alojamientos';
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || 'Error al obtener los alojamientos');
         return throwError(() => new Error(mensaje));
       })
     );
@@ -46,14 +44,12 @@ export class AlojamientoService {
   // GET BY ID
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Obtiene un alojamiento específico por su ID.
-   * @param id - ID del alojamiento
-   */
   getById(id: number): Observable<Alojamiento> {
     return this.http.get<Alojamiento>(`${this.apiUrl}/${id}`).pipe(
       catchError(error => {
-        const mensaje = error.error?.mensaje || `Error al obtener el alojamiento con ID ${id}`;
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || `Error al obtener el alojamiento con ID ${id}`);
         return throwError(() => new Error(mensaje));
       })
     );
@@ -63,14 +59,12 @@ export class AlojamientoService {
   // CREATE
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Crea un nuevo alojamiento en la plataforma.
-   * @param alojamiento - Datos del alojamiento a crear
-   */
   create(alojamiento: Alojamiento): Observable<Alojamiento> {
     return this.http.post<Alojamiento>(this.apiUrl, alojamiento).pipe(
       catchError(error => {
-        const mensaje = error.error?.mensaje || 'Error al crear el alojamiento';
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || 'Error al crear el alojamiento');
         return throwError(() => new Error(mensaje));
       })
     );
@@ -80,15 +74,12 @@ export class AlojamientoService {
   // UPDATE
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Actualiza los datos de un alojamiento existente.
-   * @param id - ID del alojamiento a actualizar
-   * @param alojamiento - Datos actualizados
-   */
   update(id: number, alojamiento: Alojamiento): Observable<Alojamiento> {
     return this.http.put<Alojamiento>(`${this.apiUrl}/${id}`, alojamiento).pipe(
       catchError(error => {
-        const mensaje = error.error?.mensaje || `Error al actualizar el alojamiento con ID ${id}`;
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || `Error al actualizar el alojamiento con ID ${id}`);
         return throwError(() => new Error(mensaje));
       })
     );
@@ -98,45 +89,44 @@ export class AlojamientoService {
   // DELETE
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Elimina un alojamiento por su ID.
-   * El backend realiza un soft delete (marca como inactivo).
-   * @param id - ID del alojamiento a eliminar
-   */
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
       catchError(error => {
-        const mensaje = error.error?.mensaje || `Error al eliminar el alojamiento con ID ${id}`;
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || `Error al eliminar el alojamiento con ID ${id}`);
         return throwError(() => new Error(mensaje));
       })
     );
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // MÉTODOS ADICIONALES
+  // GET BY ANFITRION
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Obtiene todos los alojamientos de un anfitrión específico.
-   * @param hostId - ID del anfitrión
-   */
   getByAnfitrion(hostId: number): Observable<Alojamiento[]> {
     return this.http.get<Alojamiento[]>(`${this.apiUrl}/anfitrion/${hostId}`).pipe(
       catchError(error => {
-        const mensaje = error.error?.mensaje || 'Error al obtener los alojamientos del anfitrión';
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || 'Error al obtener los alojamientos del anfitrión');
         return throwError(() => new Error(mensaje));
       })
     );
   }
 
-  /**
-   * Busca alojamientos por ciudad.
-   * @param ciudad - Nombre de la ciudad
-   */
+  // ─────────────────────────────────────────────────────────────────
+  // BUSCAR POR CIUDAD
+  // ─────────────────────────────────────────────────────────────────
+
   getByCiudad(ciudad: string): Observable<Alojamiento[]> {
-    return this.http.get<Alojamiento[]>(`${this.apiUrl}/ciudad/${ciudad}`).pipe(
+    return this.http.get<Alojamiento[]>(`${this.apiUrl}/buscar`, {
+      params: { ciudad }
+    }).pipe(
       catchError(error => {
-        const mensaje = error.error?.mensaje || 'Error al buscar alojamientos por ciudad';
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || 'Error al buscar alojamientos por ciudad');
         return throwError(() => new Error(mensaje));
       })
     );
