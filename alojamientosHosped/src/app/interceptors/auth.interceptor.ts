@@ -6,26 +6,22 @@ import {
   HttpEvent,
   HttpErrorResponse
 } from '@angular/common/http';
-import { Observable, throwError, switchMap, catchError } from 'rxjs';
+import { Observable, throwError, catchError } from 'rxjs';
 import { AuthService } from '../../services/AuthService';
 import { Router } from '@angular/router';
 
 /**
  * AuthInterceptor — Interceptor HTTP
  *
- * Responsabilidades (AUTH-18 + AUTH-19):
+ * Responsabilidades:
  * 1. Agrega automáticamente el token JWT en el header Authorization.
  * 2. Excluye las rutas públicas (/auth/login, /auth/register, etc.)
- *    para evitar conflictos cuando hay una sesión activa en localStorage.
- * 3. Si el token está próximo a expirar (< 5 min), lo renueva antes
- *    de enviar la petición usando el refresh token.
- * 4. Si el backend responde 401, intenta renovar el token una vez.
- *    Si falla, redirige al login.
+ * 3. Si el backend responde 401, redirige al login.
  */
 @Injectable()
 export class AuthInterceptor implements HttpInterceptor {
 
-  // Rutas que no requieren token aunque haya sesión activa
+  // Rutas que no requieren token
   private readonly rutasPublicas = [
     '/auth/login',
     '/auth/register',
@@ -47,35 +43,12 @@ export class AuthInterceptor implements HttpInterceptor {
       return next.handle(req);
     }
 
-    // Si el token está próximo a expirar y hay refresh token, renovar primero
-    if (this.authService.estaProximoAExpirar() && this.authService.getRefreshToken()) {
-      return this.authService.refreshAccessToken().pipe(
-        switchMap(() => {
-          const nuevoToken = this.authService.getToken();
-          return next.handle(this.agregarToken(req, nuevoToken!));
-        }),
-        catchError(() => {
-          this.router.navigate(['/login']);
-          return throwError(() => new Error('Sesión expirada'));
-        })
-      );
-    }
-
-    // Caso normal: agregar el token actual
+    // Agregar token a la petición
     return next.handle(this.agregarToken(req, token)).pipe(
       catchError((error: HttpErrorResponse) => {
-        // Si el backend responde 401 y hay refresh token, intentar renovar
-        if (error.status === 401 && this.authService.getRefreshToken()) {
-          return this.authService.refreshAccessToken().pipe(
-            switchMap(() => {
-              const nuevoToken = this.authService.getToken();
-              return next.handle(this.agregarToken(req, nuevoToken!));
-            }),
-            catchError(() => {
-              this.router.navigate(['/login']);
-              return throwError(() => new Error('Sesión expirada'));
-            })
-          );
+        if (error.status === 401) {
+          this.authService.logout();
+          this.router.navigate(['/login']);
         }
         return throwError(() => error);
       })

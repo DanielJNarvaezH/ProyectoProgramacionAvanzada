@@ -10,10 +10,16 @@ import {
 
 import { AuthInterceptor } from './auth.interceptor';
 import { AuthService } from '../../services/AuthService';
+import { Router } from '@angular/router';
 
-// ── Stub del AuthService ───────────────────────────────────────────
+// ── Stubs ─────────────────────────────────────────────────────────
 const authServiceStub = {
-  getToken: jasmine.createSpy('getToken')
+  getToken: jasmine.createSpy('getToken'),
+  logout:   jasmine.createSpy('logout')
+};
+
+const routerStub = {
+  navigate: jasmine.createSpy('navigate')
 };
 
 const TEST_URL = 'http://localhost:8080/alojamientos/api/test';
@@ -27,6 +33,7 @@ describe('AuthInterceptor', () => {
       imports: [HttpClientTestingModule],
       providers: [
         { provide: AuthService, useValue: authServiceStub },
+        { provide: Router,      useValue: routerStub },
         {
           provide: HTTP_INTERCEPTORS,
           useClass: AuthInterceptor,
@@ -42,9 +49,11 @@ describe('AuthInterceptor', () => {
   afterEach(() => {
     httpMock.verify();
     authServiceStub.getToken.calls.reset();
+    authServiceStub.logout.calls.reset();
+    routerStub.navigate.calls.reset();
   });
 
-  // ── Con token ──────────────────────────────────────────────────────
+  // ── Con token ──────────────────────────────────────────────────
 
   it('debería agregar el header Authorization cuando hay token', () => {
     authServiceStub.getToken.and.returnValue('mi.jwt.token');
@@ -114,7 +123,7 @@ describe('AuthInterceptor', () => {
     req.flush({});
   });
 
-  // ── Sin token ──────────────────────────────────────────────────────
+  // ── Sin token ──────────────────────────────────────────────────
 
   it('no debería agregar Authorization si no hay token (null)', () => {
     authServiceStub.getToken.and.returnValue(null);
@@ -137,7 +146,7 @@ describe('AuthInterceptor', () => {
     req.flush({});
   });
 
-  // ── Inmutabilidad ──────────────────────────────────────────────────
+  // ── Inmutabilidad ─────────────────────────────────────────────
 
   it('no debería mutar la petición original (usa clone)', () => {
     authServiceStub.getToken.and.returnValue('token-clone');
@@ -146,6 +155,33 @@ describe('AuthInterceptor', () => {
 
     const req = httpMock.expectOne(TEST_URL);
     expect(req.request.headers.get('Authorization')).toBe('Bearer token-clone');
+    req.flush({});
+  });
+
+  // ── Error 401 ─────────────────────────────────────────────────
+
+  it('debería redirigir al login si el backend responde 401', () => {
+    authServiceStub.getToken.and.returnValue('token-expirado');
+
+    http.get(TEST_URL).subscribe({ error: () => {} });
+
+    const req = httpMock.expectOne(TEST_URL);
+    req.flush('Unauthorized', { status: 401, statusText: 'Unauthorized' });
+
+    expect(authServiceStub.logout).toHaveBeenCalled();
+    expect(routerStub.navigate).toHaveBeenCalledWith(['/login']);
+  });
+
+  // ── Rutas públicas ────────────────────────────────────────────
+
+  it('no debería agregar token en rutas públicas de auth', () => {
+    authServiceStub.getToken.and.returnValue('token123');
+
+    const urlPublica = 'http://localhost:8080/alojamientos/api/auth/login';
+    http.post(urlPublica, {}).subscribe();
+
+    const req = httpMock.expectOne(urlPublica);
+    expect(req.request.headers.has('Authorization')).toBeFalse();
     req.flush({});
   });
 });
