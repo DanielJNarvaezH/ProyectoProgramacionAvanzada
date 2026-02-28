@@ -20,31 +20,15 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
-/**
- * Configuración central de Spring Security 6.x para la plataforma Hosped.
- *
- * <p>Define:
- * <ul>
- *   <li>Rutas públicas (auth, Swagger/OpenAPI) y rutas protegidas por rol.</li>
- *   <li>Política de sesión stateless (JWT).</li>
- *   <li>Integración del filtro JWT antes del filtro estándar de Spring.</li>C
- *   <li>PasswordEncoder BCrypt y AuthenticationProvider para login.</li>
- * </ul>
- */
 @Configuration
 @EnableWebSecurity
-@EnableMethodSecurity          // Habilita @PreAuthorize / @PostAuthorize en controllers
+@EnableMethodSecurity
 @RequiredArgsConstructor
 public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
 
-    // ─────────────────────────────────────────────────────────────────
-    // RUTAS COMPLETAMENTE PÚBLICAS (sin token)
-    // ─────────────────────────────────────────────────────────────────
-
-    /** Swagger UI y OpenAPI docs */
     private static final String[] SWAGGER_WHITELIST = {
             "/api-docs/**",
             "/api-docs.yaml",
@@ -52,7 +36,6 @@ public class SecurityConfig {
             "/swagger-ui.html"
     };
 
-    /** Endpoints de autenticación y registro */
     private static final String[] AUTH_WHITELIST = {
             "/api/auth/login",
             "/api/auth/register",
@@ -60,40 +43,17 @@ public class SecurityConfig {
             "/api/auth/recuperar-contrasena",
             "/api/auth/reset-contrasena",
             "/api/usuarios"
-
-
     };
 
-    // ─────────────────────────────────────────────────────────────────
-    // CADENA DE FILTROS PRINCIPAL
-    // ─────────────────────────────────────────────────────────────────
-
-    /**
-     * Define la cadena de seguridad HTTP con:
-     * <ul>
-     *   <li>CSRF deshabilitado (API REST stateless).</li>
-     *   <li>CORS delegado a {@link CorsConfig}.</li>
-     *   <li>Sesiones stateless (JWT).</li>
-     *   <li>Reglas de autorización por rol y método HTTP.</li>
-     *   <li>Filtro JWT inyectado antes de {@link UsernamePasswordAuthenticationFilter}.</li>
-     * </ul>
-     */
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
 
         http
-                // ── CSRF: deshabilitado para APIs REST stateless ──────────────
                 .csrf(AbstractHttpConfigurer::disable)
-
-                // ── CORS: usa la configuración de CorsConfig ──────────────────
-                .cors(cors -> {})   // delega al bean CorsConfigurationSource / WebMvcConfigurer
-
-                // ── Sesiones: STATELESS, no se crean sesiones HTTP ────────────
+                .cors(cors -> {})
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
-
-                // ── Reglas de autorización ─────────────────────────────────────
                 .authorizeHttpRequests(auth -> auth
 
                         // Swagger / OpenAPI — público
@@ -103,10 +63,10 @@ public class SecurityConfig {
                         .requestMatchers(AUTH_WHITELIST).permitAll()
 
                         // Alojamientos — lectura pública, escritura autenticada
-                        .requestMatchers(HttpMethod.GET,  "/api/alojamientos/**").permitAll()
-                        .requestMatchers(HttpMethod.POST, "/api/alojamientos/**").hasAnyRole("ANFITRION", "ADMIN")
-                        .requestMatchers(HttpMethod.PUT,  "/api/alojamientos/**").hasAnyRole("ANFITRION", "ADMIN")
-                        .requestMatchers(HttpMethod.DELETE,"/api/alojamientos/**").hasAnyRole("ANFITRION", "ADMIN")
+                        .requestMatchers(HttpMethod.GET,    "/api/alojamientos/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,   "/api/alojamientos/**").hasAnyRole("ANFITRION", "ADMIN")
+                        .requestMatchers(HttpMethod.PUT,    "/api/alojamientos/**").hasAnyRole("ANFITRION", "ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/api/alojamientos/**").hasAnyRole("ANFITRION", "ADMIN")
 
                         // Servicios / imágenes — lectura pública
                         .requestMatchers(HttpMethod.GET, "/api/servicios/**").permitAll()
@@ -131,8 +91,12 @@ public class SecurityConfig {
                         // Notificaciones — solo usuarios autenticados
                         .requestMatchers("/api/notificaciones/**").authenticated()
 
-                        // Recuperación de contraseña (códigos) — público
+                        // Recuperación de contraseña — público
                         .requestMatchers("/api/codigos-recuperacion/**").permitAll()
+
+                        // ── Perfil propio — ANTES de la regla general de usuarios ──
+                        .requestMatchers(HttpMethod.GET, "/api/usuarios/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT, "/api/usuarios/me").authenticated()
 
                         // Usuarios — ADMIN para gestión general
                         .requestMatchers(HttpMethod.GET,    "/api/usuarios/**").hasRole("ADMIN")
@@ -142,33 +106,17 @@ public class SecurityConfig {
                         // Cualquier otra ruta requiere autenticación
                         .anyRequest().authenticated()
                 )
-
-                // ── Proveedor de autenticación personalizado ──────────────────
                 .authenticationProvider(authenticationProvider())
-
-                // ── Filtro JWT antes del filtro de usuario/contraseña ─────────
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }
 
-    // ─────────────────────────────────────────────────────────────────
-    // BEANS DE SOPORTE
-    // ─────────────────────────────────────────────────────────────────
-
-    /**
-     * Codificador de contraseñas BCrypt (coste por defecto = 10).
-     * Usado al registrar usuarios y al validar credenciales en login.
-     */
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
     }
 
-    /**
-     * Proveedor de autenticación DAO que usa {@link UserDetailsService}
-     * y {@link BCryptPasswordEncoder} para validar credenciales.
-     */
     @Bean
     public AuthenticationProvider authenticationProvider() {
         DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
@@ -177,10 +125,6 @@ public class SecurityConfig {
         return provider;
     }
 
-    /**
-     * Expone el {@link AuthenticationManager} como bean para que pueda
-     * ser inyectado en el servicio de autenticación (AuthService).
-     */
     @Bean
     public AuthenticationManager authenticationManager(AuthenticationConfiguration config)
             throws Exception {

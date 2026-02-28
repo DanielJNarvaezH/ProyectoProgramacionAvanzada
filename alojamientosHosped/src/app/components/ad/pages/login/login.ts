@@ -49,7 +49,7 @@ export class LoginPageComponent implements OnInit {
     }).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/perfil']); // ← único cambio
+        this.router.navigate(['/alojamientos']);
       },
       error: (err: Error) => {
         this.isLoading    = false;

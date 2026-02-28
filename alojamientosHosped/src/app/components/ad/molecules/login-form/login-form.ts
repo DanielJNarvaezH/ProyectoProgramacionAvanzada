@@ -102,7 +102,7 @@ export class LoginFormComponent implements OnInit, OnDestroy {
     this.authService.login(credentials).subscribe({
       next: () => {
         this.isLoading = false;
-        this.router.navigate(['/']);
+        this.router.navigate(['/alojamientos']);
       },
       error: (err: Error) => {
         this.isLoading    = false;
