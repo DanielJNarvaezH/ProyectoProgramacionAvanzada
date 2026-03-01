@@ -344,7 +344,7 @@ export class AuthService {
   }
 
   getRol(): string | null {
-    return this.getUsuario()?.rol ?? null;
+    return this.getUsuario()?.role ?? null;
   }
 
   esAnfitrion(): boolean {
@@ -369,8 +369,8 @@ export class AuthService {
       this.guardarRefreshToken(response.refreshToken);
     }
     localStorage.setItem(this.USER_KEY, JSON.stringify({
-      correo: response.email,
-      rol:    response.rol
+      email: response.email,
+      role:  response.rol
     }));
   }
 }

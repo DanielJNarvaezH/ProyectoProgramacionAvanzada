@@ -16,10 +16,10 @@ export class PerfilPageComponent implements OnInit {
   usuario: User | null = null;
   perfilForm!: FormGroup;
 
-  isLoading    = true;   // cargando datos iniciales
-  isSaving     = false;  // guardando cambios
-  modoEdicion  = false;  // alterna vista/edición
-  errorMessage = '';
+  isLoading      = true;
+  isSaving       = false;
+  modoEdicion    = false;
+  errorMessage   = '';
   successMessage = '';
 
   constructor(
@@ -31,16 +31,16 @@ export class PerfilPageComponent implements OnInit {
 
   ngOnInit(): void {
     this.perfilForm = this.fb.group({
-      nombre:   ['', [Validators.required, Validators.maxLength(100)]],
-      telefono: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]]
+      name:  ['', [Validators.required, Validators.maxLength(100)]],
+      phone: ['', [Validators.required, Validators.pattern(/^\d{10}$/)]]
     });
 
     this.cargarPerfil();
   }
 
   // ─── Getters del formulario ───────────────────────────────────
-  get nombre()   { return this.perfilForm.get('nombre'); }
-  get telefono() { return this.perfilForm.get('telefono'); }
+  get name()  { return this.perfilForm.get('name'); }
+  get phone() { return this.perfilForm.get('phone'); }
 
   // ─── Cargar datos desde el backend ───────────────────────────
   cargarPerfil(): void {
@@ -49,11 +49,11 @@ export class PerfilPageComponent implements OnInit {
 
     this.usuarioService.getMiPerfil().subscribe({
       next: (user) => {
-        this.usuario  = user;
+        this.usuario   = user;
         this.isLoading = false;
         this.perfilForm.patchValue({
-          nombre:   user.nombre,
-          telefono: user.telefono ?? ''
+          name:  user.name,
+          phone: user.phone ?? ''
         });
       },
       error: (err: Error) => {
@@ -74,11 +74,10 @@ export class PerfilPageComponent implements OnInit {
   cancelarEdicion(): void {
     this.modoEdicion  = false;
     this.errorMessage = '';
-    // Restaurar valores originales
     if (this.usuario) {
       this.perfilForm.patchValue({
-        nombre:   this.usuario.nombre,
-        telefono: this.usuario.telefono ?? ''
+        name:  this.usuario.name,
+        phone: this.usuario.phone ?? ''
       });
     }
   }
@@ -94,8 +93,8 @@ export class PerfilPageComponent implements OnInit {
     this.errorMessage = '';
 
     const datos: Partial<User> = {
-      nombre:   this.perfilForm.value.nombre.trim(),
-      telefono: this.perfilForm.value.telefono.trim()
+      name:  this.perfilForm.value.name.trim(),
+      phone: this.perfilForm.value.phone.trim()
     };
 
     this.usuarioService.actualizarPerfil(datos).subscribe({
@@ -104,7 +103,6 @@ export class PerfilPageComponent implements OnInit {
         this.isSaving       = false;
         this.modoEdicion    = false;
         this.successMessage = '¡Perfil actualizado correctamente!';
-        // Limpiar el mensaje de éxito después de 3 segundos
         setTimeout(() => this.successMessage = '', 3000);
       },
       error: (err: Error) => {
@@ -121,21 +119,21 @@ export class PerfilPageComponent implements OnInit {
   }
 
   // ─── Helpers de UI ───────────────────────────────────────────
-  getRolLabel(rol: string | undefined): string {
+  getRolLabel(role: string | undefined): string {
     const labels: Record<string, string> = {
       USUARIO:   'Huésped',
       ANFITRION: 'Anfitrión',
       ADMIN:     'Administrador'
     };
-    return labels[rol ?? ''] ?? rol ?? '';
+    return labels[role ?? ''] ?? role ?? '';
   }
 
-  getRolColor(rol: string | undefined): string {
+  getRolColor(role: string | undefined): string {
     const colors: Record<string, string> = {
       USUARIO:   'badge-guest',
       ANFITRION: 'badge-host',
       ADMIN:     'badge-admin'
     };
-    return colors[rol ?? ''] ?? '';
+    return colors[role ?? ''] ?? '';
   }
 }

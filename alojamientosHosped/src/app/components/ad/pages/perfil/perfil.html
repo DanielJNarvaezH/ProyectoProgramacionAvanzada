@@ -34,11 +34,11 @@
       <div class="flex flex-col items-center mb-6">
         <div class="avatar-circle mb-3">
           <span class="text-3xl font-bold text-white">
-            {{ usuario?.nombre?.charAt(0)?.toUpperCase() ?? '?' }}
+            {{ usuario?.name ? (usuario!.name)[0].toUpperCase() : '?' }}
           </span>
         </div>
-        <span [ngClass]="['badge', getRolColor(usuario?.rol)]">
-          {{ getRolLabel(usuario?.rol) }}
+        <span [ngClass]="['badge', getRolColor(usuario?.role)]">
+          {{ getRolLabel(usuario?.role) }}
         </span>
       </div>
 
@@ -49,28 +49,28 @@
           <span class="info-label">
             <app-icon icon="fa-solid fa-user"></app-icon> Nombre
           </span>
-          <span class="info-value">{{ usuario?.nombre }}</span>
+          <span class="info-value">{{ usuario?.name }}</span>
         </div>
 
         <div class="info-row">
           <span class="info-label">
             <app-icon icon="fa-solid fa-envelope"></app-icon> Correo
           </span>
-          <span class="info-value">{{ usuario?.correo }}</span>
+          <span class="info-value">{{ usuario?.email }}</span>
         </div>
 
         <div class="info-row">
           <span class="info-label">
             <app-icon icon="fa-solid fa-phone"></app-icon> Teléfono
           </span>
-          <span class="info-value">{{ usuario?.telefono || '—' }}</span>
+          <span class="info-value">{{ usuario?.phone || '—' }}</span>
         </div>
 
         <div class="info-row">
           <span class="info-label">
             <app-icon icon="fa-solid fa-cake-candles"></app-icon> Nacimiento
           </span>
-          <span class="info-value">{{ usuario?.fechaNacimiento || '—' }}</span>
+          <span class="info-value">{{ usuario?.birthDate || '—' }}</span>
         </div>
 
         <!-- Botón editar -->
@@ -92,19 +92,19 @@
             Nombre <span class="text-red-500">*</span>
           </label>
           <input
-            formControlName="nombre"
+            formControlName="name"
             type="text"
             placeholder="Tu nombre completo"
             class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 transition"
             [ngClass]="{
-              'border-red-400 bg-red-50':     nombre?.invalid && nombre?.touched,
-              'border-green-400 bg-green-50': nombre?.valid   && nombre?.touched,
-              'border-neutral-300':           !nombre?.touched
+              'border-red-400 bg-red-50':     name?.invalid && name?.touched,
+              'border-green-400 bg-green-50': name?.valid   && name?.touched,
+              'border-neutral-300':           !name?.touched
             }"
           />
-          <div *ngIf="nombre?.invalid && nombre?.touched" class="mt-1 text-xs text-red-500">
-            <span *ngIf="nombre?.errors?.['required']">El nombre es obligatorio</span>
-            <span *ngIf="nombre?.errors?.['maxlength']">Máximo 100 caracteres</span>
+          <div *ngIf="name?.invalid && name?.touched" class="mt-1 text-xs text-red-500">
+            <span *ngIf="name?.errors?.['required']">El nombre es obligatorio</span>
+            <span *ngIf="name?.errors?.['maxlength']">Máximo 100 caracteres</span>
           </div>
         </div>
 
@@ -114,19 +114,19 @@
             Teléfono <span class="text-red-500">*</span>
           </label>
           <input
-            formControlName="telefono"
+            formControlName="phone"
             type="tel"
             placeholder="3001234567"
             class="w-full px-4 py-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500 transition"
             [ngClass]="{
-              'border-red-400 bg-red-50':     telefono?.invalid && telefono?.touched,
-              'border-green-400 bg-green-50': telefono?.valid   && telefono?.touched,
-              'border-neutral-300':           !telefono?.touched
+              'border-red-400 bg-red-50':     phone?.invalid && phone?.touched,
+              'border-green-400 bg-green-50': phone?.valid   && phone?.touched,
+              'border-neutral-300':           !phone?.touched
             }"
           />
-          <div *ngIf="telefono?.invalid && telefono?.touched" class="mt-1 text-xs text-red-500">
-            <span *ngIf="telefono?.errors?.['required']">El teléfono es obligatorio</span>
-            <span *ngIf="telefono?.errors?.['pattern']">Debe tener exactamente 10 dígitos</span>
+          <div *ngIf="phone?.invalid && phone?.touched" class="mt-1 text-xs text-red-500">
+            <span *ngIf="phone?.errors?.['required']">El teléfono es obligatorio</span>
+            <span *ngIf="phone?.errors?.['pattern']">Debe tener exactamente 10 dígitos</span>
           </div>
         </div>
 
@@ -137,7 +137,7 @@
           </label>
           <input
             type="email"
-            [value]="usuario?.correo"
+            [value]="usuario?.email"
             disabled
             class="w-full px-4 py-2 border border-neutral-200 bg-neutral-100 text-neutral-400 rounded-md cursor-not-allowed"
           />

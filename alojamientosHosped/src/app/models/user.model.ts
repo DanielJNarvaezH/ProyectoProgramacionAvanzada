@@ -1,11 +1,9 @@
 export interface User {
   id?: number;
-  nombre: string;
-  correo: string;
-  telefono?: string;
-  fechaNacimiento?: string;
-  rol: 'USUARIO' | 'ANFITRION' | 'ADMIN';
-  descripcion?: string;
-  foto?: string;
-  activo?: boolean;
+  name: string;
+  email: string;
+  phone?: string;
+  birthDate?: string;
+  role: 'USUARIO' | 'ANFITRION' | 'ADMIN';
+  password?: string;
 }
