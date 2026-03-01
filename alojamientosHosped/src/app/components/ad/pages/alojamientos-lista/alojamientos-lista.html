@@ -16,7 +16,7 @@
         <span *ngIf="!hayFiltroActivo">{{ totalMostrados }} lugares para hospedarte</span>
         <span *ngIf="hayFiltroActivo">
           {{ totalMostrados }} resultado{{ totalMostrados !== 1 ? 's' : '' }}
-          para <strong>"{{ filtroCiudad }}"</strong>
+          para <strong>"{{ terminoBusqueda }}"</strong>
         </span>
       </p>
     </div>
@@ -27,9 +27,9 @@
         <i class="fa-solid fa-magnifying-glass search-box__icon"></i>
         <input
           type="text"
-          [(ngModel)]="filtroCiudad"
-          (ngModelChange)="filtrarPorCiudad()"
-          placeholder="Buscar por ciudad..."
+          [(ngModel)]="terminoBusqueda"
+          (ngModelChange)="filtrar()"
+          placeholder="Buscar por nombre o ciudad..."
           class="search-box__input"
           autocomplete="off"
         />
@@ -78,8 +78,8 @@
     <div class="lista-empty__icon">
       <i class="fa-solid fa-map-location-dot"></i>
     </div>
-    <h2 class="lista-empty__title">Sin resultados en "{{ filtroCiudad }}"</h2>
-    <p class="lista-empty__msg">Intenta con otra ciudad o limpia el filtro.</p>
+    <h2 class="lista-empty__title">Sin resultados en "{{ terminoBusqueda }}"</h2>
+    <p class="lista-empty__msg">Intenta con otro nombre o ciudad.</p>
     <button (click)="limpiarFiltro()" class="btn-retry">
       <i class="fa-solid fa-xmark"></i>
       Limpiar filtro
