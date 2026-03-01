@@ -19,6 +19,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.security.web.header.writers.ReferrerPolicyHeaderWriter;
 
 @Configuration
 @EnableWebSecurity
@@ -54,6 +55,37 @@ public class SecurityConfig {
                 .sessionManagement(session ->
                         session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
+
+                // ── Security Headers — corrige vulnerabilidad CSP (CWE-693) ──
+                .headers(headers -> headers
+                        // Content Security Policy — evita XSS e inyección de contenido
+                        .contentSecurityPolicy(csp -> csp
+                                .policyDirectives(
+                                        "default-src 'self'; " +
+                                                "script-src 'self'; " +
+                                                "style-src 'self' 'unsafe-inline'; " +
+                                                "img-src 'self' data: https:; " +
+                                                "font-src 'self'; " +
+                                                "connect-src 'self'; " +
+                                                "frame-ancestors 'none'"
+                                )
+                        )
+                        // Evita clickjacking
+                        .frameOptions(frame -> frame.deny())
+                        // Fuerza HTTPS en navegadores compatibles
+                        .httpStrictTransportSecurity(hsts -> hsts
+                                .includeSubDomains(true)
+                                .maxAgeInSeconds(31536000)
+                        )
+                        // Evita que el navegador detecte el tipo MIME automáticamente
+                        .contentTypeOptions(contentType -> {})
+                        // Referrer policy: no enviar información de referencia
+                        .referrerPolicy(referrer -> referrer
+                                .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER)
+                        )
+                )
+
+                // ── Reglas de autorización ─────────────────────────────────────
                 .authorizeHttpRequests(auth -> auth
 
                         // Swagger / OpenAPI — público
@@ -94,7 +126,7 @@ public class SecurityConfig {
                         // Recuperación de contraseña — público
                         .requestMatchers("/api/codigos-recuperacion/**").permitAll()
 
-                        // ── Perfil propio — ANTES de la regla general de usuarios ──
+                        // Perfil propio — ANTES de la regla general de usuarios
                         .requestMatchers(HttpMethod.GET, "/api/usuarios/me").authenticated()
                         .requestMatchers(HttpMethod.PUT, "/api/usuarios/me").authenticated()
 
