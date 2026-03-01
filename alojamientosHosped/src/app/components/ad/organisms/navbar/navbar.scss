@@ -1,0 +1,73 @@
+// NavbarComponent — Organismo
+// Barra de navegación superior de Hosped
+
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 2rem;
+  height: 64px;
+  background-color: #ffffff;
+  border-bottom: 1px solid #f1f5f9;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+
+  // ── Logo ──────────────────────────────────────────────────────
+  &__logo {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+
+    &-img {
+      height: 32px;
+      width: auto;
+    }
+  }
+
+  // ── Acciones (derecha) ────────────────────────────────────────
+  &__actions {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+  }
+
+  // ── Botón de perfil ───────────────────────────────────────────
+  &__profile-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.4rem 0.75rem;
+    border-radius: 9999px;
+    transition: background-color 0.2s;
+    color: #4b5563;
+
+    &:hover {
+      background-color: #f3f4f6;
+      color: var(--color-primary, #7c3aed);
+    }
+
+    &:focus-visible {
+      outline: 2px solid var(--color-primary, #7c3aed);
+      outline-offset: 2px;
+    }
+  }
+
+  &__profile-icon {
+    font-size: 1.75rem;
+    color: var(--color-primary, #7c3aed);
+  }
+
+  &__profile-name {
+    font-size: 0.875rem;
+    font-weight: 500;
+    max-width: 120px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

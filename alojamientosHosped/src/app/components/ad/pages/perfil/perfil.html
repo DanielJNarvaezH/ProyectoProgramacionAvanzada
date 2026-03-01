@@ -170,6 +170,14 @@
         <hr class="flex-1 border-neutral-200" />
       </div>
 
+      <!-- Volver a alojamientos -->
+      <button
+        routerLink="/alojamientos"
+        class="w-full mb-3 py-2 border-2 border-primary-300 text-primary-600 font-semibold rounded-md hover:bg-primary-50 transition flex items-center justify-center gap-2">
+        <app-icon icon="fa-solid fa-arrow-left"></app-icon>
+        <span>Volver a alojamientos</span>
+      </button>
+
       <button
         (click)="cerrarSesion()"
         class="w-full py-2 border-2 border-red-300 text-red-500 font-semibold rounded-md hover:bg-red-50 transition flex items-center justify-center gap-2">

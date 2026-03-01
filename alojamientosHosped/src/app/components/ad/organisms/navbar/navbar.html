@@ -1,0 +1,29 @@
+<!-- ─────────────────────────────────────────────────────────────────
+     NavbarComponent — Organismo
+     Barra superior con logo Hosped + acceso al perfil de usuario
+     ───────────────────────────────────────────────────────────────── -->
+<nav class="navbar">
+
+  <!-- ── Logo ──────────────────────────────────────────────────── -->
+  <a routerLink="/alojamientos" class="navbar__logo" aria-label="Ir al inicio">
+    <img
+      src="assets/logo/hosped-logo.svg"
+      alt="Hosped"
+      class="navbar__logo-img"
+    />
+  </a>
+
+  <!-- ── Acciones ───────────────────────────────────────────────── -->
+  <div class="navbar__actions">
+    <button
+      (click)="irAlPerfil()"
+      class="navbar__profile-btn"
+      [attr.aria-label]="'Perfil de ' + nombreUsuario"
+      [title]="nombreUsuario"
+    >
+      <i class="fa-solid fa-circle-user navbar__profile-icon"></i>
+      <span class="navbar__profile-name">{{ nombreUsuario }}</span>
+    </button>
+  </div>
+
+</nav>

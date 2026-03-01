@@ -31,6 +31,7 @@ import { AlojamientoCardComponent }  from './components/ad/molecules/alojamiento
 // ── Organismos ────────────────────────────────────────────────────
 import { LoginCardComponent }    from './components/ad/organisms/login-card/login-card';
 import { RegisterCardComponent } from './components/ad/organisms/register-card/register-card';
+import { NavbarComponent }       from './components/ad/organisms/navbar/navbar'; // ← navbar
 
 // ── Templates ─────────────────────────────────────────────────────
 import { LoginTemplateComponent }    from './components/ad/templates/login-template/login-template';
@@ -59,6 +60,7 @@ import { PerfilPageComponent }   from './components/ad/pages/perfil/perfil'; // 
     // Organismos
     LoginCardComponent,
     RegisterCardComponent,
+    NavbarComponent,             // ← navbar
     // Templates
     LoginTemplateComponent,
     RegisterTemplateComponent,
