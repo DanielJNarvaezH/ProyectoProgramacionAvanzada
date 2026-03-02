@@ -1,0 +1,492 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// AlojamientoDetallePageComponent — ALOJ-5
+// Estilos de la página de detalle completa de un alojamiento
+// ─────────────────────────────────────────────────────────────────────────────
+
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+// ── Variables (consistentes con el sistema de diseño del proyecto) ────────────
+$primary:       #9B5CFF;
+$primary-light: #C4A0FF;
+$primary-dark:  #7B3FE4;
+$text-dark:     #1a1a2e;
+$text-mid:      #64748b;
+$text-light:    #94a3b8;
+$bg-page:       #f9f6ff;
+$white:         #ffffff;
+$error:         #ef4444;
+$radius-card:   1.25rem;
+$shadow-sm:     0 2px 8px rgba(155, 92, 255, 0.08);
+$shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
+
+// ── Página ───────────────────────────────────────────────────────────────────
+.detalle-page {
+  min-height: 100vh;
+  background: $bg-page;
+  font-family: 'Poppins', sans-serif;
+  padding: 2rem 1.5rem 5rem;
+  max-width: 1180px;
+  margin: 0 auto;
+  animation: fadeIn 0.35s ease;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(10px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+// ── Botón volver ─────────────────────────────────────────────────────────────
+.btn-volver {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: none;
+  border: none;
+  color: $text-mid;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  margin-bottom: 1.25rem;
+  padding: 0.4rem 0;
+  transition: color 0.2s;
+
+  &:hover { color: $primary; }
+}
+
+// ── Galería ───────────────────────────────────────────────────────────────────
+.detalle-galeria {
+  display: block;
+  margin-bottom: 2rem;
+}
+
+// ── Layout dos columnas ───────────────────────────────────────────────────────
+.detalle-layout {
+  display: grid;
+  grid-template-columns: 1fr 340px;
+  gap: 2rem;
+  align-items: start;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+// ── Columna principal ────────────────────────────────────────────────────────
+.detalle-main {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+}
+
+// ── Header del alojamiento ───────────────────────────────────────────────────
+.detalle-header {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+
+  &__top {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 0.75rem;
+  }
+
+  &__nombre {
+    font-size: clamp(1.5rem, 3vw, 2rem);
+    font-weight: 700;
+    color: $text-dark;
+    margin: 0;
+    line-height: 1.2;
+  }
+
+  &__calificacion {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    flex-shrink: 0;
+  }
+
+  &__promedio {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $text-dark;
+  }
+
+  &__resenas {
+    font-size: 0.85rem;
+    color: $text-mid;
+  }
+
+  &__meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem;
+  }
+}
+
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  font-size: 0.875rem;
+  color: $text-mid;
+
+  i {
+    color: $primary-light;
+    font-size: 0.8rem;
+  }
+}
+
+// ── Estrellas ─────────────────────────────────────────────────────────────────
+.estrellas {
+  display: flex;
+  gap: 0.1rem;
+
+  &--sm { gap: 0.05rem; }
+}
+
+.estrella {
+  font-size: 0.875rem;
+
+  &--full, &--half { color: #FBBF24; }
+  &--empty         { color: #D1D5DB; }
+}
+
+// ── Divider ───────────────────────────────────────────────────────────────────
+.divider {
+  border: none;
+  border-top: 1px solid #ede8f9;
+  margin: 1.75rem 0;
+}
+
+// ── Secciones ─────────────────────────────────────────────────────────────────
+.detalle-seccion {
+  &__titulo {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0 0 1rem;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i { color: $primary; font-size: 1rem; }
+  }
+}
+
+// ── Descripción ───────────────────────────────────────────────────────────────
+.detalle-descripcion {
+  font-size: 0.95rem;
+  color: $text-mid;
+  line-height: 1.75;
+  margin: 0;
+  white-space: pre-line; // respeta saltos de línea del backend
+}
+
+// ── Servicios ─────────────────────────────────────────────────────────────────
+.servicios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 0.75rem;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+}
+
+.servicio-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.9rem;
+  color: $text-mid;
+  background: rgba(155, 92, 255, 0.05);
+  border: 1px solid #ede8f9;
+  border-radius: 0.75rem;
+  padding: 0.65rem 0.9rem;
+
+  &__icono {
+    color: $primary;
+    font-size: 1rem;
+    flex-shrink: 0;
+  }
+}
+
+// ── Mapa ──────────────────────────────────────────────────────────────────────
+.detalle-ubicacion {
+  font-size: 0.9rem;
+  color: $text-mid;
+  margin: 0 0 1rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+
+  i { color: $primary; }
+}
+
+.mapa-wrap {
+  border-radius: $radius-card;
+  overflow: hidden;
+  border: 1px solid #ede8f9;
+  box-shadow: $shadow-sm;
+}
+
+.mapa-iframe {
+  width: 100%;
+  height: 320px;
+  display: block;
+  border: none;
+}
+
+// ── Comentarios ───────────────────────────────────────────────────────────────
+.badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.5rem;
+  height: 1.5rem;
+  padding: 0 0.4rem;
+  border-radius: 999px;
+  background: $primary;
+  color: #fff;
+  font-size: 0.75rem;
+  font-weight: 600;
+  margin-left: 0.25rem;
+}
+
+.comentarios-lista {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.sin-comentarios {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 2.5rem 1rem;
+  text-align: center;
+  color: $text-mid;
+  gap: 0.5rem;
+
+  &__icono {
+    font-size: 2.5rem;
+    color: $primary-light;
+    margin-bottom: 0.5rem;
+  }
+
+  &__sub {
+    font-size: 0.85rem;
+    color: $text-light;
+    margin: 0;
+  }
+
+  p { margin: 0; font-size: 0.95rem; }
+}
+
+.sin-datos {
+  font-size: 0.9rem;
+  color: $text-light;
+  margin: 0;
+  font-style: italic;
+}
+
+// ── Aside: caja de precio ─────────────────────────────────────────────────────
+.detalle-aside {
+  position: sticky;
+  top: 5rem;
+}
+
+.precio-box {
+  background: $white;
+  border-radius: $radius-card;
+  box-shadow: $shadow-md;
+  border: 1px solid #ede8f9;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+
+  &__precio {
+    display: flex;
+    align-items: baseline;
+    gap: 0.3rem;
+  }
+
+  &__valor {
+    font-size: 1.75rem;
+    font-weight: 700;
+    color: $primary-dark;
+  }
+
+  &__unidad {
+    font-size: 0.875rem;
+    color: $text-mid;
+  }
+
+  &__calificacion {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.85rem;
+    color: $text-mid;
+  }
+
+  &__detalles {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+
+    li {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.875rem;
+      color: $text-mid;
+
+      strong { color: $text-dark; }
+      i      { color: $primary-light; margin-right: 0.3rem; }
+    }
+  }
+}
+
+.btn-reservar {
+  width: 100%;
+  padding: 0.85rem;
+  border: none;
+  border-radius: 999px;
+  background: $primary;
+  color: $white;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  transition: background 0.2s, transform 0.15s;
+
+  &:hover:not(:disabled) {
+    background: $primary-dark;
+    transform: translateY(-1px);
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// ── Error / Loading states ────────────────────────────────────────────────────
+.detalle-skeleton {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.skeleton-galeria {
+  width: 100%;
+  height: 400px;
+  border-radius: $radius-card;
+  background: #e8e0f5;
+}
+
+.skeleton-info {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  max-width: 600px;
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 8px;
+  background: #e8e0f5;
+}
+
+.skeleton-pulse {
+  animation: pulse 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.45; }
+}
+
+.detalle-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 6rem 1.5rem;
+  text-align: center;
+  gap: 1rem;
+
+  &__icon {
+    font-size: 2.5rem;
+    color: $error;
+    width: 5rem;
+    height: 5rem;
+    border-radius: 50%;
+    background: rgba(239,68,68,0.08);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: $text-dark;
+    margin: 0;
+  }
+
+  &__msg {
+    font-size: 0.9rem;
+    color: $text-mid;
+    margin: 0;
+    max-width: 400px;
+  }
+
+  &__actions {
+    display: flex;
+    gap: 0.75rem;
+  }
+}
+
+.btn-secondary {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.65rem 1.5rem;
+  border: 1.5px solid $primary;
+  border-radius: 999px;
+  background: transparent;
+  color: $primary;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s;
+
+  &:hover {
+    background: $primary;
+    color: $white;
+  }
+}
+
+// ── Responsive ────────────────────────────────────────────────────────────────
+@media (max-width: 640px) {
+  .detalle-page {
+    padding: 1.5rem 1rem 3rem;
+  }
+
+  .precio-box {
+    margin-top: 1rem;
+  }
+}

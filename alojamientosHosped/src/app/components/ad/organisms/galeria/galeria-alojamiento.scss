@@ -1,0 +1,183 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// GaleriaAlojamientoComponent — ALOJ-5
+// Galería principal + miniaturas + lightbox
+// ─────────────────────────────────────────────────────────────────────────────
+
+$primary:   #9B5CFF;
+$radius:    1rem;
+$overlay:   rgba(0, 0, 0, 0.45);
+
+// ── Layout ───────────────────────────────────────────────────────────────────
+.galeria {
+  &__layout {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 480px;
+    gap: 0.5rem;
+    border-radius: $radius;
+    overflow: hidden;
+
+    @media (max-width: 768px) {
+      grid-template-columns: 1fr;
+      grid-template-rows: 280px;
+    }
+  }
+
+  // ── Imagen principal ────────────────────────────────────────────────────
+  &__principal {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    background: #e2e8f0;
+
+    @media (max-width: 768px) {
+      border-radius: $radius;
+    }
+  }
+
+  // ── Grid de miniaturas ──────────────────────────────────────────────────
+  &__miniaturas {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: repeat(2, 1fr);
+    gap: 0.5rem;
+
+    @media (max-width: 768px) {
+      display: none;
+    }
+  }
+
+  &__miniatura {
+    position: relative;
+    overflow: hidden;
+    cursor: pointer;
+    background: #e2e8f0;
+
+    &--ultima {
+      .galeria__overlay {
+        background: rgba(0, 0, 0, 0.55);
+        opacity: 1;
+      }
+    }
+  }
+
+  // ── Imagen base ─────────────────────────────────────────────────────────
+  &__img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 0.35s ease;
+  }
+
+  &__principal:hover &__img,
+  &__miniatura:hover &__img {
+    transform: scale(1.04);
+  }
+
+  // ── Overlay hover ────────────────────────────────────────────────────────
+  &__overlay {
+    position: absolute;
+    inset: 0;
+    background: $overlay;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s;
+    color: #fff;
+    font-size: 1.5rem;
+
+    .galeria__principal:hover &,
+    .galeria__miniatura:hover & {
+      opacity: 1;
+    }
+  }
+
+  &__mas {
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #fff;
+  }
+}
+
+// ── Lightbox ─────────────────────────────────────────────────────────────────
+.lightbox {
+  position: fixed;
+  inset: 0;
+  z-index: 1000;
+  background: rgba(0, 0, 0, 0.92);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  animation: fadeIn 0.2s ease;
+
+  @keyframes fadeIn {
+    from { opacity: 0; }
+    to   { opacity: 1; }
+  }
+
+  &__close {
+    position: absolute;
+    top: 1.25rem;
+    right: 1.25rem;
+    background: rgba(255,255,255,0.12);
+    border: none;
+    color: #fff;
+    font-size: 1.25rem;
+    width: 2.75rem;
+    height: 2.75rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    z-index: 10;
+
+    &:hover {
+      background: rgba(255,255,255,0.25);
+    }
+  }
+
+  &__nav {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    background: rgba(255,255,255,0.12);
+    border: none;
+    color: #fff;
+    font-size: 1.125rem;
+    width: 3rem;
+    height: 3rem;
+    border-radius: 50%;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s;
+    z-index: 10;
+
+    &:hover {
+      background: rgba(255,255,255,0.25);
+    }
+
+    &--prev { left: 1rem; }
+    &--next { right: 1rem; }
+  }
+
+  &__img-wrap {
+    max-width: 90vw;
+    max-height: 88vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  &__img {
+    max-width: 100%;
+    max-height: 88vh;
+    border-radius: 0.75rem;
+    object-fit: contain;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.5);
+  }
+}

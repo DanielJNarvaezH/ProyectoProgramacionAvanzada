@@ -1,0 +1,98 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     GaleriaAlojamientoComponent — ALOJ-5
+     Galería de fotos: imagen principal + miniaturas + lightbox
+     ───────────────────────────────────────────────────────────────────────── -->
+
+<section class="galeria" [attr.aria-label]="'Galería de fotos de ' + nombre">
+
+  <!-- ── Layout principal + miniaturas ───────────────────────────────────── -->
+  <div class="galeria__layout">
+
+    <!-- Imagen principal -->
+    <div class="galeria__principal" (click)="abrirLightbox(imagenPrincipal)">
+      <img
+        [src]="imagenPrincipal"
+        [alt]="'Foto principal de ' + nombre"
+        (error)="onImageError($event)"
+        class="galeria__img"
+        loading="eager"
+      />
+      <div class="galeria__overlay">
+        <i class="fa-solid fa-magnifying-glass-plus"></i>
+      </div>
+    </div>
+
+    <!-- Grid de miniaturas -->
+    <div class="galeria__miniaturas" *ngIf="miniaturas.length > 0">
+      <div
+        *ngFor="let img of miniaturas; let i = index"
+        class="galeria__miniatura"
+        [class.galeria__miniatura--ultima]="i === 3 && hayMasImagenes"
+        (click)="abrirLightbox(img.url)"
+      >
+        <img
+          [src]="img.url"
+          [alt]="img.descripcion || ('Foto ' + (i + 2) + ' de ' + nombre)"
+          (error)="onImageError($event)"
+          class="galeria__img"
+          loading="lazy"
+        />
+        <div class="galeria__overlay">
+          <ng-container *ngIf="i === 3 && hayMasImagenes; else iconoZoom">
+            <span class="galeria__mas">+{{ cantidadRestante }}</span>
+          </ng-container>
+          <ng-template #iconoZoom>
+            <i class="fa-solid fa-magnifying-glass-plus"></i>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+</section>
+
+<!-- ── Lightbox ─────────────────────────────────────────────────────────────── -->
+<div
+  *ngIf="lightboxUrl"
+  class="lightbox"
+  (click)="cerrarLightbox()"
+  role="dialog"
+  aria-modal="true"
+  [attr.aria-label]="'Vista ampliada de foto de ' + nombre"
+>
+  <!-- Botón cerrar -->
+  <button class="lightbox__close" (click)="cerrarLightbox()" aria-label="Cerrar galería">
+    <i class="fa-solid fa-xmark"></i>
+  </button>
+
+  <!-- Navegación anterior -->
+  <button
+    *ngIf="todasLasImagenes.length > 1"
+    class="lightbox__nav lightbox__nav--prev"
+    (click)="$event.stopPropagation(); navegarLightbox(-1)"
+    aria-label="Imagen anterior"
+  >
+    <i class="fa-solid fa-chevron-left"></i>
+  </button>
+
+  <!-- Imagen activa -->
+  <div class="lightbox__img-wrap" (click)="$event.stopPropagation()">
+    <img
+      [src]="lightboxUrl"
+      [alt]="'Vista ampliada'"
+      (error)="onImageError($event)"
+      class="lightbox__img"
+    />
+  </div>
+
+  <!-- Navegación siguiente -->
+  <button
+    *ngIf="todasLasImagenes.length > 1"
+    class="lightbox__nav lightbox__nav--next"
+    (click)="$event.stopPropagation(); navegarLightbox(1)"
+    aria-label="Imagen siguiente"
+  >
+    <i class="fa-solid fa-chevron-right"></i>
+  </button>
+</div>

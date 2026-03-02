@@ -1,0 +1,88 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// ComentarioCardComponent — ALOJ-5
+// Estilos de la tarjeta de comentario
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Variables (reutilizadas del sistema de diseño del proyecto) ───────────────
+$primary:    #9B5CFF;
+$text-dark:  #1a1a2e;
+$text-mid:   #64748b;
+$text-light: #94a3b8;
+$white:      #ffffff;
+$radius:     1rem;
+$shadow-sm:  0 2px 8px rgba(155, 92, 255, 0.08);
+
+// ── Card ─────────────────────────────────────────────────────────────────────
+.comentario-card {
+  background: $white;
+  border-radius: $radius;
+  padding: 1.25rem;
+  box-shadow: $shadow-sm;
+  border: 1px solid #f0ebff;
+  display: flex;
+  flex-direction: column;
+  gap: 0.875rem;
+  transition: box-shadow 0.2s;
+
+  &:hover {
+    box-shadow: 0 4px 16px rgba(155, 92, 255, 0.12);
+  }
+
+  // ── Header ────────────────────────────────────────────────────────────────
+  &__header {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.875rem;
+  }
+
+  // ── Avatar ────────────────────────────────────────────────────────────────
+  &__avatar {
+    flex-shrink: 0;
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: #fff;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.03em;
+  }
+
+  // ── Meta ──────────────────────────────────────────────────────────────────
+  &__meta {
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+  }
+
+  // ── Estrellas ─────────────────────────────────────────────────────────────
+  &__estrellas {
+    display: flex;
+    gap: 0.15rem;
+
+    i {
+      font-size: 0.75rem;
+      color: #FBBF24; // amarillo estrellas
+
+      &.fa-regular {
+        color: #D1D5DB; // gris para vacía
+      }
+    }
+  }
+
+  // ── Fecha ─────────────────────────────────────────────────────────────────
+  &__fecha {
+    font-size: 0.75rem;
+    color: $text-light;
+  }
+
+  // ── Texto ─────────────────────────────────────────────────────────────────
+  &__texto {
+    font-size: 0.9rem;
+    color: $text-mid;
+    line-height: 1.6;
+    margin: 0;
+  }
+}

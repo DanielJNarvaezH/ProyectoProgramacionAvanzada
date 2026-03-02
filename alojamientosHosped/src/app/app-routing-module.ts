@@ -1,23 +1,26 @@
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import { LoginPageComponent }           from './components/ad/pages/login/login';
-import { RegisterPageComponent }        from './components/ad/pages/register/register';
-import { RecuperarContrasenaComponent } from './components/ad/pages/recuperar-contrasena/recuperar-contrasena';
-import { PerfilPageComponent }          from './components/ad/pages/perfil/perfil'; // ← AUTH-21
-import { authGuard }                    from './guards/auth.guard';
+import { LoginPageComponent }             from './components/ad/pages/login/login';
+import { RegisterPageComponent }          from './components/ad/pages/register/register';
+import { RecuperarContrasenaComponent }   from './components/ad/pages/recuperar-contrasena/recuperar-contrasena';
+import { PerfilPageComponent }            from './components/ad/pages/perfil/perfil'; // ← AUTH-21
+import { authGuard }                      from './guards/auth.guard';
 import { AlojamientosListaPageComponent } from './components/ad/pages/alojamientos-lista/alojamientos-lista';
+import { AlojamientoDetallePageComponent } from './components/ad/pages/alojamiento-detalle/alojamiento-detalle'; // ← ALOJ-5
 
 
 const routes: Routes = [
-  { path: '',                    redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login',               component: LoginPageComponent },
-  { path: 'register',            component: RegisterPageComponent },
+  { path: '',                     redirectTo: 'login', pathMatch: 'full' },
+  { path: 'login',                component: LoginPageComponent },
+  { path: 'register',             component: RegisterPageComponent },
   { path: 'recuperar-contrasena', component: RecuperarContrasenaComponent },
   // AUTH-21: ruta protegida del perfil
-  { path: 'perfil',              component: PerfilPageComponent, canActivate: [authGuard] },
-  { path: 'alojamientos', component: AlojamientosListaPageComponent, canActivate: [authGuard] },
+  { path: 'perfil',               component: PerfilPageComponent,             canActivate: [authGuard] },
+  { path: 'alojamientos',         component: AlojamientosListaPageComponent,  canActivate: [authGuard] },
+  // ALOJ-5: detalle de un alojamiento
+  { path: 'alojamientos/:id',     component: AlojamientoDetallePageComponent, canActivate: [authGuard] },
   // home protegido (pendiente de implementación futura)
-  { path: 'home',                component: LoginPageComponent,  canActivate: [authGuard] }
+  { path: 'home',                 component: LoginPageComponent,              canActivate: [authGuard] }
 ];
 
 @NgModule({

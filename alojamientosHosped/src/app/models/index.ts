@@ -5,3 +5,5 @@ export * from './auth-response.model';
 export * from './alojamiento.model';
 export * from './servicio.model';
 export * from './imagen.model';
+export * from './comentario.model';
+export * from './alojamiento-servicio.model';

@@ -27,11 +27,13 @@ import { PasswordFieldComponent }    from './components/ad/molecules/password-fi
 import { LoginFormComponent }        from './components/ad/molecules/login-form/login-form';
 import { RegisterFormComponent }     from './components/ad/molecules/register-form/register-form';
 import { AlojamientoCardComponent }  from './components/ad/molecules/alojamiento-card/alojamiento-card'; // ← ALOJ-3
+import { ComentarioCardComponent }   from './components/ad/molecules/comentario-card/comentario-card';   // ← ALOJ-5
 
 // ── Organismos ────────────────────────────────────────────────────
-import { LoginCardComponent }    from './components/ad/organisms/login-card/login-card';
-import { RegisterCardComponent } from './components/ad/organisms/register-card/register-card';
-import { NavbarComponent }       from './components/ad/organisms/navbar/navbar'; // ← navbar
+import { LoginCardComponent }             from './components/ad/organisms/login-card/login-card';
+import { RegisterCardComponent }          from './components/ad/organisms/register-card/register-card';
+import { NavbarComponent }                from './components/ad/organisms/navbar/navbar'; // ← navbar
+import { GaleriaAlojamientoComponent }    from './components/ad/organisms/galeria/galeria-alojamiento'; // ← ALOJ-5
 
 // ── Templates ─────────────────────────────────────────────────────
 import { LoginTemplateComponent }    from './components/ad/templates/login-template/login-template';
@@ -42,6 +44,10 @@ import { LoginPageComponent }    from './components/ad/pages/login/login';
 import { RegisterPageComponent } from './components/ad/pages/register/register';
 import { RecuperarContrasenaComponent } from './components/ad/pages/recuperar-contrasena/recuperar-contrasena';
 import { PerfilPageComponent }   from './components/ad/pages/perfil/perfil'; // ← AUTH-21
+import { AlojamientoDetallePageComponent } from './components/ad/pages/alojamiento-detalle/alojamiento-detalle'; // ← ALOJ-5
+
+// ── Pipes ──────────────────────────────────────────────────────────
+import { SafeUrlPipe } from './pipes/safe-url.pipe'; // ← ALOJ-5
 
 @NgModule({
   declarations: [
@@ -57,10 +63,12 @@ import { PerfilPageComponent }   from './components/ad/pages/perfil/perfil'; // 
     LoginFormComponent,
     RegisterFormComponent,
     AlojamientoCardComponent,        // ← ALOJ-3
+    ComentarioCardComponent,         // ← ALOJ-5
     // Organismos
     LoginCardComponent,
     RegisterCardComponent,
-    NavbarComponent,             // ← navbar
+    NavbarComponent,                 // ← navbar
+    GaleriaAlojamientoComponent,     // ← ALOJ-5
     // Templates
     LoginTemplateComponent,
     RegisterTemplateComponent,
@@ -68,7 +76,10 @@ import { PerfilPageComponent }   from './components/ad/pages/perfil/perfil'; // 
     LoginPageComponent,
     RegisterPageComponent,
     AlojamientosListaPageComponent,
-    PerfilPageComponent          // ← AUTH-21
+    AlojamientoDetallePageComponent, // ← ALOJ-5
+    PerfilPageComponent,             // ← AUTH-21
+    // Pipes
+    SafeUrlPipe,                     // ← ALOJ-5
   ],
   imports: [
     BrowserModule,

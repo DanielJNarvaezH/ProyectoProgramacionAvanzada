@@ -1,0 +1,233 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     AlojamientoDetallePageComponent — ALOJ-5
+     Vista completa: galería, descripción, servicios, ubicación, comentarios
+     ───────────────────────────────────────────────────────────────────────── -->
+<app-navbar></app-navbar>
+
+<main class="detalle-page">
+
+  <!-- ── Loading skeleton ───────────────────────────────────────────────── -->
+  <section *ngIf="cargando" class="detalle-skeleton" aria-label="Cargando detalle del alojamiento">
+    <div class="skeleton-galeria skeleton-pulse"></div>
+    <div class="skeleton-info">
+      <div class="skeleton-line skeleton-pulse" style="width: 60%; height: 2rem;"></div>
+      <div class="skeleton-line skeleton-pulse" style="width: 35%;"></div>
+      <div class="skeleton-line skeleton-pulse" style="width: 80%;"></div>
+      <div class="skeleton-line skeleton-pulse" style="width: 75%;"></div>
+    </div>
+  </section>
+
+  <!-- ── Error state ────────────────────────────────────────────────────── -->
+  <section *ngIf="!cargando && error" class="detalle-error">
+    <div class="detalle-error__icon">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    <h2 class="detalle-error__title">No pudimos cargar el alojamiento</h2>
+    <p class="detalle-error__msg">{{ error }}</p>
+    <div class="detalle-error__actions">
+      <button (click)="volver()" class="btn-secondary">
+        <i class="fa-solid fa-arrow-left"></i> Volver al listado
+      </button>
+    </div>
+  </section>
+
+  <!-- ── Contenido principal ────────────────────────────────────────────── -->
+  <ng-container *ngIf="!cargando && !error && alojamiento">
+
+    <!-- Botón volver -->
+    <button (click)="volver()" class="btn-volver" aria-label="Volver al listado">
+      <i class="fa-solid fa-arrow-left"></i>
+      <span>Volver</span>
+    </button>
+
+    <!-- ── Galería ─────────────────────────────────────────────────────── -->
+    <app-galeria-alojamiento
+      [imagenes]="imagenes"
+      [mainImage]="alojamiento.mainImage"
+      [nombre]="alojamiento.name"
+      class="detalle-galeria"
+    ></app-galeria-alojamiento>
+
+    <!-- ── Layout de dos columnas ─────────────────────────────────────── -->
+    <div class="detalle-layout">
+
+      <!-- ── Columna izquierda: info + servicios + ubicación + comentarios -->
+      <div class="detalle-main">
+
+        <!-- Encabezado del alojamiento -->
+        <header class="detalle-header">
+          <div class="detalle-header__top">
+            <h1 class="detalle-header__nombre">{{ alojamiento.name }}</h1>
+            <div class="detalle-header__calificacion">
+              <div class="estrellas">
+                <ng-container *ngFor="let e of estrellas">
+                  <i
+                    *ngIf="e === 'full'"
+                    class="fa-solid fa-star estrella estrella--full"
+                  ></i>
+                  <i
+                    *ngIf="e === 'half'"
+                    class="fa-solid fa-star-half-stroke estrella estrella--half"
+                  ></i>
+                  <i
+                    *ngIf="e === 'empty'"
+                    class="fa-regular fa-star estrella estrella--empty"
+                  ></i>
+                </ng-container>
+              </div>
+              <span class="detalle-header__promedio">{{ promedioLabel }}</span>
+              <span class="detalle-header__resenas">· {{ totalResenasLabel }}</span>
+            </div>
+          </div>
+
+          <div class="detalle-header__meta">
+            <span class="meta-item">
+              <i class="fa-solid fa-location-dot"></i>
+              {{ alojamiento.city }}
+            </span>
+            <span class="meta-item">
+              <i class="fa-solid fa-users"></i>
+              Hasta {{ alojamiento.maxCapacity }} huéspedes
+            </span>
+            <span *ngIf="alojamiento.address" class="meta-item">
+              <i class="fa-solid fa-map-pin"></i>
+              {{ alojamiento.address }}
+            </span>
+          </div>
+        </header>
+
+        <hr class="divider" />
+
+        <!-- Descripción -->
+        <section class="detalle-seccion" aria-labelledby="desc-title">
+          <h2 id="desc-title" class="detalle-seccion__titulo">
+            <i class="fa-solid fa-align-left"></i> Descripción
+          </h2>
+          <p class="detalle-descripcion">{{ alojamiento.description }}</p>
+        </section>
+
+        <hr class="divider" />
+
+        <!-- Servicios -->
+        <section class="detalle-seccion" aria-labelledby="serv-title">
+          <h2 id="serv-title" class="detalle-seccion__titulo">
+            <i class="fa-solid fa-star"></i> Servicios disponibles
+          </h2>
+
+          <ng-container *ngIf="servicios.length > 0; else sinServicios">
+            <ul class="servicios-grid" role="list">
+              <li *ngFor="let s of servicios" class="servicio-item">
+                <i class="servicio-item__icono" [ngClass]="s.icono || 'fa-solid fa-check-circle'"></i>
+                <span>{{ s.nombre || ('Servicio ' + s.serviceId) }}</span>
+              </li>
+            </ul>
+          </ng-container>
+          <ng-template #sinServicios>
+            <p class="sin-datos">No hay servicios registrados para este alojamiento.</p>
+          </ng-template>
+        </section>
+
+        <hr class="divider" />
+
+        <!-- Ubicación / Mapa -->
+        <section class="detalle-seccion" aria-labelledby="mapa-title">
+          <h2 id="mapa-title" class="detalle-seccion__titulo">
+            <i class="fa-solid fa-map-location-dot"></i> Ubicación
+          </h2>
+
+          <p class="detalle-ubicacion">
+            <i class="fa-solid fa-location-dot"></i>
+            {{ alojamiento.address }}<span *ngIf="alojamiento.address">, </span>{{ alojamiento.city }}
+          </p>
+
+          <div *ngIf="hayMapa" class="mapa-wrap">
+            <iframe
+              [src]="mapaUrl | safeUrl"
+              class="mapa-iframe"
+              frameborder="0"
+              scrolling="no"
+              marginheight="0"
+              marginwidth="0"
+              title="Ubicación del alojamiento en el mapa"
+              loading="lazy"
+            ></iframe>
+          </div>
+          <p *ngIf="!hayMapa" class="sin-datos">
+            No hay coordenadas disponibles para mostrar el mapa.
+          </p>
+        </section>
+
+        <hr class="divider" />
+
+        <!-- Comentarios -->
+        <section class="detalle-seccion" aria-labelledby="com-title">
+          <h2 id="com-title" class="detalle-seccion__titulo">
+            <i class="fa-solid fa-comments"></i>
+            Comentarios
+            <span *ngIf="comentarios.length > 0" class="badge">{{ comentarios.length }}</span>
+          </h2>
+
+          <ng-container *ngIf="comentarios.length > 0; else sinComentarios">
+            <div class="comentarios-lista">
+              <app-comentario-card
+                *ngFor="let c of comentarios"
+                [comentario]="c"
+              ></app-comentario-card>
+            </div>
+          </ng-container>
+          <ng-template #sinComentarios>
+            <div class="sin-comentarios">
+              <i class="fa-regular fa-comment-dots sin-comentarios__icono"></i>
+              <p>Aún no hay comentarios para este alojamiento.</p>
+              <p class="sin-comentarios__sub">¡Sé el primero en dejar tu opinión!</p>
+            </div>
+          </ng-template>
+        </section>
+
+      </div><!-- /detalle-main -->
+
+      <!-- ── Columna derecha: caja de precio ────────────────────────────── -->
+      <aside class="detalle-aside">
+        <div class="precio-box">
+          <div class="precio-box__precio">
+            <span class="precio-box__valor">${{ precioFormateado }}</span>
+            <span class="precio-box__unidad">/ noche</span>
+          </div>
+
+          <div class="precio-box__calificacion">
+            <div class="estrellas estrellas--sm">
+              <ng-container *ngFor="let e of estrellas">
+                <i *ngIf="e === 'full'"  class="fa-solid fa-star estrella--full"></i>
+                <i *ngIf="e === 'half'"  class="fa-solid fa-star-half-stroke estrella--half"></i>
+                <i *ngIf="e === 'empty'" class="fa-regular fa-star estrella--empty"></i>
+              </ng-container>
+            </div>
+            <span>{{ promedioLabel }} · {{ totalResenasLabel }}</span>
+          </div>
+
+          <hr class="divider" />
+
+          <ul class="precio-box__detalles" role="list">
+            <li>
+              <span><i class="fa-solid fa-users"></i> Capacidad</span>
+              <strong>{{ alojamiento.maxCapacity }} huéspedes</strong>
+            </li>
+            <li>
+              <span><i class="fa-solid fa-location-dot"></i> Ciudad</span>
+              <strong>{{ alojamiento.city }}</strong>
+            </li>
+          </ul>
+
+          <!-- Placeholder de reserva: ruta futura ALOJ-8 -->
+          <button class="btn-reservar" disabled title="Disponible próximamente">
+            <i class="fa-solid fa-calendar-check"></i>
+            Reservar (próximamente)
+          </button>
+        </div>
+      </aside>
+
+    </div><!-- /detalle-layout -->
+
+  </ng-container>
+
+</main>

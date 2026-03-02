@@ -1,0 +1,36 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     ComentarioCardComponent — ALOJ-5
+     Tarjeta de un comentario: avatar, calificación, texto y fecha
+     ───────────────────────────────────────────────────────────────────────── -->
+<article class="comentario-card">
+
+  <!-- ── Encabezado: avatar + meta ─────────────────────────────────────── -->
+  <header class="comentario-card__header">
+    <div
+      class="comentario-card__avatar"
+      [style.background-color]="avatarColor"
+      [attr.aria-label]="'Usuario ' + comentario.userId"
+    >
+      {{ avatarLabel }}
+    </div>
+
+    <div class="comentario-card__meta">
+      <!-- Estrellas -->
+      <div class="comentario-card__estrellas" [attr.aria-label]="comentario.rating + ' de 5 estrellas'">
+        <i
+          *ngFor="let e of estrellas"
+          [class]="e === 'full' ? 'fa-solid fa-star' : 'fa-regular fa-star'"
+        ></i>
+      </div>
+
+      <!-- Fecha -->
+      <time *ngIf="fechaFormateada" class="comentario-card__fecha">
+        {{ fechaFormateada }}
+      </time>
+    </div>
+  </header>
+
+  <!-- ── Texto del comentario ───────────────────────────────────────────── -->
+  <p class="comentario-card__texto">{{ comentario.text }}</p>
+
+</article>
