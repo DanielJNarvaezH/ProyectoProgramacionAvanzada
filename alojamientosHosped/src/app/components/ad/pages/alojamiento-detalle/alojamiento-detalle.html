@@ -117,8 +117,8 @@
           <ng-container *ngIf="servicios.length > 0; else sinServicios">
             <ul class="servicios-grid" role="list">
               <li *ngFor="let s of servicios" class="servicio-item">
-                <i class="servicio-item__icono" [ngClass]="s.icono || 'fa-solid fa-check-circle'"></i>
-                <span>{{ s.nombre || ('Servicio ' + s.serviceId) }}</span>
+                <i class="servicio-item__icono" [ngClass]="s.serviceIcon || 'fa-solid fa-check-circle'"></i>
+                <span>{{ s.serviceName || ('Servicio ' + s.serviceId) }}</span>
               </li>
             </ul>
           </ng-container>

@@ -9,8 +9,10 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface AlojamientoServicioDataMapper {
 
-    @Mapping(target = "lodgingId", source = "alojamiento.id")
-    @Mapping(target = "serviceId", source = "servicio.id")
+    @Mapping(target = "lodgingId",    source = "alojamiento.id")
+    @Mapping(target = "serviceId",    source = "servicio.id")
+    @Mapping(target = "serviceName",  source = "servicio.nombre")
+    @Mapping(target = "serviceIcon",  source = "servicio.icono")
     AlojamientoServicioDTO toDTO(AlojamientoServicioEntity entity);
 
     @Mapping(target = "alojamiento", source = "lodgingId", qualifiedByName = "lodgingIdToEntity")

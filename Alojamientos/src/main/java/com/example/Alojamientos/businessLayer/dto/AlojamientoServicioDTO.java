@@ -14,4 +14,8 @@ public class AlojamientoServicioDTO {
 
     @NotNull
     private Integer serviceId;
+
+    // Campos enriquecidos del servicio — solo lectura (no se usan en creación)
+    private String serviceName;
+    private String serviceIcon;
 }
