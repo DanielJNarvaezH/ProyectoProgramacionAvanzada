@@ -1,4 +1,4 @@
-import { Component, Input, OnInit } from '@angular/core';
+import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Imagen } from '../../../../models/imagen.model';
 
 /**
@@ -22,7 +22,7 @@ import { Imagen } from '../../../../models/imagen.model';
   templateUrl: './galeria-alojamiento.html',
   styleUrls: ['./galeria-alojamiento.scss']
 })
-export class GaleriaAlojamientoComponent implements OnInit {
+export class GaleriaAlojamientoComponent implements OnChanges {
 
   @Input() imagenes: Imagen[]  = [];
   @Input() mainImage?: string;
@@ -39,8 +39,10 @@ export class GaleriaAlojamientoComponent implements OnInit {
   /** Hasta 4 miniaturas adicionales */
   miniaturas: Imagen[] = [];
 
-  ngOnInit(): void {
-    this.construirGaleria();
+  ngOnChanges(changes: SimpleChanges): void {
+    if (changes['imagenes'] || changes['mainImage']) {
+      this.construirGaleria();
+    }
   }
 
   // ─────────────────────────────────────────────────────────────────
@@ -48,9 +50,10 @@ export class GaleriaAlojamientoComponent implements OnInit {
   // ─────────────────────────────────────────────────────────────────
 
   private construirGaleria(): void {
-    if (this.imagenes.length > 0) {
-      this.imagenPrincipal = this.imagenes[0].url;
-      this.miniaturas       = this.imagenes.slice(1, 5);
+    const imgs = this.imagenes ?? [];
+    if (imgs.length > 0) {
+      this.imagenPrincipal = imgs[0].url;
+      this.miniaturas       = imgs.slice(1, 5);
     } else {
       this.imagenPrincipal = this.mainImage || this.placeholder;
       this.miniaturas       = [];
@@ -81,18 +84,19 @@ export class GaleriaAlojamientoComponent implements OnInit {
   }
 
   get todasLasImagenes(): string[] {
-    if (this.imagenes.length > 0) {
-      return this.imagenes.map(i => i.url);
+    const imgs = this.imagenes ?? [];
+    if (imgs.length > 0) {
+      return imgs.map(i => i.url);
     }
     return [this.imagenPrincipal];
   }
 
   get hayMasImagenes(): boolean {
-    return this.imagenes.length > 5;
+    return (this.imagenes ?? []).length > 5;
   }
 
   get cantidadRestante(): number {
-    return this.imagenes.length - 5;
+    return (this.imagenes ?? []).length - 5;
   }
 
   onImageError(event: Event): void {

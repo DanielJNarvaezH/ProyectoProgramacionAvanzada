@@ -170,12 +170,12 @@
         <hr class="flex-1 border-neutral-200" />
       </div>
 
-      <!-- Volver a alojamientos -->
+      <!-- Volver — regresa a la página anterior (listado o detalle) -->
       <button
-        routerLink="/alojamientos"
+        (click)="volver()"
         class="w-full mb-3 py-2 border-2 border-primary-300 text-primary-600 font-semibold rounded-md hover:bg-primary-50 transition flex items-center justify-center gap-2">
         <app-icon icon="fa-solid fa-arrow-left"></app-icon>
-        <span>Volver a alojamientos</span>
+        <span>Volver</span>
       </button>
 
       <button

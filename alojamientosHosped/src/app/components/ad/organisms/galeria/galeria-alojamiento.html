@@ -52,7 +52,7 @@
 
 </section>
 
-<!-- ── Lightbox ─────────────────────────────────────────────────────────────── -->
+<!-- ── Lightbox — fuera del section para escapar del overflow:hidden ──────── -->
 <div
   *ngIf="lightboxUrl"
   class="lightbox"
@@ -80,8 +80,7 @@
   <div class="lightbox__img-wrap" (click)="$event.stopPropagation()">
     <img
       [src]="lightboxUrl"
-      [alt]="'Vista ampliada'"
-      (error)="onImageError($event)"
+      alt="Vista ampliada"
       class="lightbox__img"
     />
   </div>

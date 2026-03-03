@@ -9,6 +9,8 @@ import jakarta.validation.constraints.*;
 @AllArgsConstructor
 public class AlojamientoDTO {
 
+    private Integer id;  // ← necesario para navegación al detalle desde el front
+
     @NotNull
     private Integer hostId;
 

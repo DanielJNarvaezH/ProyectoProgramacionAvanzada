@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Router } from '@angular/router';
+import { Location } from '@angular/common';
 import { UsuarioService } from '../../../../../services/UsuarioService';
 import { AuthService } from '../../../../../services/AuthService';
 import { User } from '../../../../models';
@@ -26,7 +27,8 @@ export class PerfilPageComponent implements OnInit {
     private fb: FormBuilder,
     private usuarioService: UsuarioService,
     private authService: AuthService,
-    private router: Router
+    private router: Router,
+    private location: Location
   ) {}
 
   ngOnInit(): void {
@@ -113,6 +115,10 @@ export class PerfilPageComponent implements OnInit {
   }
 
   // ─── Cerrar sesión ────────────────────────────────────────────
+  volver(): void {
+    this.location.back();
+  }
+
   cerrarSesion(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
