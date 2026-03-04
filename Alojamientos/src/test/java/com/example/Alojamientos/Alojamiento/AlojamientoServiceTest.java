@@ -431,4 +431,203 @@ class AlojamientoServiceTest {
         verify(alojamientoRepository, times(1)).save(any(AlojamientoEntity.class));
         assertThat(alojamientoEntity.getActivo()).isFalse();
     }
+
+    // ==================== PRUEBAS DE BÚSQUEDA POR CIUDAD ====================
+
+    @Test
+    @DisplayName("GET /api/alojamientos/buscar?ciudad=Cartagena - Buscar alojamientos por ciudad exitosamente")
+    void testBuscarPorCiudadExitoso() {
+        // Given
+        when(alojamientoRepository.findByCiudadIgnoreCase("Cartagena"))
+                .thenReturn(Arrays.asList(alojamientoEntity));
+        when(alojamientoMapper.toDTO(alojamientoEntity)).thenReturn(alojamientoDTO);
+
+        // When
+        List<AlojamientoDTO> resultado = alojamientoService.buscarPorCiudad("Cartagena");
+
+        // Then
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getCity()).isEqualTo("Cartagena");
+        verify(alojamientoRepository, times(1)).findByCiudadIgnoreCase("Cartagena");
+    }
+
+    @Test
+    @DisplayName("GET /api/alojamientos/buscar?ciudad=Atlantis - Ciudad sin alojamientos activos devuelve lista vacía")
+    void testBuscarPorCiudadSinResultados() {
+        // Given
+        when(alojamientoRepository.findByCiudadIgnoreCase("Atlantis"))
+                .thenReturn(Collections.emptyList());
+
+        // When
+        List<AlojamientoDTO> resultado = alojamientoService.buscarPorCiudad("Atlantis");
+
+        // Then
+        assertThat(resultado).isEmpty();
+        verify(alojamientoRepository, times(1)).findByCiudadIgnoreCase("Atlantis");
+    }
+
+    @Test
+    @DisplayName("GET /api/alojamientos/buscar?ciudad=Cartagena - No retorna alojamientos inactivos")
+    void testBuscarPorCiudadExcluyeInactivos() {
+        // Given
+        alojamientoEntity.setActivo(false);
+        when(alojamientoRepository.findByCiudadIgnoreCase("Cartagena"))
+                .thenReturn(Arrays.asList(alojamientoEntity));
+
+        // When
+        List<AlojamientoDTO> resultado = alojamientoService.buscarPorCiudad("Cartagena");
+
+        // Then
+        assertThat(resultado).isEmpty();
+    }
+
+    // ==================== PRUEBAS DE BÚSQUEDA POR RANGO DE PRECIO ====================
+
+    @Test
+    @DisplayName("GET /api/alojamientos/filtro/precio - Buscar por rango de precio exitosamente")
+    void testBuscarPorRangoPrecioExitoso() {
+        // Given
+        when(alojamientoRepository.findByPrecioPorNocheBetween(150.0, 300.0))
+                .thenReturn(Arrays.asList(alojamientoEntity));
+        when(alojamientoMapper.toDTO(alojamientoEntity)).thenReturn(alojamientoDTO);
+
+        // When
+        List<AlojamientoDTO> resultado = alojamientoService.buscarPorRangoPrecio(150.0, 300.0);
+
+        // Then
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getPricePerNight()).isEqualTo(200.0);
+        verify(alojamientoRepository, times(1)).findByPrecioPorNocheBetween(150.0, 300.0);
+    }
+
+    @Test
+    @DisplayName("GET /api/alojamientos/filtro/precio - Rango sin resultados devuelve lista vacía")
+    void testBuscarPorRangoPrecioSinResultados() {
+        // Given
+        when(alojamientoRepository.findByPrecioPorNocheBetween(500.0, 600.0))
+                .thenReturn(Collections.emptyList());
+
+        // When
+        List<AlojamientoDTO> resultado = alojamientoService.buscarPorRangoPrecio(500.0, 600.0);
+
+        // Then
+        assertThat(resultado).isEmpty();
+        verify(alojamientoRepository, times(1)).findByPrecioPorNocheBetween(500.0, 600.0);
+    }
+
+    @Test
+    @DisplayName("GET /api/alojamientos/filtro/precio - No retorna alojamientos inactivos en el rango")
+    void testBuscarPorRangoPrecioExcluyeInactivos() {
+        // Given
+        alojamientoEntity.setActivo(false);
+        when(alojamientoRepository.findByPrecioPorNocheBetween(150.0, 300.0))
+                .thenReturn(Arrays.asList(alojamientoEntity));
+
+        // When
+        List<AlojamientoDTO> resultado = alojamientoService.buscarPorRangoPrecio(150.0, 300.0);
+
+        // Then
+        assertThat(resultado).isEmpty();
+    }
+
+    // ==================== PRUEBAS DE LISTAR POR ANFITRIÓN ====================
+
+    @Test
+    @DisplayName("GET /api/alojamientos/anfitrion/{id} - Listar alojamientos de un anfitrión exitosamente")
+    void testListarPorAnfitrionExitoso() {
+        // Given
+        when(alojamientoRepository.findByAnfitrion_Id(1))
+                .thenReturn(Arrays.asList(alojamientoEntity));
+        when(alojamientoMapper.toDTO(alojamientoEntity)).thenReturn(alojamientoDTO);
+
+        // When
+        List<AlojamientoDTO> resultado = alojamientoService.listarPorAnfitrion(1);
+
+        // Then
+        assertThat(resultado).hasSize(1);
+        assertThat(resultado.get(0).getHostId()).isEqualTo(1);
+        verify(alojamientoRepository, times(1)).findByAnfitrion_Id(1);
+    }
+
+    @Test
+    @DisplayName("GET /api/alojamientos/anfitrion/{id} - Anfitrión sin alojamientos devuelve lista vacía")
+    void testListarPorAnfitrionSinAlojamientos() {
+        // Given
+        when(alojamientoRepository.findByAnfitrion_Id(99))
+                .thenReturn(Collections.emptyList());
+
+        // When
+        List<AlojamientoDTO> resultado = alojamientoService.listarPorAnfitrion(99);
+
+        // Then
+        assertThat(resultado).isEmpty();
+        verify(alojamientoRepository, times(1)).findByAnfitrion_Id(99);
+    }
+
+    @Test
+    @DisplayName("GET /api/alojamientos/anfitrion/{id} - No retorna alojamientos inactivos del anfitrión")
+    void testListarPorAnfitrionExcluyeInactivos() {
+        // Given
+        alojamientoEntity.setActivo(false);
+        when(alojamientoRepository.findByAnfitrion_Id(1))
+                .thenReturn(Arrays.asList(alojamientoEntity));
+
+        // When
+        List<AlojamientoDTO> resultado = alojamientoService.listarPorAnfitrion(1);
+
+        // Then
+        assertThat(resultado).isEmpty();
+    }
+
+    // ==================== PRUEBAS DE OBTENER NÚMERO DE RESERVAS ====================
+
+    @Test
+    @DisplayName("GET /api/alojamientos/{id}/metricas/reservas - Obtener número de reservas exitosamente")
+    void testObtenerNumeroReservasExitoso() {
+        // Given
+        ReservaEntity reserva = ReservaEntity.builder()
+                .id(1)
+                .estado(ReservaEntity.EstadoReserva.CONFIRMADA)
+                .build();
+
+        when(alojamientoRepository.existsById(1)).thenReturn(true);
+        when(reservaRepository.findByAlojamiento_Id(1)).thenReturn(Arrays.asList(reserva));
+
+        // When
+        Long resultado = alojamientoService.obtenerNumeroReservas(1);
+
+        // Then
+        assertThat(resultado).isEqualTo(1L);
+        verify(alojamientoRepository, times(1)).existsById(1);
+        verify(reservaRepository, times(1)).findByAlojamiento_Id(1);
+    }
+
+    @Test
+    @DisplayName("GET /api/alojamientos/{id}/metricas/reservas - Alojamiento sin reservas devuelve 0")
+    void testObtenerNumeroReservasSinReservas() {
+        // Given
+        when(alojamientoRepository.existsById(1)).thenReturn(true);
+        when(reservaRepository.findByAlojamiento_Id(1)).thenReturn(Collections.emptyList());
+
+        // When
+        Long resultado = alojamientoService.obtenerNumeroReservas(1);
+
+        // Then
+        assertThat(resultado).isEqualTo(0L);
+    }
+
+    @Test
+    @DisplayName("GET /api/alojamientos/{id}/metricas/reservas - Error: Alojamiento no encontrado")
+    void testObtenerNumeroReservasAlojamientoNoExiste() {
+        // Given
+        when(alojamientoRepository.existsById(999)).thenReturn(false);
+
+        // When & Then
+        assertThatThrownBy(() -> alojamientoService.obtenerNumeroReservas(999))
+                .isInstanceOf(IllegalArgumentException.class)
+                .hasMessageContaining("Alojamiento no encontrado");
+
+        verify(alojamientoRepository, times(1)).existsById(999);
+        verify(reservaRepository, never()).findByAlojamiento_Id(any());
+    }
 }
