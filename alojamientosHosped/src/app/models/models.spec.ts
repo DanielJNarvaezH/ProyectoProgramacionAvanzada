@@ -40,13 +40,13 @@ describe('Modelos TypeScript', () => {
 
   it('User debe tener campos opcionales como undefined por defecto', () => {
     const user: User = {
-      nombre: 'Juan Pérez',
-      correo: 'juan@example.com',
-      rol: 'ANFITRION'
+      name: 'Juan Pérez',
+      email: 'juan@example.com',
+      role: 'ANFITRION'
     };
-    expect(user.nombre).toBe('Juan Pérez');
+    expect(user.name).toBe('Juan Pérez');
     expect(user.id).toBeUndefined();
-    expect(user.foto).toBeUndefined();
+    expect(user.phone).toBeUndefined();
   });
 
 });

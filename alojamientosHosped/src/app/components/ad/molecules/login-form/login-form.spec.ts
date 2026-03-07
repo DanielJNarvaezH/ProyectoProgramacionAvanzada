@@ -1,4 +1,4 @@
-import { ComponentFixture, TestBed } from '@angular/core/testing';
+﻿import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
 import { of, throwError } from 'rxjs';
@@ -6,7 +6,7 @@ import { of, throwError } from 'rxjs';
 import { LoginFormComponent } from './login-form';
 import { AuthService } from '../../../../../services/AuthService';
 
-// ── Stubs ──────────────────────────────────────────────────────────
+// â”€â”€ Stubs â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const authServiceStub = {
   login: jasmine.createSpy('login')
 };
@@ -38,70 +38,70 @@ describe('LoginFormComponent', () => {
     routerStub.navigate.calls.reset();
   });
 
-  // ── Creación ──────────────────────────────────────────────────────
+  // â”€â”€ CreaciÃ³n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  it('debería crearse correctamente', () => {
+  it('deberÃ­a crearse correctamente', () => {
     expect(component).toBeTruthy();
   });
 
-  // ── Validación inicial ────────────────────────────────────────────
+  // â”€â”€ ValidaciÃ³n inicial â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  it('el formulario debería ser inválido cuando está vacío', () => {
+  it('el formulario deberÃ­a ser invÃ¡lido cuando estÃ¡ vacÃ­o', () => {
     expect(component.loginForm.invalid).toBeTrue();
   });
 
-  it('el campo email debería ser requerido', () => {
+  it('el campo email deberÃ­a ser requerido', () => {
     component.emailCtrl.setValue('');
     expect(component.emailCtrl.hasError('required')).toBeTrue();
   });
 
-  it('el campo email debería rechazar un formato inválido', () => {
+  it('el campo email deberÃ­a rechazar un formato invÃ¡lido', () => {
     component.emailCtrl.setValue('no-es-un-email');
     expect(component.emailCtrl.hasError('email')).toBeTrue();
   });
 
-  it('el campo email debería aceptar un correo válido', () => {
+  it('el campo email deberÃ­a aceptar un correo vÃ¡lido', () => {
     component.emailCtrl.setValue('usuario@ejemplo.com');
     expect(component.emailCtrl.valid).toBeTrue();
   });
 
-  it('el campo password debería ser requerido', () => {
+  it('el campo password deberÃ­a ser requerido', () => {
     component.passwordCtrl.setValue('');
     expect(component.passwordCtrl.hasError('required')).toBeTrue();
   });
 
-  it('el campo password debería rechazar contraseñas menores de 6 caracteres', () => {
+  it('el campo password deberÃ­a rechazar contraseÃ±as menores de 6 caracteres', () => {
     component.passwordCtrl.setValue('abc');
     expect(component.passwordCtrl.hasError('minlength')).toBeTrue();
   });
 
-  it('el formulario debería ser válido con datos correctos', () => {
+  it('el formulario deberÃ­a ser vÃ¡lido con datos correctos', () => {
     component.emailCtrl.setValue('usuario@ejemplo.com');
     component.passwordCtrl.setValue('segura123');
     expect(component.loginForm.valid).toBeTrue();
   });
 
-  // ── Mensajes de error ─────────────────────────────────────────────
+  // â”€â”€ Mensajes de error â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  it('emailError debería retornar null cuando el campo está pristine', () => {
+  it('emailError deberÃ­a retornar null cuando el campo estÃ¡ pristine', () => {
     expect(component.emailError).toBeNull();
   });
 
-  it('emailError debería mostrar mensaje cuando el campo está tocado y vacío', () => {
+  it('emailError deberÃ­a mostrar mensaje cuando el campo estÃ¡ tocado y vacÃ­o', () => {
     component.emailCtrl.setValue('');
     component.emailCtrl.markAsTouched();
     expect(component.emailError).toBe('El correo electrónico es obligatorio.');
   });
 
-  it('passwordError debería mostrar mensaje de minlength cuando la contraseña es corta', () => {
+  it('passwordError deberÃ­a mostrar mensaje de minlength cuando la contraseÃ±a es corta', () => {
     component.passwordCtrl.setValue('123');
     component.passwordCtrl.markAsTouched();
     expect(component.passwordError).toBe('La contraseña debe tener al menos 6 caracteres.');
   });
 
-  // ── Toggle password ───────────────────────────────────────────────
+  // â”€â”€ Toggle password â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  it('togglePassword debería alternar showPassword', () => {
+  it('togglePassword deberÃ­a alternar showPassword', () => {
     expect(component.showPassword).toBeFalse();
     component.togglePassword();
     expect(component.showPassword).toBeTrue();
@@ -109,16 +109,16 @@ describe('LoginFormComponent', () => {
     expect(component.showPassword).toBeFalse();
   });
 
-  // ── onSubmit con formulario inválido ──────────────────────────────
+  // â”€â”€ onSubmit con formulario invÃ¡lido â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  it('onSubmit no debería llamar a authService si el formulario es inválido', () => {
+  it('onSubmit no deberÃ­a llamar a authService si el formulario es invÃ¡lido', () => {
     component.onSubmit();
     expect(authServiceStub.login).not.toHaveBeenCalled();
   });
 
-  // ── onSubmit con formulario válido (login exitoso) ────────────────
+  // â”€â”€ onSubmit con formulario vÃ¡lido (login exitoso) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  it('onSubmit debería llamar a authService.login y navegar al inicio si tiene éxito', () => {
+  it('onSubmit deberÃ­a llamar a authService.login y navegar al inicio si tiene Ã©xito', () => {
     authServiceStub.login.and.returnValue(of({ token: 'abc', email: 'u@e.com', rol: 'USUARIO', mensaje: 'OK' }));
 
     component.emailCtrl.setValue('usuario@ejemplo.com');
@@ -129,13 +129,13 @@ describe('LoginFormComponent', () => {
       email: 'usuario@ejemplo.com',
       password: 'segura123'
     });
-    expect(routerStub.navigate).toHaveBeenCalledWith(['/']);
+    expect(routerStub.navigate).toHaveBeenCalledWith(['/alojamientos']);
     expect(component.isLoading).toBeFalse();
   });
 
-  // ── onSubmit con error del backend ────────────────────────────────
+  // â”€â”€ onSubmit con error del backend â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
-  it('onSubmit debería mostrar errorMessage si el backend retorna un error', () => {
+  it('onSubmit deberÃ­a mostrar errorMessage si el backend retorna un error', () => {
     authServiceStub.login.and.returnValue(
       throwError(() => new Error('Credenciales incorrectas'))
     );
