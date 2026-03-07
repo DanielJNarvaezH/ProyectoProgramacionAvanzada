@@ -38,7 +38,7 @@ export class LoginFormComponent implements OnInit, OnDestroy {
         '',
         [
           Validators.required,
-          Validators.minLength(6),
+          Validators.minLength(8),
           Validators.maxLength(50)
         ]
       ]
