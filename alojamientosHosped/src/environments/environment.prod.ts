@@ -1,4 +1,4 @@
 export const environment = {
   production: true,
-  apiUrl: 'https://alojamientos-backend.onrender.com/alojamientos'
+  apiUrl: 'http://44.203.231.120:8080/alojamientos'
 };
