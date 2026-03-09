@@ -1,4 +1,4 @@
-export const environment = {
+﻿export const environment = {
   production: true,
-  apiUrl: 'http://44.203.231.120:8080/alojamientos'
+  apiUrl: 'https://d1wx2sdpi0nhf4.cloudfront.net/api'
 };
