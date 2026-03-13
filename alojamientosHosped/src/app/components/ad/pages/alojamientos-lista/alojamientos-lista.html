@@ -1,14 +1,19 @@
-<!-- ─────────────────────────────────────────────────────────────────────────
-     AlojamientosListaPageComponent — ALOJ-4
+﻿<!-- â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+     AlojamientosListaPageComponent â€” ALOJ-4
      Grid de tarjetas con loading states, filtro por ciudad y empty state
-     ───────────────────────────────────────────────────────────────────────── -->
+     â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
 
-<!-- ── Barra de navegación superior ──────────────────────────────────────── -->
+<!-- â”€â”€ Barra de navegaciÃ³n superior â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
 <app-navbar></app-navbar>
+
+<!-- PRUEBA TEMPORAL ALOJ-11 -->
+<div style="padding: 24px">
+  <app-image-uploader [maxImagenes]="8"></app-image-uploader>
+</div>
 
 <main class="lista-page">
 
-  <!-- ── Header de la sección ──────────────────────────────────────────── -->
+  <!-- â”€â”€ Header de la secciÃ³n â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <section class="lista-header">
     <div class="lista-header__text">
       <h1 class="lista-header__title">Alojamientos disponibles</h1>
@@ -37,7 +42,7 @@
           *ngIf="hayFiltroActivo"
           (click)="limpiarFiltro()"
           class="search-box__clear"
-          aria-label="Limpiar búsqueda"
+          aria-label="Limpiar bÃºsqueda"
         >
           <i class="fa-solid fa-xmark"></i>
         </button>
@@ -45,7 +50,7 @@
     </div>
   </section>
 
-  <!-- ── Loading skeleton ───────────────────────────────────────────────── -->
+  <!-- â”€â”€ Loading skeleton â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <section *ngIf="cargando" class="lista-grid" aria-label="Cargando alojamientos">
     <div *ngFor="let i of [1,2,3,4,5,6]" class="skeleton-card">
       <div class="skeleton-card__img skeleton-pulse"></div>
@@ -57,7 +62,7 @@
     </div>
   </section>
 
-  <!-- ── Error state ────────────────────────────────────────────────────── -->
+  <!-- â”€â”€ Error state â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <section *ngIf="!cargando && error" class="lista-empty">
     <div class="lista-empty__icon lista-empty__icon--error">
       <i class="fa-solid fa-triangle-exclamation"></i>
@@ -70,7 +75,7 @@
     </button>
   </section>
 
-  <!-- ── Empty state (sin resultados de filtro) ─────────────────────────── -->
+  <!-- â”€â”€ Empty state (sin resultados de filtro) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <section
     *ngIf="!cargando && !error && totalMostrados === 0 && hayFiltroActivo"
     class="lista-empty"
@@ -86,7 +91,7 @@
     </button>
   </section>
 
-  <!-- ── Empty state (sin alojamientos en BD) ───────────────────────────── -->
+  <!-- â”€â”€ Empty state (sin alojamientos en BD) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <section
     *ngIf="!cargando && !error && totalMostrados === 0 && !hayFiltroActivo"
     class="lista-empty"
@@ -94,11 +99,11 @@
     <div class="lista-empty__icon">
       <i class="fa-solid fa-house-circle-xmark"></i>
     </div>
-    <h2 class="lista-empty__title">Aún no hay alojamientos</h2>
-    <p class="lista-empty__msg">Pronto encontrarás lugares increíbles aquí.</p>
+    <h2 class="lista-empty__title">AÃºn no hay alojamientos</h2>
+    <p class="lista-empty__msg">Pronto encontrarÃ¡s lugares increÃ­bles aquÃ­.</p>
   </section>
 
-  <!-- ── Grid de tarjetas ───────────────────────────────────────────────── -->
+  <!-- â”€â”€ Grid de tarjetas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <section
     *ngIf="!cargando && !error && totalMostrados > 0"
     class="lista-grid"
