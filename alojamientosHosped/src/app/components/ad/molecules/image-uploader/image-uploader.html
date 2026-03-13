@@ -1,0 +1,150 @@
+<div class="uploader-root">
+
+  <!-- ── ZONA DROP ─────────────────────────────────────────── -->
+  <div
+    class="drop-zone"
+    [class.drag-over]="isDragOver"
+    [class.lleno]="!puedeAgregarMas"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave($event)"
+    (drop)="onDrop($event)"
+  >
+    <input
+      #fileInput
+      type="file"
+      accept="image/*"
+      multiple
+      class="hidden"
+      (change)="onFileSelected($event)"
+    />
+
+    <ng-container *ngIf="puedeAgregarMas; else zonaLlena">
+      <div class="drop-content" (click)="fileInput.click()">
+        <div class="drop-icon" [class.animando]="isDragOver">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M24 8L24 32M24 8L16 16M24 8L32 16" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path d="M8 36H40" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"/>
+            <path d="M8 40H40" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-opacity="0.4"/>
+          </svg>
+        </div>
+        <p class="drop-title">
+          <span *ngIf="isDragOver">Suelta aquí</span>
+          <span *ngIf="!isDragOver">Arrastra imágenes o <span class="link">selecciona archivos</span></span>
+        </p>
+        <p class="drop-sub">
+          JPG, PNG, WEBP · Máx {{ maxImagenes }} imágenes ·
+          {{ imagenes.length }}/{{ maxImagenes }} agregadas
+        </p>
+      </div>
+    </ng-container>
+
+    <ng-template #zonaLlena>
+      <div class="drop-content lleno-msg">
+        <div class="drop-icon check">
+          <svg viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <circle cx="24" cy="24" r="18" stroke="currentColor" stroke-width="2.5"/>
+            <path d="M15 24L21 30L33 18" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+        </div>
+        <p class="drop-title">Galería completa</p>
+        <p class="drop-sub">Elimina una imagen para agregar otra</p>
+      </div>
+    </ng-template>
+  </div>
+
+  <!-- ── GRID DE IMÁGENES ───────────────────────────────────── -->
+  <div class="imagen-grid" *ngIf="imagenes.length > 0">
+
+    <div
+      *ngFor="let img of imagenes; trackBy: trackByIndex; let i = index"
+      class="imagen-card"
+      [class.es-principal]="i === 0"
+      [class.subiendo]="img.subiendo"
+      [class.tiene-error]="!!img.error"
+      draggable="true"
+      (dragstart)="onCardDragStart(i)"
+      (dragover)="onCardDragOver($event, i)"
+      (drop)="onCardDrop($event, i)"
+    >
+      <!-- Preview -->
+      <div class="img-wrap">
+        <img [src]="img.url" [alt]="img.nombre" class="preview-img" />
+
+        <!-- Overlay subiendo -->
+        <div class="overlay-upload" *ngIf="img.subiendo">
+          <div class="progress-ring">
+            <svg viewBox="0 0 44 44">
+              <circle class="ring-bg" cx="22" cy="22" r="18" />
+              <circle
+                class="ring-fill"
+                cx="22" cy="22" r="18"
+                [style.stroke-dashoffset]="113 - (113 * img.progreso / 100)"
+              />
+            </svg>
+            <span class="progress-num">{{ img.progreso }}%</span>
+          </div>
+        </div>
+
+        <!-- Overlay error -->
+        <div class="overlay-error" *ngIf="img.error">
+          <svg viewBox="0 0 24 24" fill="none" class="error-icon">
+            <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
+            <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+          <span>{{ img.error }}</span>
+          <button class="btn-retry" (click)="reintentar(i)">Eliminar</button>
+        </div>
+
+        <!-- Badge principal -->
+        <div class="badge-principal" *ngIf="i === 0 && !img.subiendo && !img.error">
+          ★ Principal
+        </div>
+
+        <!-- Badge orden -->
+        <div class="badge-orden" *ngIf="i > 0 && !img.subiendo && !img.error">
+          {{ i + 1 }}
+        </div>
+      </div>
+
+      <!-- Footer de la tarjeta -->
+      <div class="card-footer" *ngIf="!img.subiendo && !img.error">
+        <span class="img-nombre">{{ img.nombre }}</span>
+        <span class="img-size">{{ formatearTamanio(img.tamanio) }}</span>
+
+        <div class="card-actions">
+          <button
+            class="btn-action"
+            title="Mover izquierda"
+            [disabled]="i === 0"
+            (click)="moverIzquierda(i)"
+          >
+            <svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button
+            class="btn-action"
+            title="Mover derecha"
+            [disabled]="i === imagenes.length - 1"
+            (click)="moverDerecha(i)"
+          >
+            <svg viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+          <button
+            class="btn-action btn-delete"
+            title="Eliminar imagen"
+            (click)="eliminar(i)"
+          >
+            <svg viewBox="0 0 16 16" fill="none"><path d="M3 4h10M6 4V3h4v1M5 4l.5 8h5l.5-8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ── AYUDA ──────────────────────────────────────────────── -->
+  <p class="ayuda-txt" *ngIf="imagenes.length > 1">
+    <svg viewBox="0 0 16 16" fill="none" class="inline-icon"><path d="M8 1.5a6.5 6.5 0 100 13 6.5 6.5 0 000-13zM8 5v4M8 10.5h.01" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/></svg>
+    La primera imagen es la <strong>portada</strong>. Arrastra las tarjetas o usa las flechas para reordenar.
+  </p>
+
+</div>

@@ -7,6 +7,8 @@ import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { AlojamientosListaPageComponent } from './components/ad/pages/alojamientos-lista/alojamientos-lista';
+import { ImageUploaderComponent } from './components/ad/molecules/image-uploader/image-uploader';
+
 
 
 import { provideBrowserGlobalErrorListeners } from '@angular/core';
@@ -64,6 +66,7 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe'; // ← ALOJ-5
     RegisterFormComponent,
     AlojamientoCardComponent,        // ← ALOJ-3
     ComentarioCardComponent,         // ← ALOJ-5
+    ImageUploaderComponent,
     // Organismos
     LoginCardComponent,
     RegisterCardComponent,
