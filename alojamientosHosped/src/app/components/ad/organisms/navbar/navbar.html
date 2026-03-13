@@ -15,6 +15,16 @@
 
   <!-- ── Acciones ───────────────────────────────────────────────── -->
   <div class="navbar__actions">
+    <!-- ALOJ-12: acceso directo al formulario de creación -->
+    <button
+      (click)="irACrear()"
+      class="navbar__create-btn"
+      title="Publicar nuevo alojamiento"
+    >
+      <i class="fa-solid fa-plus"></i>
+      <span>Publicar</span>
+    </button>
+
     <button
       (click)="irAlPerfil()"
       class="navbar__profile-btn"

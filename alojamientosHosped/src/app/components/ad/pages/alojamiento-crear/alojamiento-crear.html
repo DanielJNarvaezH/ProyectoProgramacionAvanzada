@@ -1,0 +1,291 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     AlojamientoCrearPageComponent — ALOJ-12
+     Formulario de creación con validaciones:
+       · precio > 0
+       · capacidad >= 1
+       · coordenadas válidas (lat -90/90, lng -180/180)
+       · imagen principal obligatoria
+     ───────────────────────────────────────────────────────────────────────── -->
+
+<app-navbar></app-navbar>
+
+<main class="crear-page">
+  <div class="crear-card">
+
+    <!-- ── Encabezado ─────────────────────────────────────────────── -->
+    <div class="crear-card__header">
+      <h1 class="crear-card__title">
+        <i class="fa-solid fa-house-chimney-medical"></i>
+        Publicar alojamiento
+      </h1>
+      <p class="crear-card__subtitle">Completa todos los campos para registrar tu alojamiento.</p>
+    </div>
+
+    <!-- ── Mensajes globales ──────────────────────────────────────── -->
+    <div *ngIf="errorMessage"
+         class="alert alert--error">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span>{{ errorMessage }}</span>
+    </div>
+
+    <div *ngIf="successMessage"
+         class="alert alert--success">
+      <i class="fa-solid fa-circle-check"></i>
+      <span>{{ successMessage }}</span>
+    </div>
+
+    <!-- ── Formulario ─────────────────────────────────────────────── -->
+    <form [formGroup]="form" (ngSubmit)="crear()" novalidate class="crear-form">
+
+      <!-- ── Sección: Información básica ──────────────────────────── -->
+      <fieldset class="crear-section">
+        <legend class="crear-section__legend">
+          <i class="fa-solid fa-tag"></i> Información básica
+        </legend>
+
+        <!-- Nombre -->
+        <div class="field">
+          <label class="field__label">
+            Nombre del alojamiento <span class="required">*</span>
+          </label>
+          <input
+            formControlName="name"
+            type="text"
+            placeholder="Ej: Cabaña en el bosque"
+            class="field__input"
+            [ngClass]="campoClase(name)"
+          />
+          <div *ngIf="name?.invalid && name?.touched" class="field__error">
+            <span *ngIf="name?.errors?.['required']">El nombre es obligatorio.</span>
+            <span *ngIf="name?.errors?.['maxlength']">Máximo 150 caracteres.</span>
+          </div>
+        </div>
+
+        <!-- Descripción -->
+        <div class="field">
+          <label class="field__label">
+            Descripción <span class="required">*</span>
+          </label>
+          <textarea
+            formControlName="description"
+            rows="4"
+            placeholder="Describe tu alojamiento: características, ambiente, reglas..."
+            class="field__input field__textarea"
+            [ngClass]="campoClase(description)"
+          ></textarea>
+          <div *ngIf="description?.invalid && description?.touched" class="field__error">
+            <span *ngIf="description?.errors?.['required']">La descripción es obligatoria.</span>
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- ── Sección: Ubicación ─────────────────────────────────────── -->
+      <fieldset class="crear-section">
+        <legend class="crear-section__legend">
+          <i class="fa-solid fa-location-dot"></i> Ubicación
+        </legend>
+
+        <!-- Dirección -->
+        <div class="field">
+          <label class="field__label">
+            Dirección <span class="required">*</span>
+          </label>
+          <input
+            formControlName="address"
+            type="text"
+            placeholder="Ej: Calle 10 # 5-23"
+            class="field__input"
+            [ngClass]="campoClase(address)"
+          />
+          <div *ngIf="address?.invalid && address?.touched" class="field__error">
+            <span *ngIf="address?.errors?.['required']">La dirección es obligatoria.</span>
+            <span *ngIf="address?.errors?.['maxlength']">Máximo 255 caracteres.</span>
+          </div>
+        </div>
+
+        <!-- Ciudad -->
+        <div class="field">
+          <label class="field__label">
+            Ciudad <span class="required">*</span>
+          </label>
+          <input
+            formControlName="city"
+            type="text"
+            placeholder="Ej: Medellín"
+            class="field__input"
+            [ngClass]="campoClase(city)"
+          />
+          <div *ngIf="city?.invalid && city?.touched" class="field__error">
+            <span *ngIf="city?.errors?.['required']">La ciudad es obligatoria.</span>
+            <span *ngIf="city?.errors?.['maxlength']">Máximo 100 caracteres.</span>
+          </div>
+        </div>
+
+        <!-- Coordenadas — ALOJ-12 -->
+        <div class="field-row">
+
+          <!-- Latitud -->
+          <div class="field">
+            <label class="field__label">
+              Latitud <span class="required">*</span>
+              <span class="field__hint">(-90 a 90)</span>
+            </label>
+            <input
+              formControlName="latitude"
+              type="number"
+              step="any"
+              placeholder="Ej: 6.2442"
+              class="field__input"
+              [ngClass]="campoClase(latitude)"
+            />
+            <div *ngIf="latitude?.invalid && latitude?.touched" class="field__error">
+              <span *ngIf="latitude?.errors?.['required']">La latitud es obligatoria.</span>
+              <span *ngIf="latitude?.errors?.['min'] || latitude?.errors?.['max']">
+                Debe estar entre -90 y 90.
+              </span>
+            </div>
+          </div>
+
+          <!-- Longitud -->
+          <div class="field">
+            <label class="field__label">
+              Longitud <span class="required">*</span>
+              <span class="field__hint">(-180 a 180)</span>
+            </label>
+            <input
+              formControlName="longitude"
+              type="number"
+              step="any"
+              placeholder="Ej: -75.5812"
+              class="field__input"
+              [ngClass]="campoClase(longitude)"
+            />
+            <div *ngIf="longitude?.invalid && longitude?.touched" class="field__error">
+              <span *ngIf="longitude?.errors?.['required']">La longitud es obligatoria.</span>
+              <span *ngIf="longitude?.errors?.['min'] || longitude?.errors?.['max']">
+                Debe estar entre -180 y 180.
+              </span>
+            </div>
+          </div>
+
+        </div>
+      </fieldset>
+
+      <!-- ── Sección: Precio y capacidad ───────────────────────────── -->
+      <fieldset class="crear-section">
+        <legend class="crear-section__legend">
+          <i class="fa-solid fa-sliders"></i> Precio y capacidad
+        </legend>
+
+        <div class="field-row">
+
+          <!-- Precio por noche — ALOJ-12: precio > 0 -->
+          <div class="field">
+            <label class="field__label">
+              Precio por noche (COP) <span class="required">*</span>
+            </label>
+            <div class="field__input-prefix">
+              <span class="field__prefix">$</span>
+              <input
+                formControlName="pricePerNight"
+                type="number"
+                step="0.01"
+                min="0.01"
+                placeholder="Ej: 150000"
+                class="field__input field__input--prefixed"
+                [ngClass]="campoClase(pricePerNight)"
+              />
+            </div>
+            <div *ngIf="pricePerNight?.invalid && pricePerNight?.touched" class="field__error">
+              <span *ngIf="pricePerNight?.errors?.['required']">El precio es obligatorio.</span>
+              <!-- ALOJ-12: precio > 0 -->
+              <span *ngIf="pricePerNight?.errors?.['min']">El precio debe ser mayor a 0.</span>
+            </div>
+          </div>
+
+          <!-- Capacidad máxima — ALOJ-12: capacidad >= 1 -->
+          <div class="field">
+            <label class="field__label">
+              Capacidad máxima <span class="required">*</span>
+            </label>
+            <div class="field__input-prefix">
+              <span class="field__prefix">
+                <i class="fa-solid fa-people-group"></i>
+              </span>
+              <input
+                formControlName="maxCapacity"
+                type="number"
+                step="1"
+                min="1"
+                placeholder="Ej: 4"
+                class="field__input field__input--prefixed"
+                [ngClass]="campoClase(maxCapacity)"
+              />
+            </div>
+            <div *ngIf="maxCapacity?.invalid && maxCapacity?.touched" class="field__error">
+              <span *ngIf="maxCapacity?.errors?.['required']">La capacidad es obligatoria.</span>
+              <!-- ALOJ-12: capacidad >= 1 -->
+              <span *ngIf="maxCapacity?.errors?.['min']">La capacidad debe ser al menos 1 huésped.</span>
+            </div>
+          </div>
+
+        </div>
+      </fieldset>
+
+      <!-- ── Sección: Imagen — ALOJ-12: imagen obligatoria ─────────── -->
+      <fieldset class="crear-section">
+        <legend class="crear-section__legend">
+          <i class="fa-solid fa-image"></i> Imagen principal
+        </legend>
+
+        <div class="field">
+          <label class="field__label">
+            URL de la imagen <span class="required">*</span>
+          </label>
+          <input
+            formControlName="mainImage"
+            type="url"
+            placeholder="https://ejemplo.com/mi-alojamiento.jpg"
+            class="field__input"
+            [ngClass]="campoClase(mainImage)"
+          />
+          <div *ngIf="mainImage?.invalid && mainImage?.touched" class="field__error">
+            <!-- ALOJ-12: imagen obligatoria -->
+            <span *ngIf="mainImage?.errors?.['required']">La imagen principal es obligatoria.</span>
+            <span *ngIf="mainImage?.errors?.['pattern']">Debe ser una URL válida (http:// o https://).</span>
+          </div>
+          <!-- Preview de imagen -->
+          <div
+            *ngIf="mainImage?.valid && mainImage?.value"
+            class="image-preview"
+          >
+            <img [src]="mainImage?.value" alt="Vista previa" class="image-preview__img" />
+          </div>
+        </div>
+      </fieldset>
+
+      <!-- ── Botones de acción ────────────────────────────────────── -->
+      <div class="crear-actions">
+        <button
+          type="button"
+          (click)="cancelar()"
+          class="btn btn--secondary"
+        >
+          <i class="fa-solid fa-xmark"></i>
+          Cancelar
+        </button>
+
+        <button
+          type="submit"
+          [disabled]="isSubmitting"
+          class="btn btn--primary"
+        >
+          <i *ngIf="isSubmitting" class="fa-solid fa-spinner fa-spin"></i>
+          <i *ngIf="!isSubmitting" class="fa-solid fa-house-chimney-medical"></i>
+          {{ isSubmitting ? 'Publicando...' : 'Publicar alojamiento' }}
+        </button>
+      </div>
+
+    </form>
+  </div>
+</main>

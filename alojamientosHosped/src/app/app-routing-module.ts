@@ -7,20 +7,23 @@ import { PerfilPageComponent }            from './components/ad/pages/perfil/per
 import { authGuard }                      from './guards/auth.guard';
 import { AlojamientosListaPageComponent } from './components/ad/pages/alojamientos-lista/alojamientos-lista';
 import { AlojamientoDetallePageComponent } from './components/ad/pages/alojamiento-detalle/alojamiento-detalle'; // ← ALOJ-5
+import { AlojamientoCrearPageComponent }  from './components/ad/pages/alojamiento-crear/alojamiento-crear';   // ← ALOJ-12
 
 
 const routes: Routes = [
-  { path: '',                     redirectTo: 'login', pathMatch: 'full' },
-  { path: 'login',                component: LoginPageComponent },
-  { path: 'register',             component: RegisterPageComponent },
-  { path: 'recuperar-contrasena', component: RecuperarContrasenaComponent },
+  { path: '',                        redirectTo: 'login', pathMatch: 'full' },
+  { path: 'login',                   component: LoginPageComponent },
+  { path: 'register',                component: RegisterPageComponent },
+  { path: 'recuperar-contrasena',    component: RecuperarContrasenaComponent },
   // AUTH-21: ruta protegida del perfil
-  { path: 'perfil',               component: PerfilPageComponent,             canActivate: [authGuard] },
-  { path: 'alojamientos',         component: AlojamientosListaPageComponent,  canActivate: [authGuard] },
+  { path: 'perfil',                  component: PerfilPageComponent,             canActivate: [authGuard] },
+  { path: 'alojamientos',            component: AlojamientosListaPageComponent,  canActivate: [authGuard] },
+  // ALOJ-12: formulario de creación de alojamiento
+  { path: 'alojamientos/crear',      component: AlojamientoCrearPageComponent,   canActivate: [authGuard] },
   // ALOJ-5: detalle de un alojamiento
-  { path: 'alojamientos/:id',     component: AlojamientoDetallePageComponent, canActivate: [authGuard] },
+  { path: 'alojamientos/:id',        component: AlojamientoDetallePageComponent, canActivate: [authGuard] },
   // home protegido (pendiente de implementación futura)
-  { path: 'home',                 component: LoginPageComponent,              canActivate: [authGuard] }
+  { path: 'home',                    component: LoginPageComponent,              canActivate: [authGuard] }
 ];
 
 @NgModule({

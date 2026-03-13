@@ -45,6 +45,7 @@ import { RegisterPageComponent } from './components/ad/pages/register/register';
 import { RecuperarContrasenaComponent } from './components/ad/pages/recuperar-contrasena/recuperar-contrasena';
 import { PerfilPageComponent }   from './components/ad/pages/perfil/perfil'; // ← AUTH-21
 import { AlojamientoDetallePageComponent } from './components/ad/pages/alojamiento-detalle/alojamiento-detalle'; // ← ALOJ-5
+import { AlojamientoCrearPageComponent }  from './components/ad/pages/alojamiento-crear/alojamiento-crear';   // ← ALOJ-12
 
 // ── Pipes ──────────────────────────────────────────────────────────
 import { SafeUrlPipe } from './pipes/safe-url.pipe'; // ← ALOJ-5
@@ -77,6 +78,7 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe'; // ← ALOJ-5
     RegisterPageComponent,
     AlojamientosListaPageComponent,
     AlojamientoDetallePageComponent, // ← ALOJ-5
+    AlojamientoCrearPageComponent,   // ← ALOJ-12
     PerfilPageComponent,             // ← AUTH-21
     // Pipes
     SafeUrlPipe,                     // ← ALOJ-5

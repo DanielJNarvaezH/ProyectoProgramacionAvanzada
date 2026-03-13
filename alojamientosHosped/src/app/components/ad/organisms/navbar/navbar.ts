@@ -34,4 +34,8 @@ export class NavbarComponent {
   irAlPerfil(): void {
     this.router.navigate(['/perfil']);
   }
+
+  irACrear(): void {
+    this.router.navigate(['/alojamientos/crear']);
+  }
 }
