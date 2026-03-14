@@ -9,6 +9,8 @@ import jakarta.validation.constraints.*;
 @AllArgsConstructor
 public class ServicioDTO {
 
+    private Integer id;
+
     @NotBlank
     @Size(max = 50)
     private String name;

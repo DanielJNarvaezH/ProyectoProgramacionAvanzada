@@ -1,5 +1,5 @@
 /**
- * Interfaz AlojamientoServicio — alineada con AlojamientoServicioDTO del backend.
+ * AlojamientoServicio — alineada con AlojamientoServicioDTO del backend.
  *
  * Representa la relación entre un alojamiento y un servicio.
  * serviceName e serviceIcon vienen enriquecidos directamente del backend.

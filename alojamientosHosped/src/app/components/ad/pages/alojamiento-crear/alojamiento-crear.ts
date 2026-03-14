@@ -1,18 +1,13 @@
 import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/forms';
 import { Router } from '@angular/router';
+import { forkJoin, of } from 'rxjs';
+import { catchError } from 'rxjs/operators';
 import { AlojamientoService } from '../../../../../services/AlojamientoService';
 import { AuthService } from '../../../../../services/AuthService';
+import { AlojamientoServicioService } from '../../../../../services/AlojamientoServicioService';
+import { ServicioDisponible } from '../../../../models/servicio.model';
 
-/**
- * AlojamientoCrearPageComponent — ALOJ-12
- *
- * Formulario de creación de alojamiento con validaciones:
- * - Precio por noche > 0
- * - Capacidad máxima >= 1
- * - Latitud entre -90 y 90 / Longitud entre -180 y 180
- * - Imagen principal obligatoria (URL)
- */
 @Component({
   selector: 'app-alojamiento-crear',
   standalone: false,
@@ -23,15 +18,21 @@ export class AlojamientoCrearPageComponent implements OnInit {
 
   form!: FormGroup;
 
-  isSubmitting  = false;
-  errorMessage  = '';
+  isSubmitting   = false;
+  errorMessage   = '';
   successMessage = '';
 
+  serviciosDisponibles: ServicioDisponible[] = [];
+  serviciosSeleccionados: Set<number>        = new Set();
+  cargandoServicios                          = false;
+  errorServicios                             = '';
+
   constructor(
-    private fb:                 FormBuilder,
-    private alojamientoService: AlojamientoService,
-    private authService:        AuthService,
-    private router:             Router
+    private fb:                         FormBuilder,
+    private alojamientoService:         AlojamientoService,
+    private alojamientoServicioService: AlojamientoServicioService,
+    private authService:                AuthService,
+    private router:                     Router
   ) {}
 
   ngOnInit(): void {
@@ -40,19 +41,49 @@ export class AlojamientoCrearPageComponent implements OnInit {
       description:   ['', [Validators.required]],
       address:       ['', [Validators.required, Validators.maxLength(255)]],
       city:          ['', [Validators.required, Validators.maxLength(100)]],
-      // ALOJ-12: precio > 0
       pricePerNight: [null, [Validators.required, Validators.min(0.01)]],
-      // ALOJ-12: capacidad >= 1
       maxCapacity:   [null, [Validators.required, Validators.min(1)]],
-      // ALOJ-12: coordenadas válidas
       latitude:      [null, [Validators.required, Validators.min(-90),  Validators.max(90)]],
       longitude:     [null, [Validators.required, Validators.min(-180), Validators.max(180)]],
-      // ALOJ-12: imagen obligatoria
       mainImage:     ['', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
+    });
+
+    this.cargarServicios();
+  }
+
+  cargarServicios(): void {
+    this.cargandoServicios = true;
+    this.errorServicios    = '';
+
+    this.alojamientoServicioService.getServiciosDisponibles().subscribe({
+      next: (servicios) => {
+        console.log('Servicios recibidos del backend:', servicios);
+        this.serviciosDisponibles = servicios;
+        this.cargandoServicios    = false;
+      },
+      error: () => {
+        this.cargandoServicios = false;
+        this.errorServicios    = 'No se pudieron cargar los servicios. Puedes continuar sin seleccionarlos.';
+      }
     });
   }
 
-  // ── Getters para acceso fácil desde el template ───────────────
+  toggleServicio(servicioId: number): void {
+    console.log('Toggle servicioId:', servicioId, '| tipo:', typeof servicioId);
+    const nuevos = new Set(this.serviciosSeleccionados);
+    if (nuevos.has(servicioId)) {
+      nuevos.delete(servicioId);
+    } else {
+      nuevos.add(servicioId);
+    }
+    this.serviciosSeleccionados = nuevos;
+    console.log('Set después del toggle:', Array.from(this.serviciosSeleccionados));
+  }
+
+  isSeleccionado(servicioId: number): boolean {
+    return this.serviciosSeleccionados.has(servicioId);
+  }
+
   get name()          { return this.form.get('name'); }
   get description()   { return this.form.get('description'); }
   get address()       { return this.form.get('address'); }
@@ -63,7 +94,6 @@ export class AlojamientoCrearPageComponent implements OnInit {
   get longitude()     { return this.form.get('longitude'); }
   get mainImage()     { return this.form.get('mainImage'); }
 
-  // ── Clases de estilo por estado del campo ─────────────────────
   campoClase(control: AbstractControl | null): Record<string, boolean> {
     return {
       'border-red-400 bg-red-50':     !!control?.invalid && !!control?.touched,
@@ -72,7 +102,6 @@ export class AlojamientoCrearPageComponent implements OnInit {
     };
   }
 
-  // ── Envío del formulario ──────────────────────────────────────
   crear(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
@@ -80,8 +109,8 @@ export class AlojamientoCrearPageComponent implements OnInit {
       return;
     }
 
-    this.isSubmitting  = true;
-    this.errorMessage  = '';
+    this.isSubmitting   = true;
+    this.errorMessage   = '';
     this.successMessage = '';
 
     const usuario = this.authService.getUsuario();
@@ -92,16 +121,36 @@ export class AlojamientoCrearPageComponent implements OnInit {
     };
 
     this.alojamientoService.create(payload).subscribe({
-      next: () => {
-        this.isSubmitting   = false;
-        this.successMessage = '¡Alojamiento creado exitosamente!';
-        setTimeout(() => this.router.navigate(['/alojamientos']), 1500);
+      next: (alojamientoCreado) => {
+        const serviciosIds = Array.from(this.serviciosSeleccionados);
+
+        if (serviciosIds.length === 0 || !alojamientoCreado.id) {
+          this.finalizarCreacion();
+          return;
+        }
+
+        const peticiones = serviciosIds.map(serviceId =>
+          this.alojamientoServicioService
+            .addServicio(alojamientoCreado.id!, serviceId)
+            .pipe(catchError(() => of(null)))
+        );
+
+        forkJoin(peticiones).subscribe({
+          next: () => this.finalizarCreacion(),
+          error: () => this.finalizarCreacion()
+        });
       },
       error: (err: Error) => {
         this.isSubmitting = false;
         this.errorMessage = err.message || 'Error al crear el alojamiento.';
       }
     });
+  }
+
+  private finalizarCreacion(): void {
+    this.isSubmitting   = false;
+    this.successMessage = '¡Alojamiento creado exitosamente!';
+    setTimeout(() => this.router.navigate(['/alojamientos']), 1500);
   }
 
   cancelar(): void {

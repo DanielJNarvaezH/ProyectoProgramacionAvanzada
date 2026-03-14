@@ -1,10 +1,7 @@
 <!-- ─────────────────────────────────────────────────────────────────────────
-     AlojamientoCrearPageComponent — ALOJ-12
-     Formulario de creación con validaciones:
-       · precio > 0
-       · capacidad >= 1
-       · coordenadas válidas (lat -90/90, lng -180/180)
-       · imagen principal obligatoria
+     AlojamientoCrearPageComponent — ALOJ-12 + ALOJ-10
+     ALOJ-12: Validaciones de precio, capacidad, coordenadas e imagen
+     ALOJ-10: Selector de servicios con checkboxes
      ───────────────────────────────────────────────────────────────────────── -->
 
 <app-navbar></app-navbar>
@@ -22,14 +19,12 @@
     </div>
 
     <!-- ── Mensajes globales ──────────────────────────────────────── -->
-    <div *ngIf="errorMessage"
-         class="alert alert--error">
+    <div *ngIf="errorMessage" class="alert alert--error">
       <i class="fa-solid fa-circle-exclamation"></i>
       <span>{{ errorMessage }}</span>
     </div>
 
-    <div *ngIf="successMessage"
-         class="alert alert--success">
+    <div *ngIf="successMessage" class="alert alert--success">
       <i class="fa-solid fa-circle-check"></i>
       <span>{{ successMessage }}</span>
     </div>
@@ -123,8 +118,6 @@
 
         <!-- Coordenadas — ALOJ-12 -->
         <div class="field-row">
-
-          <!-- Latitud -->
           <div class="field">
             <label class="field__label">
               Latitud <span class="required">*</span>
@@ -146,7 +139,6 @@
             </div>
           </div>
 
-          <!-- Longitud -->
           <div class="field">
             <label class="field__label">
               Longitud <span class="required">*</span>
@@ -167,7 +159,6 @@
               </span>
             </div>
           </div>
-
         </div>
       </fieldset>
 
@@ -178,8 +169,6 @@
         </legend>
 
         <div class="field-row">
-
-          <!-- Precio por noche — ALOJ-12: precio > 0 -->
           <div class="field">
             <label class="field__label">
               Precio por noche (COP) <span class="required">*</span>
@@ -198,12 +187,10 @@
             </div>
             <div *ngIf="pricePerNight?.invalid && pricePerNight?.touched" class="field__error">
               <span *ngIf="pricePerNight?.errors?.['required']">El precio es obligatorio.</span>
-              <!-- ALOJ-12: precio > 0 -->
               <span *ngIf="pricePerNight?.errors?.['min']">El precio debe ser mayor a 0.</span>
             </div>
           </div>
 
-          <!-- Capacidad máxima — ALOJ-12: capacidad >= 1 -->
           <div class="field">
             <label class="field__label">
               Capacidad máxima <span class="required">*</span>
@@ -224,15 +211,13 @@
             </div>
             <div *ngIf="maxCapacity?.invalid && maxCapacity?.touched" class="field__error">
               <span *ngIf="maxCapacity?.errors?.['required']">La capacidad es obligatoria.</span>
-              <!-- ALOJ-12: capacidad >= 1 -->
               <span *ngIf="maxCapacity?.errors?.['min']">La capacidad debe ser al menos 1 huésped.</span>
             </div>
           </div>
-
         </div>
       </fieldset>
 
-      <!-- ── Sección: Imagen — ALOJ-12: imagen obligatoria ─────────── -->
+      <!-- ── Sección: Imagen ─────────────────────────────────────────── -->
       <fieldset class="crear-section">
         <legend class="crear-section__legend">
           <i class="fa-solid fa-image"></i> Imagen principal
@@ -250,36 +235,90 @@
             [ngClass]="campoClase(mainImage)"
           />
           <div *ngIf="mainImage?.invalid && mainImage?.touched" class="field__error">
-            <!-- ALOJ-12: imagen obligatoria -->
             <span *ngIf="mainImage?.errors?.['required']">La imagen principal es obligatoria.</span>
             <span *ngIf="mainImage?.errors?.['pattern']">Debe ser una URL válida (http:// o https://).</span>
           </div>
-          <!-- Preview de imagen -->
-          <div
-            *ngIf="mainImage?.valid && mainImage?.value"
-            class="image-preview"
-          >
+          <div *ngIf="mainImage?.valid && mainImage?.value" class="image-preview">
             <img [src]="mainImage?.value" alt="Vista previa" class="image-preview__img" />
           </div>
         </div>
       </fieldset>
 
-      <!-- ── Botones de acción ────────────────────────────────────── -->
-      <div class="crear-actions">
-        <button
-          type="button"
-          (click)="cancelar()"
-          class="btn btn--secondary"
+      <!-- ── ALOJ-10: Servicios ─────────────────────────────────────── -->
+      <fieldset class="crear-section">
+        <legend class="crear-section__legend">
+          <i class="fa-solid fa-star"></i> Servicios del alojamiento
+          <span class="crear-section__legend-hint">(opcional)</span>
+        </legend>
+
+        <!-- Cargando -->
+        <div *ngIf="cargandoServicios" class="servicios-loading">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          <span>Cargando servicios...</span>
+        </div>
+
+        <!-- Error -->
+        <div *ngIf="errorServicios && !cargandoServicios" class="servicios-error">
+          <i class="fa-solid fa-triangle-exclamation"></i>
+          <span>{{ errorServicios }}</span>
+        </div>
+
+        <!-- Grid de servicios — ALOJ-10
+             FIX: usamos div con (click) en lugar de label+checkbox
+             para evitar que el browser active todos los checkboxes al mismo tiempo -->
+        <div
+          *ngIf="!cargandoServicios && serviciosDisponibles.length > 0"
+          class="servicios-grid"
         >
+          <div
+            *ngFor="let servicio of serviciosDisponibles"
+            class="servicio-item"
+            [class.servicio-item--selected]="isSeleccionado(servicio.id)"
+            (click)="toggleServicio(servicio.id)"
+            role="checkbox"
+            [attr.aria-checked]="isSeleccionado(servicio.id)"
+            tabindex="0"
+            (keydown.space)="toggleServicio(servicio.id)"
+          >
+            <!-- Checkmark visual — sin input nativo -->
+            <span class="servicio-item__check">
+              <i
+                [class]="isSeleccionado(servicio.id)
+                  ? 'fa-solid fa-circle-check'
+                  : 'fa-regular fa-circle'"
+              ></i>
+            </span>
+            <span class="servicio-item__icon">
+              <i [class]="servicio.icon || 'fa-solid fa-star'"></i>
+            </span>
+            <span class="servicio-item__nombre">{{ servicio.name }}</span>
+          </div>
+        </div>
+
+        <!-- Sin servicios -->
+        <div
+          *ngIf="!cargandoServicios && serviciosDisponibles.length === 0 && !errorServicios"
+          class="servicios-empty"
+        >
+          <i class="fa-solid fa-info-circle"></i>
+          <span>No hay servicios disponibles en este momento.</span>
+        </div>
+
+        <!-- Contador -->
+        <div *ngIf="serviciosSeleccionados.size > 0" class="servicios-contador">
+          <i class="fa-solid fa-circle-check"></i>
+          {{ serviciosSeleccionados.size }} servicio{{ serviciosSeleccionados.size > 1 ? 's' : '' }} seleccionado{{ serviciosSeleccionados.size > 1 ? 's' : '' }}
+        </div>
+      </fieldset>
+
+      <!-- ── Botones ─────────────────────────────────────────────────── -->
+      <div class="crear-actions">
+        <button type="button" (click)="cancelar()" class="btn btn--secondary">
           <i class="fa-solid fa-xmark"></i>
           Cancelar
         </button>
 
-        <button
-          type="submit"
-          [disabled]="isSubmitting"
-          class="btn btn--primary"
-        >
+        <button type="submit" [disabled]="isSubmitting" class="btn btn--primary">
           <i *ngIf="isSubmitting" class="fa-solid fa-spinner fa-spin"></i>
           <i *ngIf="!isSubmitting" class="fa-solid fa-house-chimney-medical"></i>
           {{ isSubmitting ? 'Publicando...' : 'Publicar alojamiento' }}

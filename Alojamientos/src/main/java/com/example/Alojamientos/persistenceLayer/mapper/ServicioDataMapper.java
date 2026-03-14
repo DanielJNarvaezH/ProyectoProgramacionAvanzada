@@ -7,6 +7,7 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ServicioDataMapper {
 
+    @Mapping(target = "id", source = "id")
     @Mapping(target = "name", source = "nombre")
     @Mapping(target = "description", source = "descripcion")
     @Mapping(target = "icon", source = "icono")

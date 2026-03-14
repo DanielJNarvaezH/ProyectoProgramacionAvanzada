@@ -1,8 +1,9 @@
-// ─── alojamiento-crear.scss — ALOJ-12 ────────────────────────────────────────
+// ─── alojamiento-crear.scss — ALOJ-12 + ALOJ-10 ─────────────────────────────
 
 .crear-page {
   min-height: calc(100vh - 64px);
-  background: #f8f9fb;
+  // FIX: fondo explícito blanco-gris para neutralizar el azul de Angular Material
+  background: #f8f9fb !important;
   display: flex;
   justify-content: center;
   padding: 2rem 1rem 4rem;
@@ -12,7 +13,7 @@
 .crear-card {
   width: 100%;
   max-width: 720px;
-  background: #fff;
+  background: #ffffff !important;
   border-radius: 16px;
   box-shadow: 0 4px 24px rgba(0, 0, 0, 0.08);
   padding: 2rem 2.5rem;
@@ -70,6 +71,8 @@
   border-radius: 10px;
   padding: 1.25rem 1.5rem;
   margin-bottom: 1.25rem;
+  // FIX: fondo explícito para evitar herencia de color de Material
+  background: #ffffff;
 
   &__legend {
     font-size: 0.875rem;
@@ -79,6 +82,15 @@
     display: flex;
     align-items: center;
     gap: 0.4rem;
+    // FIX: fondo del legend también blanco
+    background: #ffffff;
+  }
+
+  &__legend-hint {
+    font-size: 0.75rem;
+    font-weight: 400;
+    color: #9ca3af;
+    margin-left: 0.25rem;
   }
 }
 
@@ -110,6 +122,8 @@
     outline: none;
     transition: border-color 0.2s, box-shadow 0.2s;
     box-sizing: border-box;
+    background: #ffffff;
+    color: #1e293b;
 
     &:focus {
       border-color: #6366f1;
@@ -127,7 +141,6 @@
     min-height: 100px;
   }
 
-  // Prefijo ($, ícono)
   &__input-prefix {
     display: flex;
     align-items: stretch;
@@ -187,7 +200,118 @@
   }
 }
 
-// ── Botones de acción ─────────────────────────────────────────────────────────
+// ── ALOJ-10: Servicios ────────────────────────────────────────────────────────
+
+.servicios-loading {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #6b7280;
+  font-size: 0.875rem;
+  padding: 0.5rem 0;
+
+  i { color: #6366f1; }
+}
+
+.servicios-error {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #d97706;
+  font-size: 0.875rem;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+}
+
+.servicios-empty {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  padding: 0.5rem 0;
+}
+
+.servicios-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+  gap: 0.75rem;
+  margin-top: 0.5rem;
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr 1fr;
+  }
+}
+
+// FIX: ahora es div con (click), no label+checkbox
+// Esto evita que el browser active todos los checkboxes al hacer click
+.servicio-item {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.65rem 0.85rem;
+  border: 1.5px solid #e5e7eb;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: border-color 0.18s, background 0.18s, box-shadow 0.18s;
+  user-select: none;
+  background: #ffffff;
+
+  &:hover {
+    border-color: #a5b4fc;
+    background: #f5f3ff;
+  }
+
+  // Estado seleccionado
+  &--selected {
+    border-color: #6366f1;
+    background: #eef2ff;
+    box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.18);
+
+    .servicio-item__check { color: #6366f1; }
+    .servicio-item__icon  { color: #6366f1; }
+    .servicio-item__nombre { color: #4338ca; font-weight: 600; }
+  }
+
+  // Checkmark visual (fa-circle-check / fa-circle)
+  &__check {
+    font-size: 0.95rem;
+    color: #d1d5db;
+    width: 16px;
+    text-align: center;
+    transition: color 0.18s;
+    flex-shrink: 0;
+  }
+
+  &__icon {
+    font-size: 0.95rem;
+    color: #9ca3af;
+    width: 16px;
+    text-align: center;
+    transition: color 0.18s;
+    flex-shrink: 0;
+  }
+
+  &__nombre {
+    font-size: 0.82rem;
+    color: #374151;
+    transition: color 0.18s;
+  }
+}
+
+.servicios-contador {
+  margin-top: 0.75rem;
+  font-size: 0.82rem;
+  color: #6366f1;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+// ── Botones ───────────────────────────────────────────────────────────────────
 .crear-actions {
   display: flex;
   gap: 1rem;
@@ -226,5 +350,4 @@
   }
 }
 
-// ── Required asterisk ─────────────────────────────────────────────────────────
 .required { color: #ef4444; margin-left: 2px; }
