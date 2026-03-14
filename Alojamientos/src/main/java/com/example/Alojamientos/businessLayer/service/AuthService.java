@@ -70,6 +70,8 @@ public class AuthService {
                 .email(guardado.getCorreo())
                 .rol(guardado.getRol().name())
                 .mensaje("Registro exitoso")
+                .userId(guardado.getId())    // ← ALOJ-7
+                .name(guardado.getNombre())  // ← ALOJ-7
                 .build();
     }
 
@@ -92,14 +94,14 @@ public class AuthService {
                 .email(usuario.getCorreo())
                 .rol(usuario.getRol().name())
                 .mensaje("Login exitoso")
+                .userId(usuario.getId())    // ← ALOJ-7
+                .name(usuario.getNombre())  // ← ALOJ-7
                 .build();
     }
 
     // ─────────────────────────────────────────────────────────────
     // RECUPERAR CONTRASEÑA — Paso 1: enviar código
     // ─────────────────────────────────────────────────────────────
-
-// Reemplaza el método solicitarRecuperacion en AuthService.java
 
     @Transactional
     public String solicitarRecuperacion(String correo) {
@@ -120,13 +122,11 @@ public class AuthService {
                 .build();
 
         codigoRepository.save(entidad);
-        codigoRepository.flush(); // ← fuerza el insert ANTES de enviar el email
+        codigoRepository.flush();
 
         try {
             emailService.enviarCodigoRecuperacion(correo, codigo);
         } catch (Exception e) {
-            // Si falla el email, igual retornamos éxito — el código está guardado
-            // El usuario puede solicitarlo de nuevo
             throw new RuntimeException("El código fue generado pero no se pudo enviar el email. Verifica la configuración de correo.");
         }
 

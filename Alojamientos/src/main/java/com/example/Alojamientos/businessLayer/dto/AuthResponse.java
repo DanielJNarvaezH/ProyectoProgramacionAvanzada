@@ -14,4 +14,6 @@ public class AuthResponse {
     private String email;
     private String rol;
     private String mensaje;
+    private Integer userId;  // ← ALOJ-7: id del usuario para hostId al crear alojamiento
+    private String name;     // ← ALOJ-7: nombre para mostrar en navbar
 }

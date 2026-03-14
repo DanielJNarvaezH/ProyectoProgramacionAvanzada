@@ -3,11 +3,30 @@ import { FormBuilder, FormGroup, Validators, AbstractControl } from '@angular/fo
 import { Router } from '@angular/router';
 import { forkJoin, of } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { AlojamientoService } from '../../../../../services/AlojamientoService';
-import { AuthService } from '../../../../../services/AuthService';
-import { AlojamientoServicioService } from '../../../../../services/AlojamientoServicioService';
-import { ServicioDisponible } from '../../../../models/servicio.model';
+import { AlojamientoService }           from '../../../../../services/AlojamientoService';
+import { AuthService }                  from '../../../../../services/AuthService';
+import { AlojamientoServicioService }   from '../../../../../services/AlojamientoServicioService';
+import { ServicioDisponible }           from '../../../../models/servicio.model';
 
+/**
+ * AlojamientoCrearPageComponent — ALOJ-7 + ALOJ-10
+ *
+ * Formulario de creación de alojamiento con:
+ * ALOJ-7:  Reactive form con todos los campos y validaciones en tiempo real
+ *          Acceso restringido a ANFITRION (protegido por anfitrionGuard en routing)
+ * ALOJ-10: Selector de servicios con checkboxes
+ *
+ * Validaciones implementadas:
+ * - nombre: requerido, max 150 chars
+ * - descripción: requerida
+ * - dirección: requerida, max 255 chars
+ * - ciudad: requerida, max 100 chars
+ * - precio: requerido, > 0
+ * - capacidad: requerida, >= 1
+ * - latitud: requerida, -90 a 90
+ * - longitud: requerida, -180 a 180
+ * - imagen: requerida, URL válida http/https
+ */
 @Component({
   selector: 'app-alojamiento-crear',
   standalone: false,
@@ -22,6 +41,7 @@ export class AlojamientoCrearPageComponent implements OnInit {
   errorMessage   = '';
   successMessage = '';
 
+  // ── ALOJ-10: Estado de servicios ──────────────────────────────
   serviciosDisponibles: ServicioDisponible[] = [];
   serviciosSeleccionados: Set<number>        = new Set();
   cargandoServicios                          = false;
@@ -51,13 +71,14 @@ export class AlojamientoCrearPageComponent implements OnInit {
     this.cargarServicios();
   }
 
+  // ── ALOJ-10: Cargar servicios del backend ─────────────────────
+
   cargarServicios(): void {
     this.cargandoServicios = true;
     this.errorServicios    = '';
 
     this.alojamientoServicioService.getServiciosDisponibles().subscribe({
       next: (servicios) => {
-        console.log('Servicios recibidos del backend:', servicios);
         this.serviciosDisponibles = servicios;
         this.cargandoServicios    = false;
       },
@@ -68,8 +89,11 @@ export class AlojamientoCrearPageComponent implements OnInit {
     });
   }
 
+  // ── ALOJ-10: Toggle checkbox — FIX change detection ──────────
+  // Se crea un nuevo Set en cada toggle para que Angular detecte
+  // el cambio de referencia y re-renderice solo el ítem correcto.
+
   toggleServicio(servicioId: number): void {
-    console.log('Toggle servicioId:', servicioId, '| tipo:', typeof servicioId);
     const nuevos = new Set(this.serviciosSeleccionados);
     if (nuevos.has(servicioId)) {
       nuevos.delete(servicioId);
@@ -77,13 +101,13 @@ export class AlojamientoCrearPageComponent implements OnInit {
       nuevos.add(servicioId);
     }
     this.serviciosSeleccionados = nuevos;
-    console.log('Set después del toggle:', Array.from(this.serviciosSeleccionados));
   }
 
   isSeleccionado(servicioId: number): boolean {
     return this.serviciosSeleccionados.has(servicioId);
   }
 
+  // ── Getters para acceso fácil desde el template ───────────────
   get name()          { return this.form.get('name'); }
   get description()   { return this.form.get('description'); }
   get address()       { return this.form.get('address'); }
@@ -94,6 +118,7 @@ export class AlojamientoCrearPageComponent implements OnInit {
   get longitude()     { return this.form.get('longitude'); }
   get mainImage()     { return this.form.get('mainImage'); }
 
+  // ── Clases de estilo por estado del campo ─────────────────────
   campoClase(control: AbstractControl | null): Record<string, boolean> {
     return {
       'border-red-400 bg-red-50':     !!control?.invalid && !!control?.touched,
@@ -101,6 +126,8 @@ export class AlojamientoCrearPageComponent implements OnInit {
       'border-neutral-300':           !control?.touched
     };
   }
+
+  // ── Envío del formulario ──────────────────────────────────────
 
   crear(): void {
     if (this.form.invalid) {

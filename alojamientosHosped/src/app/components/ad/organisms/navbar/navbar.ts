@@ -6,11 +6,9 @@ import { AuthService } from '../../../../../services/AuthService';
  * NavbarComponent — Organismo reutilizable
  *
  * Barra de navegación superior de Hosped.
- * Muestra el logo y el ícono de perfil del usuario autenticado.
- * Al hacer clic en el ícono navega a /perfil.
- *
- * Uso:
- * <app-navbar></app-navbar>
+ * - Logo con enlace a /alojamientos
+ * - Botón "Publicar" visible SOLO para anfitriones (ALOJ-7)
+ * - Botón de perfil para todos los usuarios autenticados
  */
 @Component({
   selector: 'app-navbar',
@@ -29,6 +27,11 @@ export class NavbarComponent {
   get nombreUsuario(): string {
     const usuario = this.authService.getUsuario();
     return usuario?.name?.split(' ')[0] || 'Mi perfil';
+  }
+
+  /** ALOJ-7: solo anfitriones ven el botón Publicar */
+  get esAnfitrion(): boolean {
+    return this.authService.esAnfitrion();
   }
 
   irAlPerfil(): void {

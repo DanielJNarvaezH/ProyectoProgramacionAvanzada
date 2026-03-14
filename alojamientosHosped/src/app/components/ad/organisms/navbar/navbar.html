@@ -1,6 +1,7 @@
 <!-- ─────────────────────────────────────────────────────────────────
      NavbarComponent — Organismo
      Barra superior con logo Hosped + acceso al perfil de usuario
+     ALOJ-7: botón Publicar visible solo para anfitriones
      ───────────────────────────────────────────────────────────────── -->
 <nav class="navbar">
 
@@ -15,8 +16,10 @@
 
   <!-- ── Acciones ───────────────────────────────────────────────── -->
   <div class="navbar__actions">
-    <!-- ALOJ-12: acceso directo al formulario de creación -->
+
+    <!-- ALOJ-7: solo anfitriones pueden publicar alojamientos -->
     <button
+      *ngIf="esAnfitrion"
       (click)="irACrear()"
       class="navbar__create-btn"
       title="Publicar nuevo alojamiento"
@@ -34,6 +37,7 @@
       <i class="fa-solid fa-circle-user navbar__profile-icon"></i>
       <span class="navbar__profile-name">{{ nombreUsuario }}</span>
     </button>
+
   </div>
 
 </nav>

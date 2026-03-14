@@ -64,7 +64,6 @@ export class AuthService {
     if (error.status === 0) {
       return 'No se puede conectar con el servidor. Verifica tu conexión a internet.';
     }
-    // El back manda String plano en el body — leerlo directo
     const backendMsg: string = typeof error.error === 'string'
       ? error.error
       : (error.error?.mensaje || error.error?.message || '');
@@ -94,7 +93,7 @@ export class AuthService {
       catchError(error => {
         const { mensaje, campo } = this.resolverErrorRegister(error);
         const err: any = new Error(mensaje);
-        err.campo = campo; // campo afectado para marcar inline en el formulario
+        err.campo = campo;
         return throwError(() => err);
       })
     );
@@ -104,17 +103,14 @@ export class AuthService {
     if (error.status === 0) {
       return { mensaje: 'No se puede conectar con el servidor. Verifica tu conexión a internet.' };
     }
-    // El back manda String plano en el body — leerlo directo
     const backendMsg: string = typeof error.error === 'string'
       ? error.error
       : (error.error?.mensaje || error.error?.message || '');
 
     if (error.status === 409) {
-      // Email duplicado — el back responde "El email ya está registrado"
       return { mensaje: 'Este correo electrónico ya está registrado. ¿Olvidaste tu contraseña?', campo: 'email' };
     }
     if (error.status === 400) {
-      // Detectar si es error de teléfono
       if (backendMsg.toLowerCase().includes('teléfono') || backendMsg.toLowerCase().includes('telefono')) {
         return { mensaje: backendMsg, campo: 'phone' };
       }
@@ -130,10 +126,6 @@ export class AuthService {
   // LOGOUT
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Cierra la sesión eliminando todos los datos de autenticación
-   * del localStorage: access token, refresh token y datos del usuario.
-   */
   logout(): void {
     this.eliminarToken();
     this.eliminarRefreshToken();
@@ -144,11 +136,6 @@ export class AuthService {
   // IS AUTHENTICATED
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Verifica si el usuario tiene una sesión activa con token válido.
-   * Si el access token expiró pero hay refresh token disponible,
-   * retorna false para que el interceptor pueda renovarlo.
-   */
   isAuthenticated(): boolean {
     const token = this.getToken();
     if (!token) return false;
@@ -157,7 +144,7 @@ export class AuthService {
       const payload = JSON.parse(atob(token.split('.')[1]));
       const expirado = payload.exp * 1000 < Date.now();
       if (expirado) {
-        this.eliminarToken(); // Solo elimina el access token, mantiene el refresh
+        this.eliminarToken();
         return false;
       }
       return true;
@@ -171,27 +158,14 @@ export class AuthService {
   // GESTIÓN DE ACCESS TOKEN
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Retorna el access token JWT almacenado o null si no existe.
-   */
   getToken(): string | null {
     return localStorage.getItem(this.TOKEN_KEY);
   }
 
-  /**
-   * Guarda únicamente el access token en localStorage.
-   * Útil cuando el backend renueva solo el access token.
-   *
-   * @param token - Nuevo access token JWT
-   */
   guardarToken(token: string): void {
     localStorage.setItem(this.TOKEN_KEY, token);
   }
 
-  /**
-   * Elimina únicamente el access token del localStorage.
-   * No afecta el refresh token ni los datos del usuario.
-   */
   eliminarToken(): void {
     localStorage.removeItem(this.TOKEN_KEY);
   }
@@ -200,41 +174,18 @@ export class AuthService {
   // GESTIÓN DE REFRESH TOKEN
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Retorna el refresh token almacenado o null si no existe.
-   * El refresh token tiene mayor duración que el access token.
-   */
   getRefreshToken(): string | null {
     return localStorage.getItem(this.REFRESH_TOKEN_KEY);
   }
 
-  /**
-   * Guarda únicamente el refresh token en localStorage.
-   *
-   * @param refreshToken - Refresh token recibido del backend
-   */
   guardarRefreshToken(refreshToken: string): void {
     localStorage.setItem(this.REFRESH_TOKEN_KEY, refreshToken);
   }
 
-  /**
-   * Elimina únicamente el refresh token del localStorage.
-   * Se usa cuando el refresh token expira o es inválido.
-   */
   eliminarRefreshToken(): void {
     localStorage.removeItem(this.REFRESH_TOKEN_KEY);
   }
 
-  /**
-   * Solicita al backend un nuevo access token usando el refresh token.
-   * Si el refresh token no existe o el backend lo rechaza, hace logout.
-   *
-   * Endpoint: POST /api/auth/refresh
-   * Body: { refreshToken: string }
-   * Response: { token: string, refreshToken: string, ... }
-   *
-   * @returns Observable<AuthResponse> con el nuevo access token
-   */
   refreshAccessToken(): Observable<AuthResponse> {
     const refreshToken = this.getRefreshToken();
 
@@ -245,14 +196,12 @@ export class AuthService {
 
     return this.http.post<AuthResponse>(`${this.apiUrl}/refresh`, { refreshToken }).pipe(
       tap(response => {
-        // Actualizar solo los tokens, mantener datos del usuario
         this.guardarToken(response.token);
         if (response.refreshToken) {
           this.guardarRefreshToken(response.refreshToken);
         }
       }),
       catchError(error => {
-        // Si el refresh falla, cerrar sesión completamente
         this.logout();
         const mensaje = error.error?.mensaje || 'Sesión expirada, inicia sesión nuevamente';
         return throwError(() => new Error(mensaje));
@@ -264,12 +213,6 @@ export class AuthService {
   // UTILIDADES DE EXPIRACIÓN
   // ─────────────────────────────────────────────────────────────────
 
-  /**
-   * Retorna la fecha de expiración del access token actual.
-   * Útil para mostrar al usuario cuánto tiempo le queda de sesión.
-   *
-   * @returns Date de expiración o null si no hay token
-   */
   getTokenExpiracion(): Date | null {
     const token = this.getToken();
     if (!token) return null;
@@ -282,11 +225,6 @@ export class AuthService {
     }
   }
 
-  /**
-   * Retorna true si el access token expira en menos de 5 minutos.
-   * El interceptor puede usar esto para renovar el token de forma proactiva
-   * antes de que expire y evitar errores 401.
-   */
   estaProximoAExpirar(): boolean {
     const expiracion = this.getTokenExpiracion();
     if (!expiracion) return false;
@@ -307,7 +245,6 @@ export class AuthService {
     ).pipe(
       catchError(error => {
         let mensaje: string;
-
         if (error.status === 0) {
           mensaje = 'No se puede conectar con el servidor. Verifica que el backend esté corriendo.';
         } else if (error.status === 404) {
@@ -315,7 +252,6 @@ export class AuthService {
         } else {
           mensaje = error.error || 'Error al enviar el código';
         }
-
         return throwError(() => new Error(mensaje));
       })
     );
@@ -361,7 +297,8 @@ export class AuthService {
 
   /**
    * Guarda access token, refresh token y datos del usuario en localStorage.
-   * Se llama automáticamente tras login y register exitosos.
+   * FIX ALOJ-7: ahora incluye id y name para que el formulario de creación
+   * pueda enviar el hostId correcto al backend.
    */
   private guardarSesion(response: AuthResponse): void {
     this.guardarToken(response.token);
@@ -369,6 +306,8 @@ export class AuthService {
       this.guardarRefreshToken(response.refreshToken);
     }
     localStorage.setItem(this.USER_KEY, JSON.stringify({
+      id:    response.userId,  // ← FIX: necesario para hostId al crear alojamiento
+      name:  response.name,    // ← FIX: necesario para mostrar nombre en navbar
       email: response.email,
       role:  response.rol
     }));
