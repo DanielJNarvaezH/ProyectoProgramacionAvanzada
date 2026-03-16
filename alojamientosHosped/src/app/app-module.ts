@@ -1,4 +1,4 @@
-import { NgModule } from '@angular/core';
+﻿import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { FormsModule, ReactiveFormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
@@ -9,82 +9,81 @@ import { App } from './app';
 import { AlojamientosListaPageComponent } from './components/ad/pages/alojamientos-lista/alojamientos-lista';
 import { ImageUploaderComponent } from './components/ad/molecules/image-uploader/image-uploader';
 
-
-
 import { provideBrowserGlobalErrorListeners } from '@angular/core';
 
-
-// ── Interceptores ──────────────────────────────────────────────────
+// -- Interceptores
 import { AuthInterceptor } from './interceptors/auth.interceptor';
 
-// ── Átomos ────────────────────────────────────────────────────────
+// -- Atomos
 import { ButtonComponent }   from './components/ad/atoms/button/button';
 import { LabelComponent }    from './components/ad/atoms/label/label';
 import { InputComponent }    from './components/ad/atoms/input/input';
 import { IconComponent }     from './components/ad/atoms/icon/icon';
 
-// ── Moléculas ─────────────────────────────────────────────────────
+// -- Moleculas
 import { InputFieldComponent }       from './components/ad/molecules/input-field/input-field';
 import { PasswordFieldComponent }    from './components/ad/molecules/password-field/password-field';
 import { LoginFormComponent }        from './components/ad/molecules/login-form/login-form';
 import { RegisterFormComponent }     from './components/ad/molecules/register-form/register-form';
-import { AlojamientoCardComponent }  from './components/ad/molecules/alojamiento-card/alojamiento-card'; // ← ALOJ-3
-import { ComentarioCardComponent }   from './components/ad/molecules/comentario-card/comentario-card';   // ← ALOJ-5
+import { AlojamientoCardComponent }  from './components/ad/molecules/alojamiento-card/alojamiento-card';
+import { ComentarioCardComponent }   from './components/ad/molecules/comentario-card/comentario-card';
 
-// ── Organismos ────────────────────────────────────────────────────
+// -- Organismos
 import { LoginCardComponent }             from './components/ad/organisms/login-card/login-card';
 import { RegisterCardComponent }          from './components/ad/organisms/register-card/register-card';
-import { NavbarComponent }                from './components/ad/organisms/navbar/navbar'; // ← navbar
-import { GaleriaAlojamientoComponent }    from './components/ad/organisms/galeria/galeria-alojamiento'; // ← ALOJ-5
+import { NavbarComponent }                from './components/ad/organisms/navbar/navbar';
+import { GaleriaAlojamientoComponent }    from './components/ad/organisms/galeria/galeria-alojamiento';
 
-// ── Templates ─────────────────────────────────────────────────────
+// -- Templates
 import { LoginTemplateComponent }    from './components/ad/templates/login-template/login-template';
 import { RegisterTemplateComponent } from './components/ad/templates/register-template/register-template';
 
-// ── Páginas ───────────────────────────────────────────────────────
-import { LoginPageComponent }    from './components/ad/pages/login/login';
-import { RegisterPageComponent } from './components/ad/pages/register/register';
-import { RecuperarContrasenaComponent } from './components/ad/pages/recuperar-contrasena/recuperar-contrasena';
-import { PerfilPageComponent }   from './components/ad/pages/perfil/perfil'; // ← AUTH-21
-import { AlojamientoDetallePageComponent } from './components/ad/pages/alojamiento-detalle/alojamiento-detalle'; // ← ALOJ-5
-import { AlojamientoCrearPageComponent }  from './components/ad/pages/alojamiento-crear/alojamiento-crear';   // ← ALOJ-12
+// -- Paginas
+import { LoginPageComponent }              from './components/ad/pages/login/login';
+import { RegisterPageComponent }           from './components/ad/pages/register/register';
+import { RecuperarContrasenaComponent }    from './components/ad/pages/recuperar-contrasena/recuperar-contrasena';
+import { PerfilPageComponent }             from './components/ad/pages/perfil/perfil';
+import { AlojamientoEditarPageComponent }  from './components/ad/pages/alojamiento-editar/alojamiento-editar';
+import { AlojamientoDetallePageComponent } from './components/ad/pages/alojamiento-detalle/alojamiento-detalle';
+import { AlojamientoCrearPageComponent }   from './components/ad/pages/alojamiento-crear/alojamiento-crear';
 
-// ── Pipes ──────────────────────────────────────────────────────────
-import { SafeUrlPipe } from './pipes/safe-url.pipe'; // ← ALOJ-5
+// -- Pipes
+import { SafeUrlPipe } from './pipes/safe-url.pipe';
 
 @NgModule({
   declarations: [
     App,
-    // Átomos
+    // Atomos
     ButtonComponent,
     LabelComponent,
     InputComponent,
     IconComponent,
-    // Moléculas
+    // Moleculas
     InputFieldComponent,
     PasswordFieldComponent,
     LoginFormComponent,
     RegisterFormComponent,
-    AlojamientoCardComponent,        // ← ALOJ-3
-    ComentarioCardComponent,         // ← ALOJ-5
+    AlojamientoCardComponent,
+    ComentarioCardComponent,
     ImageUploaderComponent,
     // Organismos
     LoginCardComponent,
     RegisterCardComponent,
-    NavbarComponent,                 // ← navbar
-    GaleriaAlojamientoComponent,     // ← ALOJ-5
+    NavbarComponent,
+    GaleriaAlojamientoComponent,
     // Templates
     LoginTemplateComponent,
     RegisterTemplateComponent,
-    // Páginas
+    // Paginas
     LoginPageComponent,
     RegisterPageComponent,
     AlojamientosListaPageComponent,
-    AlojamientoDetallePageComponent, // ← ALOJ-5
-    AlojamientoCrearPageComponent,   // ← ALOJ-12
-    PerfilPageComponent,             // ← AUTH-21
+    AlojamientoDetallePageComponent,
+    AlojamientoCrearPageComponent,
+    AlojamientoEditarPageComponent,  // ALOJ-8
+    PerfilPageComponent,
     // Pipes
-    SafeUrlPipe,                     // ← ALOJ-5
+    SafeUrlPipe,
   ],
   imports: [
     BrowserModule,
@@ -92,7 +91,7 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe'; // ← ALOJ-5
     FormsModule,
     ReactiveFormsModule,
     RouterModule.forRoot([]),
-    RecuperarContrasenaComponent  // ← standalone: va en imports, no en declarations
+    RecuperarContrasenaComponent
   ],
   providers: [
     provideBrowserGlobalErrorListeners(),

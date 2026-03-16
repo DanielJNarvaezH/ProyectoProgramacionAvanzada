@@ -1,0 +1,364 @@
+$primary:    #9B5CFF;
+$primary-dk: #7B3FE4;
+$primary-lt: #F3EEFF;
+$green:      #10B981;
+$red:        #EF4444;
+$red-lt:     #FEF2F2;
+$gray-50:    #F9FAFB;
+$gray-100:   #F3F4F6;
+$gray-200:   #E5E7EB;
+$gray-400:   #9CA3AF;
+$gray-600:   #4B5563;
+$gray-800:   #1F2937;
+$radius:     12px;
+$radius-sm:  8px;
+
+.editar-page {
+  min-height: 100vh;
+  background: $gray-50;
+  font-family: 'Poppins', sans-serif;
+  padding-bottom: 60px;
+}
+
+// ── Skeleton ──────────────────────────────────────────────────────
+.skeleton-wrap {
+  max-width: 780px;
+  margin: 48px auto;
+  padding: 0 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.skeleton-pulse {
+  background: linear-gradient(90deg, $gray-100 25%, $gray-200 50%, $gray-100 75%);
+  background-size: 200% 100%;
+  animation: pulse 1.4s infinite;
+  border-radius: $radius-sm;
+}
+
+.skeleton-header { height: 40px; width: 60%; }
+.skeleton-field  { height: 52px; width: 100%; }
+
+@keyframes pulse {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+// ── Error carga ───────────────────────────────────────────────────
+.error-carga {
+  max-width: 480px;
+  margin: 80px auto;
+  text-align: center;
+  padding: 0 24px;
+
+  &__icon {
+    width: 56px;
+    height: 56px;
+    margin: 0 auto 16px;
+    color: $red;
+
+    svg { width: 100%; height: 100%; }
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 700;
+    color: $gray-800;
+    margin: 0 0 8px;
+  }
+
+  p {
+    font-size: 14px;
+    color: $gray-600;
+    margin: 0 0 24px;
+  }
+}
+
+// ── Wrap principal ────────────────────────────────────────────────
+.editar-wrap {
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 40px 24px;
+}
+
+// ── Cabecera ──────────────────────────────────────────────────────
+.editar-header {
+  margin-bottom: 32px;
+}
+
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  font-weight: 500;
+  color: $gray-600;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0;
+  margin-bottom: 16px;
+  font-family: 'Poppins', sans-serif;
+  transition: color 0.2s;
+
+  svg { width: 18px; height: 18px; }
+
+  &:hover { color: $primary; }
+}
+
+.editar-title {
+  font-size: 26px;
+  font-weight: 700;
+  color: $gray-800;
+  margin: 0 0 6px;
+}
+
+.editar-sub {
+  font-size: 14px;
+  color: $gray-400;
+  margin: 0;
+}
+
+// ── Alertas ───────────────────────────────────────────────────────
+.toast-exito,
+.alert-error {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 14px 18px;
+  border-radius: $radius-sm;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 24px;
+
+  svg { width: 20px; height: 20px; flex-shrink: 0; }
+}
+
+.toast-exito {
+  background: #ECFDF5;
+  color: $green;
+  border: 1px solid #A7F3D0;
+}
+
+.alert-error {
+  background: $red-lt;
+  color: $red;
+  border: 1px solid #FECACA;
+}
+
+// ── Grid del formulario ───────────────────────────────────────────
+.form-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 20px;
+
+  @media (max-width: 600px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+
+  &--full {
+    grid-column: 1 / -1;
+  }
+}
+
+.form-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: $gray-800;
+}
+
+.req { color: $primary; margin-left: 2px; }
+
+.form-input {
+  padding: 11px 14px;
+  border: 1.5px solid $gray-200;
+  border-radius: $radius-sm;
+  font-size: 14px;
+  font-family: 'Poppins', sans-serif;
+  color: $gray-800;
+  background: white;
+  transition: border-color 0.2s, box-shadow 0.2s;
+  outline: none;
+
+  &::placeholder { color: $gray-400; }
+
+  &:focus {
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(155,92,255,0.12);
+  }
+
+  &--error {
+    border-color: $red;
+    &:focus { box-shadow: 0 0 0 3px rgba(239,68,68,0.12); }
+  }
+
+  &--prefixed { padding-left: 32px; }
+}
+
+.form-textarea {
+  resize: vertical;
+  min-height: 100px;
+}
+
+.input-prefix-wrap {
+  position: relative;
+}
+
+.input-prefix {
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 14px;
+  font-weight: 600;
+  color: $gray-400;
+  pointer-events: none;
+}
+
+.form-error {
+  font-size: 12px;
+  color: $red;
+  font-weight: 500;
+}
+
+// ── Preview imagen ────────────────────────────────────────────────
+.img-preview {
+  margin-top: 8px;
+  border-radius: $radius-sm;
+  overflow: hidden;
+  border: 1.5px solid $gray-200;
+  max-height: 180px;
+
+  img {
+    width: 100%;
+    height: 180px;
+    object-fit: cover;
+    display: block;
+  }
+}
+
+// ── Toggle activo ─────────────────────────────────────────────────
+.toggle-label {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  cursor: pointer;
+  user-select: none;
+}
+
+.toggle-wrap { position: relative; flex-shrink: 0; }
+
+.toggle-input {
+  position: absolute;
+  opacity: 0;
+  width: 0;
+  height: 0;
+
+  &:checked + .toggle-track {
+    background: $primary;
+
+    .toggle-thumb { transform: translateX(22px); }
+  }
+}
+
+.toggle-track {
+  width: 46px;
+  height: 24px;
+  background: $gray-200;
+  border-radius: 12px;
+  transition: background 0.2s;
+  position: relative;
+}
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 18px;
+  height: 18px;
+  background: white;
+  border-radius: 50%;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.2);
+  transition: transform 0.2s cubic-bezier(0.34,1.56,0.64,1);
+}
+
+.toggle-text {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.toggle-title {
+  font-size: 14px;
+  font-weight: 600;
+  color: $gray-800;
+}
+
+.toggle-sub {
+  font-size: 12px;
+  color: $gray-400;
+}
+
+// ── Acciones ──────────────────────────────────────────────────────
+.form-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid $gray-200;
+}
+
+.btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 11px 24px;
+  border-radius: $radius-sm;
+  font-size: 14px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s;
+
+  &--primary {
+    background: $primary;
+    color: white;
+
+    &:hover:not(:disabled) { background: $primary-dk; }
+    &:disabled { opacity: 0.6; cursor: not-allowed; }
+  }
+
+  &--secondary {
+    background: white;
+    color: $gray-600;
+    border: 1.5px solid $gray-200;
+
+    &:hover:not(:disabled) {
+      border-color: $primary;
+      color: $primary;
+    }
+    &:disabled { opacity: 0.5; cursor: not-allowed; }
+  }
+}
+
+.spinner {
+  width: 16px;
+  height: 16px;
+  border: 2px solid rgba(255,255,255,0.4);
+  border-top-color: white;
+  border-radius: 50%;
+  animation: spin 0.7s linear infinite;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
