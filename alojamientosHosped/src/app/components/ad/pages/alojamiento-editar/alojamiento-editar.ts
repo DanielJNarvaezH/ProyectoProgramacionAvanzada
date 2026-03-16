@@ -4,6 +4,7 @@ import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
 
 import { AlojamientoService } from '../../../../../services/AlojamientoService';
+import { AuthService }        from '../../../../../services/AuthService';
 import { Alojamiento }        from '../../../../models/alojamiento.model';
 
 /**
@@ -13,7 +14,9 @@ import { Alojamiento }        from '../../../../models/alojamiento.model';
  * - Carga los datos actuales del alojamiento por ID
  * - Permite modificar todos los campos editables
  * - Llama a AlojamientoService.update() al guardar
- * - Ruta: /alojamientos/:id/editar
+ * - Ruta: /alojamientos/:id/editar (protegida por anfitrionGuard)
+ *
+ * FIX: hostId se toma del usuario logueado en lugar de hardcodear 0
  */
 @Component({
   selector: 'app-alojamiento-editar',
@@ -38,7 +41,8 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
     private fb:                 FormBuilder,
     private route:              ActivatedRoute,
     private router:             Router,
-    private alojamientoService: AlojamientoService
+    private alojamientoService: AlojamientoService,
+    private authService:        AuthService
   ) {}
 
   ngOnInit(): void {
@@ -62,7 +66,7 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
       description:   ['', [Validators.required, Validators.minLength(10), Validators.maxLength(1000)]],
       address:       ['', [Validators.required, Validators.maxLength(200)]],
       city:          ['', [Validators.required, Validators.maxLength(100)]],
-      latitude:      [null, [Validators.required, Validators.min(-90), Validators.max(90)]],
+      latitude:      [null, [Validators.required, Validators.min(-90),  Validators.max(90)]],
       longitude:     [null, [Validators.required, Validators.min(-180), Validators.max(180)]],
       pricePerNight: [null, [Validators.required, Validators.min(1)]],
       maxCapacity:   [null, [Validators.required, Validators.min(1), Validators.max(50)]],
@@ -110,9 +114,11 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
     this.errorGuardar = '';
     this.exito        = false;
 
+    // FIX ALOJ-8: tomar hostId del usuario logueado, no hardcodear 0
+    const usuario = this.authService.getUsuario();
     const payload: Alojamiento = {
       ...this.form.value,
-      hostId: 0
+      hostId: usuario?.id ?? 0
     };
 
     this.alojamientoService.update(this.alojamientoId, payload)

@@ -7,24 +7,18 @@ import { AlojamientoService }        from '../../../../../services/AlojamientoSe
 import { ImagenService }              from '../../../../../services/ImagenService';
 import { ComentarioService }          from '../../../../../services/ComentarioService';
 import { AlojamientoServicioService } from '../../../../../services/AlojamientoServicioService';
+import { AuthService }                from '../../../../../services/AuthService';
 
-import { Alojamiento }        from '../../../../models/alojamiento.model';
-import { Imagen }             from '../../../../models/imagen.model';
-import { Comentario }         from '../../../../models/comentario.model';
+import { Alojamiento }         from '../../../../models/alojamiento.model';
+import { Imagen }              from '../../../../models/imagen.model';
+import { Comentario }          from '../../../../models/comentario.model';
 import { AlojamientoServicio } from '../../../../models/alojamiento-servicio.model';
 
 /**
- * AlojamientoDetallePageComponent — ALOJ-5
+ * AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8
  *
- * Vista completa del detalle de un alojamiento:
- * - Galería de imágenes (foto principal + miniaturas + lightbox)
- * - Información: nombre, ciudad, precio, capacidad, descripción
- * - Servicios disponibles (iconos)
- * - Mapa de ubicación (OpenStreetMap embed)
- * - Comentarios y calificación promedio
- *
- * Carga en paralelo usando forkJoin para minimizar tiempo de espera.
- * Rutas: /alojamientos/:id
+ * Vista completa del detalle de un alojamiento.
+ * ALOJ-8: muestra botón Editar solo si el usuario logueado es el dueño.
  */
 @Component({
   selector: 'app-alojamiento-detalle',
@@ -34,18 +28,15 @@ import { AlojamientoServicio } from '../../../../models/alojamiento-servicio.mod
 })
 export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
 
-  // ── Estado de carga ────────────────────────────────────────────────────
   cargando = true;
   error    = '';
 
-  // ── Datos del alojamiento ──────────────────────────────────────────────
-  alojamiento: Alojamiento | null = null;
-  imagenes:    Imagen[]           = [];
+  alojamiento: Alojamiento | null    = null;
+  imagenes:    Imagen[]              = [];
   servicios:   AlojamientoServicio[] = [];
-  comentarios: Comentario[]       = [];
+  comentarios: Comentario[]          = [];
   promedio     = 0;
 
-  // ── Mapa ───────────────────────────────────────────────────────────────
   mapaUrl = '';
 
   private destroy$ = new Subject<void>();
@@ -56,7 +47,8 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     private alojamientoService:       AlojamientoService,
     private imagenService:            ImagenService,
     private comentarioService:        ComentarioService,
-    private alojamientoServicioSvc:   AlojamientoServicioService
+    private alojamientoServicioSvc:   AlojamientoServicioService,
+    private authService:              AuthService
   ) {}
 
   ngOnInit(): void {
@@ -74,14 +66,31 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
   }
 
   // ─────────────────────────────────────────────────────────────────
-  // Carga de datos en paralelo
+  // ALOJ-8: getter que indica si el usuario logueado es el dueño
+  // ─────────────────────────────────────────────────────────────────
+
+  get esAnfitrionDueno(): boolean {
+    const usuario = this.authService.getUsuario();
+    if (!usuario?.id || !this.alojamiento?.hostId) return false;
+    return usuario.id === this.alojamiento.hostId;
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // ALOJ-8: navegar al formulario de edición
+  // ─────────────────────────────────────────────────────────────────
+
+  irAEditar(): void {
+    this.router.navigate(['/alojamientos', this.alojamiento!.id, 'editar']);
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // Carga de datos
   // ─────────────────────────────────────────────────────────────────
 
   cargarDetalle(id: number): void {
     this.cargando = true;
     this.error    = '';
 
-    // Primero obtenemos el alojamiento principal
     this.alojamientoService.getById(id)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -97,24 +106,12 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
       });
   }
 
-  /**
-   * Carga en paralelo: imágenes, servicios, comentarios y promedio.
-   * Usa catchError individual para que un fallo parcial no bloquee la vista.
-   */
   private cargarDatosSoporte(id: number): void {
     forkJoin({
-      imagenes:   this.imagenService.getByAlojamiento(id).pipe(
-        catchError(() => of([] as Imagen[]))
-      ),
-      servicios:  this.alojamientoServicioSvc.getServiciosByAlojamiento(id).pipe(
-        catchError(() => of([] as AlojamientoServicio[]))
-      ),
-      comentarios: this.comentarioService.getByAlojamiento(id).pipe(
-        catchError(() => of([] as Comentario[]))
-      ),
-      promedio:   this.comentarioService.getPromedio(id).pipe(
-        catchError(() => of(0))
-      )
+      imagenes:    this.imagenService.getByAlojamiento(id).pipe(catchError(() => of([] as Imagen[]))),
+      servicios:   this.alojamientoServicioSvc.getServiciosByAlojamiento(id).pipe(catchError(() => of([] as AlojamientoServicio[]))),
+      comentarios: this.comentarioService.getByAlojamiento(id).pipe(catchError(() => of([] as Comentario[]))),
+      promedio:    this.comentarioService.getPromedio(id).pipe(catchError(() => of(0)))
     })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -125,16 +122,9 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
           this.promedio    = promedio ?? 0;
           this.cargando    = false;
         },
-        error: () => {
-          // forkJoin no debería llegar aquí por los catchError individuales
-          this.cargando = false;
-        }
+        error: () => { this.cargando = false; }
       });
   }
-
-  // ─────────────────────────────────────────────────────────────────
-  // Mapa OpenStreetMap
-  // ─────────────────────────────────────────────────────────────────
 
   private construirMapaUrl(): void {
     if (!this.alojamiento) return;
@@ -146,10 +136,6 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
         `&layer=mapnik&marker=${lat},${lng}`;
     }
   }
-
-  // ─────────────────────────────────────────────────────────────────
-  // Helpers de template
-  // ─────────────────────────────────────────────────────────────────
 
   volver(): void {
     this.router.navigate(['/alojamientos']);

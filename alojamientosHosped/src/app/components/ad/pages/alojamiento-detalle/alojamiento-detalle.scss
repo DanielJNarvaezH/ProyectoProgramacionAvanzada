@@ -54,6 +54,41 @@ $shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
   &:hover { color: $primary; }
 }
 
+// ── Topbar: volver + editar — ALOJ-8 ─────────────────────────────────────────
+.detalle-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 1.25rem;
+
+  // Si solo hay botón volver (huésped), alinear a la izquierda
+  .btn-volver { margin-bottom: 0; }
+}
+
+// Botón editar — visible solo para el anfitrión dueño
+.btn-editar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: $primary;
+  color: #fff;
+  border: none;
+  cursor: pointer;
+  padding: 0.45rem 1rem;
+  border-radius: 9999px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  transition: background 0.2s;
+
+  &:hover { background: $primary-dark; }
+
+  &:focus-visible {
+    outline: 2px solid $primary;
+    outline-offset: 2px;
+  }
+}
+
 // ── Galería ───────────────────────────────────────────────────────────────────
 .detalle-galeria {
   display: block;
