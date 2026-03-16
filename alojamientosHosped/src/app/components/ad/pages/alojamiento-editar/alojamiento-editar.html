@@ -18,7 +18,7 @@
     </div>
     <h2>No se pudo cargar</h2>
     <p>{{ errorCarga }}</p>
-    <button class="btn btn--secondary" (click)="cancelar()">Volver</button>
+    <button type="button" class="btn btn--secondary" (click)="cancelar()">Volver</button>
   </div>
 
   <!-- ── FORMULARIO ────────────────────────────────────────── -->
@@ -26,7 +26,7 @@
 
     <!-- Cabecera -->
     <div class="editar-header">
-      <button class="btn-back" (click)="cancelar()">
+      <button type="button" class="btn-back" (click)="cancelar()">
         <svg viewBox="0 0 20 20" fill="none"><path d="M12 4l-6 6 6 6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
         Volver al detalle
       </button>
@@ -159,16 +159,30 @@
           <span class="form-error" *ngIf="invalido('longitude')">{{ errorMsg('longitude') }}</span>
         </div>
 
-        <!-- Imagen principal -->
+        <!-- ALOJ-11: Imágenes con Cloudinary -->
         <div class="form-group form-group--full">
-          <label class="form-label">URL imagen principal</label>
-          <input
-            class="form-input"
-            formControlName="mainImage"
-            placeholder="https://res.cloudinary.com/…"
-          />
-          <div class="img-preview" *ngIf="campo('mainImage')?.value">
-            <img [src]="campo('mainImage')?.value" alt="Preview imagen principal" />
+          <label class="form-label">
+            <i class="fa-solid fa-images" style="color: #9B5CFF; margin-right: 6px;"></i>
+            Imágenes del alojamiento
+            <span style="font-size: 12px; font-weight: 400; color: #9CA3AF; margin-left: 6px;">
+              (sube nuevas para reemplazar las actuales)
+            </span>
+          </label>
+          <app-image-uploader
+            [alojamientoId]="alojamientoId"
+            [maxImagenes]="8"
+            [imagenesExistentes]="imagenesExistentes"
+            (imagenPrincipalChange)="onImagenPrincipalChange($event)"
+            (imagenesChange)="onImagenesChange($event)"
+          ></app-image-uploader>
+
+          <!-- Imagen actual si no se ha subido nueva -->
+          <div *ngIf="campo('mainImage')?.value && !hayImagenesSubiendo" class="img-actual">
+            <span class="img-actual__label">
+              <i class="fa-solid fa-circle-check"></i>
+              Imagen principal actual:
+            </span>
+            <img [src]="campo('mainImage')?.value" alt="Imagen actual" class="img-actual__preview" />
           </div>
         </div>
 
@@ -195,9 +209,13 @@
         <button type="button" class="btn btn--secondary" (click)="cancelar()" [disabled]="guardando">
           Cancelar
         </button>
-        <button type="submit" class="btn btn--primary" [disabled]="guardando || exito">
-          <span class="spinner" *ngIf="guardando"></span>
-          <span>{{ guardando ? 'Guardando…' : 'Guardar cambios' }}</span>
+        <button
+          type="submit"
+          class="btn btn--primary"
+          [disabled]="guardando || exito || hayImagenesSubiendo"
+        >
+          <span class="spinner" *ngIf="guardando || hayImagenesSubiendo"></span>
+          <span>{{ hayImagenesSubiendo ? 'Subiendo imágenes…' : guardando ? 'Guardando…' : 'Guardar cambios' }}</span>
         </button>
       </div>
 

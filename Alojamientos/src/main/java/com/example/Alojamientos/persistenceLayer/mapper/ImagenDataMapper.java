@@ -8,14 +8,15 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ImagenDataMapper {
 
+    @Mapping(target = "id",        source = "id")
     @Mapping(target = "lodgingId", source = "alojamiento.id")
-    @Mapping(target = "url", source = "url")
+    @Mapping(target = "url",       source = "url")
     @Mapping(target = "description", source = "descripcion")
-    @Mapping(target = "order", source = "ordenVisualizacion")
+    @Mapping(target = "order",     source = "ordenVisualizacion")
     ImagenDTO toDTO(ImagenEntity entity);
 
     @Mapping(target = "alojamiento", source = "lodgingId", qualifiedByName = "lodgingIdToEntity")
-    @Mapping(target = "url", source = "url")
+    @Mapping(target = "url",         source = "url")
     @Mapping(target = "descripcion", source = "description")
     @Mapping(target = "ordenVisualizacion", source = "order")
     ImagenEntity toEntity(ImagenDTO dto);

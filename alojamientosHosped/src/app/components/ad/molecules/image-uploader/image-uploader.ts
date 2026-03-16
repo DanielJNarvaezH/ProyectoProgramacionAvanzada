@@ -1,19 +1,27 @@
 ﻿import {
-  Component, Input, Output, EventEmitter,
+  Component, Input, Output, EventEmitter, OnInit,
   OnDestroy, ChangeDetectionStrategy, ChangeDetectorRef
 } from '@angular/core';
 import { HttpClient, HttpEventType } from '@angular/common/http';
-import { environment } from '../../../../../environments/environment';
 
 export interface ImagenSubida {
-  id: string;           // public_id de Cloudinary
-  url: string;          // URL segura de Cloudinary
-  orden: number;        // posiciÃ³n en la galerÃ­a (0 = imagen principal)
-  nombre: string;       // nombre original del archivo
-  tamanio: number;      // bytes
+  id: string;           // public_id de Cloudinary o id de BD (prefijo 'bd_')
+  bdId?: number;        // id real en la BD si ya estaba guardada
+  url: string;
+  orden: number;
+  nombre: string;
+  tamanio: number;
   subiendo: boolean;
-  progreso: number;     // 0-100
+  progreso: number;
   error?: string;
+  esExistente?: boolean; // true si vino de BD, no de Cloudinary en esta sesión
+}
+
+export interface ImagenExistente {
+  id: number;
+  url: string;
+  orden: number;
+  nombre?: string;
 }
 
 @Component({
@@ -23,13 +31,19 @@ export interface ImagenSubida {
   styleUrls: ['./image-uploader.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class ImageUploaderComponent implements OnDestroy {
+export class ImageUploaderComponent implements OnInit, OnDestroy {
 
-  /** ID del alojamiento al que pertenecen las imÃ¡genes (opcional, para metadatos) */
+  /** ID del alojamiento (para metadatos en Cloudinary) */
   @Input() alojamientoId?: number;
 
-  /** MÃ¡ximo de imÃ¡genes permitidas */
+  /** Máximo de imágenes permitidas */
   @Input() maxImagenes = 8;
+
+  /**
+   * ALOJ-11: imágenes ya guardadas en BD para precargar al editar.
+   * Formato: [{ id, url, orden, nombre? }]
+   */
+  @Input() imagenesExistentes: ImagenExistente[] = [];
 
   /** Emite la lista actualizada cada vez que cambia */
   @Output() imagenesChange = new EventEmitter<ImagenSubida[]>();
@@ -41,8 +55,7 @@ export class ImageUploaderComponent implements OnDestroy {
   isDragOver = false;
   private dragSrcIndex: number | null = null;
 
-  // Cloudinary config (desde environment o hardcoded para el proyecto)
-  private readonly CLOUD_NAME = 'dxikq6rqs';
+  private readonly CLOUD_NAME    = 'dxikq6rqs';
   private readonly UPLOAD_PRESET = 'hosped_unsigned';
   private readonly CLOUDINARY_URL = `https://api.cloudinary.com/v1_1/${this.CLOUD_NAME}/image/upload`;
 
@@ -51,7 +64,26 @@ export class ImageUploaderComponent implements OnDestroy {
     private cdr: ChangeDetectorRef
   ) {}
 
-  // â”€â”€ Drag & Drop zona â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  ngOnInit(): void {
+    // ALOJ-11: precargar imágenes existentes al editar
+    if (this.imagenesExistentes && this.imagenesExistentes.length > 0) {
+      this.imagenes = this.imagenesExistentes.map((img, i) => ({
+        id:          `bd_${img.id}`,
+        bdId:        img.id,
+        url:         img.url,
+        orden:       img.orden ?? i,
+        nombre:      img.nombre ?? `imagen_${i + 1}`,
+        tamanio:     0,
+        subiendo:    false,
+        progreso:    100,
+        esExistente: true
+      }));
+      this.emitirCambio();
+      this.cdr.markForCheck();
+    }
+  }
+
+  // ── Drag & Drop zona ──────────────────────────────────────────────
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
@@ -83,29 +115,27 @@ export class ImageUploaderComponent implements OnDestroy {
     }
   }
 
-  // â”€â”€ Procesamiento de archivos â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Procesamiento de archivos ──────────────────────────────────────
 
   private procesarArchivos(files: File[]): void {
     const imagenesValidas = files.filter(f => f.type.startsWith('image/'));
-    const disponibles = this.maxImagenes - this.imagenes.length;
-    const aSubir = imagenesValidas.slice(0, disponibles);
-
+    const disponibles     = this.maxImagenes - this.imagenes.length;
+    const aSubir          = imagenesValidas.slice(0, disponibles);
     aSubir.forEach(file => this.subirImagen(file));
   }
 
   private subirImagen(file: File): void {
     const tempId = `temp_${Date.now()}_${Math.random()}`;
     const nuevaImagen: ImagenSubida = {
-      id: tempId,
-      url: '',
-      orden: this.imagenes.length,
-      nombre: file.name,
-      tamanio: file.size,
+      id:       tempId,
+      url:      '',
+      orden:    this.imagenes.length,
+      nombre:   file.name,
+      tamanio:  file.size,
       subiendo: true,
       progreso: 0
     };
 
-    // Preview local inmediato
     const reader = new FileReader();
     reader.onload = (e) => {
       nuevaImagen.url = e.target?.result as string;
@@ -116,7 +146,6 @@ export class ImageUploaderComponent implements OnDestroy {
     this.imagenes = [...this.imagenes, nuevaImagen];
     this.emitirCambio();
 
-    // Subir a Cloudinary
     const formData = new FormData();
     formData.append('file', file);
     formData.append('upload_preset', this.UPLOAD_PRESET);
@@ -133,8 +162,8 @@ export class ImageUploaderComponent implements OnDestroy {
         } else if (event.type === HttpEventType.Response) {
           const body = event.body;
           this.actualizarImagen(tempId, {
-            id: body.public_id,
-            url: body.secure_url,
+            id:       body.public_id,
+            url:      body.secure_url,
             subiendo: false,
             progreso: 100
           });
@@ -142,10 +171,10 @@ export class ImageUploaderComponent implements OnDestroy {
         }
         this.cdr.markForCheck();
       },
-      error: (err) => {
+      error: () => {
         this.actualizarImagen(tempId, {
           subiendo: false,
-          error: 'Error al subir la imagen. Intenta de nuevo.'
+          error:    'Error al subir la imagen. Intenta de nuevo.'
         });
         this.cdr.markForCheck();
       }
@@ -158,7 +187,7 @@ export class ImageUploaderComponent implements OnDestroy {
     );
   }
 
-  // â”€â”€ Eliminar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Eliminar ───────────────────────────────────────────────────────
 
   eliminar(index: number): void {
     this.imagenes = this.imagenes
@@ -169,14 +198,11 @@ export class ImageUploaderComponent implements OnDestroy {
   }
 
   reintentar(index: number): void {
-    // Solo reintenta si tiene error â€” recrea el objeto para forzar re-render
     const img = this.imagenes[index];
-    if (img?.error) {
-      this.eliminar(index);
-    }
+    if (img?.error) this.eliminar(index);
   }
 
-  // â”€â”€ Reordenar (drag entre tarjetas) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Reordenar ──────────────────────────────────────────────────────
 
   onCardDragStart(index: number): void {
     this.dragSrcIndex = index;
@@ -193,7 +219,7 @@ export class ImageUploaderComponent implements OnDestroy {
     const reordenadas = [...this.imagenes];
     const [movida] = reordenadas.splice(this.dragSrcIndex, 1);
     reordenadas.splice(targetIndex, 0, movida);
-    this.imagenes = reordenadas.map((img, i) => ({ ...img, orden: i }));
+    this.imagenes     = reordenadas.map((img, i) => ({ ...img, orden: i }));
     this.dragSrcIndex = null;
     this.emitirCambio();
     this.cdr.markForCheck();
@@ -217,7 +243,7 @@ export class ImageUploaderComponent implements OnDestroy {
     this.cdr.markForCheck();
   }
 
-  // â”€â”€ Utilidades â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+  // ── Utilidades ─────────────────────────────────────────────────────
 
   get puedeAgregarMas(): boolean {
     return this.imagenes.length < this.maxImagenes;
@@ -228,6 +254,7 @@ export class ImageUploaderComponent implements OnDestroy {
   }
 
   formatearTamanio(bytes: number): string {
+    if (bytes === 0) return '';
     if (bytes < 1024) return `${bytes} B`;
     if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
     return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;

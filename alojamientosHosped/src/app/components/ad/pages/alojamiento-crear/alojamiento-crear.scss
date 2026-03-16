@@ -367,3 +367,17 @@ $border:        #e5e7eb;
 }
 
 .required { color: $error; margin-left: 2px; }
+
+// ── ALOJ-11: Indicador imagen principal cargada ───────────────────────────────
+
+.imagen-ok {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  margin-top: 0.6rem;
+  font-size: 0.82rem;
+  font-weight: 500;
+  color: #16a34a;
+
+  i { font-size: 0.9rem; }
+}

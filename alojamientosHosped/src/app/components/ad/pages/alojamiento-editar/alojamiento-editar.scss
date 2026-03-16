@@ -362,3 +362,30 @@ $radius-sm:  8px;
 @keyframes spin {
   to { transform: rotate(360deg); }
 }
+
+// ── ALOJ-11: Imagen actual en editar ─────────────────────────────────────────
+// Agrega este bloque al FINAL de alojamiento-editar.scss
+
+.img-actual {
+  margin-top: 12px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+
+  &__label {
+    font-size: 12px;
+    font-weight: 500;
+    color: #10B981;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  &__preview {
+    width: 100%;
+    max-height: 180px;
+    object-fit: cover;
+    border-radius: 8px;
+    border: 1.5px solid #E5E7EB;
+  }
+}

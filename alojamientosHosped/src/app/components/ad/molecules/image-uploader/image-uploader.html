@@ -92,7 +92,8 @@
             <path d="M12 8v4M12 16h.01" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
           </svg>
           <span>{{ img.error }}</span>
-          <button class="btn-retry" (click)="reintentar(i)">Eliminar</button>
+          <!-- FIX: type="button" para no disparar submit del form padre -->
+          <button type="button" class="btn-retry" (click)="reintentar(i)">Eliminar</button>
         </div>
 
         <!-- Badge principal -->
@@ -112,7 +113,9 @@
         <span class="img-size">{{ formatearTamanio(img.tamanio) }}</span>
 
         <div class="card-actions">
+          <!-- FIX: type="button" en todos los botones de acción -->
           <button
+            type="button"
             class="btn-action"
             title="Mover izquierda"
             [disabled]="i === 0"
@@ -121,6 +124,7 @@
             <svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
           <button
+            type="button"
             class="btn-action"
             title="Mover derecha"
             [disabled]="i === imagenes.length - 1"
@@ -129,6 +133,7 @@
             <svg viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
           </button>
           <button
+            type="button"
             class="btn-action btn-delete"
             title="Eliminar imagen"
             (click)="eliminar(i)"

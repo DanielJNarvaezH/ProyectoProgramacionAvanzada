@@ -6,26 +6,15 @@ import { catchError } from 'rxjs/operators';
 import { AlojamientoService }           from '../../../../../services/AlojamientoService';
 import { AuthService }                  from '../../../../../services/AuthService';
 import { AlojamientoServicioService }   from '../../../../../services/AlojamientoServicioService';
+import { ImagenService }                from '../../../../../services/ImagenService';
 import { ServicioDisponible }           from '../../../../models/servicio.model';
+import { ImagenSubida }                 from '../../../../components/ad/molecules/image-uploader/image-uploader';
 
 /**
- * AlojamientoCrearPageComponent — ALOJ-7 + ALOJ-10
+ * AlojamientoCrearPageComponent — ALOJ-7 + ALOJ-10 + ALOJ-11
  *
- * Formulario de creación de alojamiento con:
- * ALOJ-7:  Reactive form con todos los campos y validaciones en tiempo real
- *          Acceso restringido a ANFITRION (protegido por anfitrionGuard en routing)
- * ALOJ-10: Selector de servicios con checkboxes
- *
- * Validaciones implementadas:
- * - nombre: requerido, max 150 chars
- * - descripción: requerida
- * - dirección: requerida, max 255 chars
- * - ciudad: requerida, max 100 chars
- * - precio: requerido, > 0
- * - capacidad: requerida, >= 1
- * - latitud: requerida, -90 a 90
- * - longitud: requerida, -180 a 180
- * - imagen: requerida, URL válida http/https
+ * ALOJ-11: Después de crear el alojamiento, guarda todas las imágenes
+ *          subidas a Cloudinary en la tabla imagen de la BD.
  */
 @Component({
   selector: 'app-alojamiento-crear',
@@ -37,11 +26,15 @@ export class AlojamientoCrearPageComponent implements OnInit {
 
   form!: FormGroup;
 
-  isSubmitting   = false;
-  errorMessage   = '';
-  successMessage = '';
+  isSubmitting        = false;
+  errorMessage        = '';
+  successMessage      = '';
+  hayImagenesSubiendo = false;
 
-  // ── ALOJ-10: Estado de servicios ──────────────────────────────
+  // Lista completa de imágenes del uploader (para persistir en BD)
+  private imagenesActuales: ImagenSubida[] = [];
+
+  // ── ALOJ-10 ────────────────────────────────────────────────────
   serviciosDisponibles: ServicioDisponible[] = [];
   serviciosSeleccionados: Set<number>        = new Set();
   cargandoServicios                          = false;
@@ -51,6 +44,7 @@ export class AlojamientoCrearPageComponent implements OnInit {
     private fb:                         FormBuilder,
     private alojamientoService:         AlojamientoService,
     private alojamientoServicioService: AlojamientoServicioService,
+    private imagenService:              ImagenService,
     private authService:                AuthService,
     private router:                     Router
   ) {}
@@ -65,41 +59,36 @@ export class AlojamientoCrearPageComponent implements OnInit {
       maxCapacity:   [null, [Validators.required, Validators.min(1)]],
       latitude:      [null, [Validators.required, Validators.min(-90),  Validators.max(90)]],
       longitude:     [null, [Validators.required, Validators.min(-180), Validators.max(180)]],
-      mainImage:     ['', [Validators.required, Validators.pattern(/^https?:\/\/.+/)]]
+      mainImage:     ['', [Validators.required]]
     });
-
     this.cargarServicios();
   }
 
-  // ── ALOJ-10: Cargar servicios del backend ─────────────────────
+  // ── ALOJ-11: callbacks del uploader ───────────────────────────
+
+  onImagenPrincipalChange(url: string): void {
+    this.form.patchValue({ mainImage: url });
+    this.form.get('mainImage')?.markAsTouched();
+  }
+
+  onImagenesChange(imagenes: ImagenSubida[]): void {
+    this.hayImagenesSubiendo  = imagenes.some(img => img.subiendo);
+    this.imagenesActuales     = imagenes;
+  }
+
+  // ── ALOJ-10 ───────────────────────────────────────────────────
 
   cargarServicios(): void {
     this.cargandoServicios = true;
-    this.errorServicios    = '';
-
     this.alojamientoServicioService.getServiciosDisponibles().subscribe({
-      next: (servicios) => {
-        this.serviciosDisponibles = servicios;
-        this.cargandoServicios    = false;
-      },
-      error: () => {
-        this.cargandoServicios = false;
-        this.errorServicios    = 'No se pudieron cargar los servicios. Puedes continuar sin seleccionarlos.';
-      }
+      next: (s) => { this.serviciosDisponibles = s; this.cargandoServicios = false; },
+      error: () => { this.cargandoServicios = false; this.errorServicios = 'No se pudieron cargar los servicios.'; }
     });
   }
 
-  // ── ALOJ-10: Toggle checkbox — FIX change detection ──────────
-  // Se crea un nuevo Set en cada toggle para que Angular detecte
-  // el cambio de referencia y re-renderice solo el ítem correcto.
-
   toggleServicio(servicioId: number): void {
     const nuevos = new Set(this.serviciosSeleccionados);
-    if (nuevos.has(servicioId)) {
-      nuevos.delete(servicioId);
-    } else {
-      nuevos.add(servicioId);
-    }
+    nuevos.has(servicioId) ? nuevos.delete(servicioId) : nuevos.add(servicioId);
     this.serviciosSeleccionados = nuevos;
   }
 
@@ -107,7 +96,7 @@ export class AlojamientoCrearPageComponent implements OnInit {
     return this.serviciosSeleccionados.has(servicioId);
   }
 
-  // ── Getters para acceso fácil desde el template ───────────────
+  // ── Getters ───────────────────────────────────────────────────
   get name()          { return this.form.get('name'); }
   get description()   { return this.form.get('description'); }
   get address()       { return this.form.get('address'); }
@@ -118,7 +107,6 @@ export class AlojamientoCrearPageComponent implements OnInit {
   get longitude()     { return this.form.get('longitude'); }
   get mainImage()     { return this.form.get('mainImage'); }
 
-  // ── Clases de estilo por estado del campo ─────────────────────
   campoClase(control: AbstractControl | null): Record<string, boolean> {
     return {
       'border-red-400 bg-red-50':     !!control?.invalid && !!control?.touched,
@@ -127,12 +115,18 @@ export class AlojamientoCrearPageComponent implements OnInit {
     };
   }
 
-  // ── Envío del formulario ──────────────────────────────────────
+  // ── Envío ─────────────────────────────────────────────────────
 
   crear(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
-      this.errorMessage = 'Por favor corrige los errores antes de continuar.';
+      this.errorMessage = !this.mainImage?.value
+        ? 'Debes subir al menos una imagen del alojamiento.'
+        : 'Por favor corrige los errores antes de continuar.';
+      return;
+    }
+    if (this.hayImagenesSubiendo) {
+      this.errorMessage = 'Espera a que terminen de subir todas las imágenes.';
       return;
     }
 
@@ -141,28 +135,34 @@ export class AlojamientoCrearPageComponent implements OnInit {
     this.successMessage = '';
 
     const usuario = this.authService.getUsuario();
-    const payload = {
-      ...this.form.value,
-      hostId: usuario?.id ?? 0,
-      active: true
-    };
+    const payload = { ...this.form.value, hostId: usuario?.id ?? 0, active: true };
 
     this.alojamientoService.create(payload).subscribe({
       next: (alojamientoCreado) => {
-        const serviciosIds = Array.from(this.serviciosSeleccionados);
+        const id = alojamientoCreado.id!;
 
-        if (serviciosIds.length === 0 || !alojamientoCreado.id) {
+        // Guardar imágenes en BD (todas las subidas a Cloudinary)
+        const imagenesListas = this.imagenesActuales.filter(img => !img.subiendo && !img.error && img.url);
+        const peticionesImg  = imagenesListas.map(img =>
+          this.imagenService.crear(id, img.url, img.orden, img.nombre)
+            .pipe(catchError(() => of(null)))
+        );
+
+        // Guardar servicios
+        const serviciosIds   = Array.from(this.serviciosSeleccionados);
+        const peticionesSvc  = serviciosIds.map(serviceId =>
+          this.alojamientoServicioService.addServicio(id, serviceId)
+            .pipe(catchError(() => of(null)))
+        );
+
+        const todasLasPeticiones = [...peticionesImg, ...peticionesSvc];
+
+        if (todasLasPeticiones.length === 0) {
           this.finalizarCreacion();
           return;
         }
 
-        const peticiones = serviciosIds.map(serviceId =>
-          this.alojamientoServicioService
-            .addServicio(alojamientoCreado.id!, serviceId)
-            .pipe(catchError(() => of(null)))
-        );
-
-        forkJoin(peticiones).subscribe({
+        forkJoin(todasLasPeticiones).subscribe({
           next: () => this.finalizarCreacion(),
           error: () => this.finalizarCreacion()
         });

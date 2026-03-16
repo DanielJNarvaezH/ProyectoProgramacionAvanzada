@@ -27,45 +27,30 @@ public class AlojamientoService {
 
     /**
      * RF9, HU-009: Crear nuevo alojamiento
-     * RN8: Debe tener al menos 1 imagen
      * RN11: Coordenadas geográficas obligatorias
      */
     public AlojamientoDTO crearAlojamiento(AlojamientoDTO dto) {
-        // RN8: Validar que tenga imagen principal
         if (dto.getMainImage() == null || dto.getMainImage().trim().isEmpty()) {
             throw new IllegalArgumentException("El alojamiento debe tener al menos una imagen principal");
         }
-
-        // RN11: Validar coordenadas
         if (dto.getLatitude() == null || dto.getLongitude() == null) {
             throw new IllegalArgumentException("Las coordenadas geográficas son obligatorias");
         }
-
-        // Validar rango de coordenadas
         if (dto.getLatitude() < -90 || dto.getLatitude() > 90) {
             throw new IllegalArgumentException("La latitud debe estar entre -90 y 90 grados");
         }
-
         if (dto.getLongitude() < -180 || dto.getLongitude() > 180) {
             throw new IllegalArgumentException("La longitud debe estar entre -180 y 180 grados");
         }
-
-        // Validar precio positivo
         if (dto.getPricePerNight() == null || dto.getPricePerNight() <= 0) {
             throw new IllegalArgumentException("El precio por noche debe ser mayor a 0");
         }
-
-        // Validar capacidad mínima
         if (dto.getMaxCapacity() == null || dto.getMaxCapacity() < 1) {
             throw new IllegalArgumentException("La capacidad máxima debe ser al menos 1 huésped");
         }
-
-        // Validar que el nombre no esté vacío
         if (dto.getName() == null || dto.getName().trim().isEmpty()) {
             throw new IllegalArgumentException("El nombre del alojamiento es obligatorio");
         }
-
-        // Validar que la descripción no esté vacía
         if (dto.getDescription() == null || dto.getDescription().trim().isEmpty()) {
             throw new IllegalArgumentException("La descripción del alojamiento es obligatoria");
         }
@@ -75,19 +60,17 @@ public class AlojamientoService {
             throw new IllegalArgumentException("Ya existe un alojamiento con ese nombre para este anfitrión");
         }
 
-        // Convertir y guardar
         AlojamientoEntity entity = alojamientoMapper.toEntity(dto);
         entity.setActivo(true);
 
         AlojamientoEntity saved = alojamientoRepository.save(entity);
-
-        // TODO: RF9 - Enviar notificación al administrador de nuevo alojamiento
-
         return alojamientoMapper.toDTO(saved);
     }
 
     /**
      * RF10, HU-010: Editar alojamiento existente
+     * FIX ALOJ-8/ALOJ-11: ahora actualiza TODOS los campos incluyendo
+     * imagenPrincipal, latitud, longitud y activo
      */
     public AlojamientoDTO actualizarAlojamiento(Integer id, AlojamientoDTO dto) {
         AlojamientoEntity entity = alojamientoRepository.findById(id)
@@ -98,13 +81,21 @@ public class AlojamientoService {
             throw new IllegalArgumentException("No se puede actualizar un alojamiento eliminado");
         }
 
-        // Actualizar campos
+        // Actualizar todos los campos editables
         entity.setNombre(dto.getName());
         entity.setDescripcion(dto.getDescription());
         entity.setDireccion(dto.getAddress());
         entity.setCiudad(dto.getCity());
         entity.setPrecioPorNoche(alojamientoMapper.doubleToBigDecimal(dto.getPricePerNight()));
         entity.setCapacidadMaxima(dto.getMaxCapacity());
+        entity.setLatitud(alojamientoMapper.doubleToBigDecimal(dto.getLatitude()));
+        entity.setLongitud(alojamientoMapper.doubleToBigDecimal(dto.getLongitude()));
+        entity.setActivo(dto.isActive());
+
+        // FIX Bug 2: actualizar imagenPrincipal si viene en el DTO
+        if (dto.getMainImage() != null && !dto.getMainImage().isBlank()) {
+            entity.setImagenPrincipal(dto.getMainImage());
+        }
 
         AlojamientoEntity updated = alojamientoRepository.save(entity);
         return alojamientoMapper.toDTO(updated);
@@ -112,14 +103,12 @@ public class AlojamientoService {
 
     /**
      * RF11, HU-011: Eliminar alojamiento (soft delete)
-     * RN10: Solo si no tiene reservas futuras
      */
     public void eliminarAlojamiento(Integer id) {
         AlojamientoEntity entity = alojamientoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Alojamiento no encontrado con id: " + id));
 
-        // RN10: Validar que no tenga reservas futuras o activas
-        List<com.example.Alojamientos.persistenceLayer.entity.ReservaEntity> reservasActivas =
+        List<ReservaEntity> reservasActivas =
                 reservaRepository.findByAlojamiento_Id(id).stream()
                         .filter(r -> r.getFechaFin().isAfter(LocalDate.now()) || r.getFechaFin().equals(LocalDate.now()))
                         .filter(r -> r.getEstado() == ReservaEntity.EstadoReserva.CONFIRMADA ||
@@ -133,37 +122,26 @@ public class AlojamientoService {
             );
         }
 
-        // Soft delete
         entity.setActivo(false);
         alojamientoRepository.save(entity);
     }
 
-    /**
-     * RF12, HU-012: Listar alojamientos de un anfitrión
-     */
     @Transactional(readOnly = true)
     public List<AlojamientoDTO> listarPorAnfitrion(Integer hostId) {
         return alojamientoRepository.findByAnfitrion_Id(hostId).stream()
-                .filter(AlojamientoEntity::getActivo) // RN9: No mostrar eliminados
+                .filter(AlojamientoEntity::getActivo)
                 .map(alojamientoMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * RF14, HU-014: Buscar alojamientos por ciudad
-     * RN25: No mostrar eliminados
-     */
     @Transactional(readOnly = true)
     public List<AlojamientoDTO> buscarPorCiudad(String ciudad) {
         return alojamientoRepository.findByCiudadIgnoreCase(ciudad).stream()
-                .filter(AlojamientoEntity::getActivo) // RN25: Solo activos
+                .filter(AlojamientoEntity::getActivo)
                 .map(alojamientoMapper::toDTO)
                 .collect(Collectors.toList());
     }
 
-    /**
-     * RF16, HU-016: Filtrar por rango de precio
-     */
     @Transactional(readOnly = true)
     public List<AlojamientoDTO> buscarPorRangoPrecio(Double precioMin, Double precioMax) {
         return alojamientoRepository.findByPrecioPorNocheBetween(precioMin, precioMax).stream()
@@ -172,9 +150,6 @@ public class AlojamientoService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * RF18, HU-018: Obtener alojamiento por ID
-     */
     @Transactional(readOnly = true)
     public AlojamientoDTO obtenerPorId(Integer id) {
         AlojamientoEntity entity = alojamientoRepository.findById(id)
@@ -187,9 +162,6 @@ public class AlojamientoService {
         return alojamientoMapper.toDTO(entity);
     }
 
-    /**
-     * RF18, RN26: Listar todos los alojamientos activos (con paginación en controller)
-     */
     @Transactional(readOnly = true)
     public List<AlojamientoDTO> listarActivos() {
         return alojamientoRepository.findByActivoTrue().stream()
@@ -197,18 +169,11 @@ public class AlojamientoService {
                 .collect(Collectors.toList());
     }
 
-    /**
-     * RF13, HU-013: Obtener métricas de un alojamiento
-     * Retorna número de reservas (implementación básica)
-     */
     @Transactional(readOnly = true)
     public Long obtenerNumeroReservas(Integer alojamientoId) {
-        // Validar que el alojamiento exista
         if (!alojamientoRepository.existsById(alojamientoId)) {
             throw new IllegalArgumentException("Alojamiento no encontrado con ID: " + alojamientoId);
         }
-
-        // Si existe, contar las reservas asociadas
         return (long) reservaRepository.findByAlojamiento_Id(alojamientoId).size();
     }
 }

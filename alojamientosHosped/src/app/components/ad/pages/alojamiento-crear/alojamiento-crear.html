@@ -1,7 +1,6 @@
 <!-- ─────────────────────────────────────────────────────────────────────────
-     AlojamientoCrearPageComponent — ALOJ-12 + ALOJ-10
-     ALOJ-12: Validaciones de precio, capacidad, coordenadas e imagen
-     ALOJ-10: Selector de servicios con checkboxes
+     AlojamientoCrearPageComponent — ALOJ-7 + ALOJ-10 + ALOJ-11
+     ALOJ-11: Sección de imagen reemplazada por app-image-uploader (Cloudinary)
      ───────────────────────────────────────────────────────────────────────── -->
 
 <app-navbar></app-navbar>
@@ -116,7 +115,7 @@
           </div>
         </div>
 
-        <!-- Coordenadas — ALOJ-12 -->
+        <!-- Coordenadas -->
         <div class="field-row">
           <div class="field">
             <label class="field__label">
@@ -217,30 +216,34 @@
         </div>
       </fieldset>
 
-      <!-- ── Sección: Imagen ─────────────────────────────────────────── -->
+      <!-- ── ALOJ-11: Sección de imágenes con Cloudinary ───────────── -->
       <fieldset class="crear-section">
         <legend class="crear-section__legend">
-          <i class="fa-solid fa-image"></i> Imagen principal
+          <i class="fa-solid fa-images"></i> Imágenes del alojamiento
+          <span class="crear-section__legend-hint">(la primera será la portada)</span>
         </legend>
 
-        <div class="field">
-          <label class="field__label">
-            URL de la imagen <span class="required">*</span>
-          </label>
-          <input
-            formControlName="mainImage"
-            type="url"
-            placeholder="https://ejemplo.com/mi-alojamiento.jpg"
-            class="field__input"
-            [ngClass]="campoClase(mainImage)"
-          />
-          <div *ngIf="mainImage?.invalid && mainImage?.touched" class="field__error">
-            <span *ngIf="mainImage?.errors?.['required']">La imagen principal es obligatoria.</span>
-            <span *ngIf="mainImage?.errors?.['pattern']">Debe ser una URL válida (http:// o https://).</span>
-          </div>
-          <div *ngIf="mainImage?.valid && mainImage?.value" class="image-preview">
-            <img [src]="mainImage?.value" alt="Vista previa" class="image-preview__img" />
-          </div>
+        <!-- ImageUploader — drag & drop, preview, Cloudinary -->
+        <app-image-uploader
+          [maxImagenes]="8"
+          (imagenPrincipalChange)="onImagenPrincipalChange($event)"
+          (imagenesChange)="onImagenesChange($event)"
+        ></app-image-uploader>
+
+        <!-- Validación: mostrar error si intentan publicar sin imagen -->
+        <div
+          *ngIf="mainImage?.invalid && mainImage?.touched"
+          class="field__error" style="margin-top: 0.5rem;"
+        >
+          <i class="fa-solid fa-circle-exclamation"></i>
+          
+          Debes subir al menos una imagen del alojamiento.
+        </div>
+
+        <!-- Indicador de imagen principal cargada -->
+        <div *ngIf="mainImage?.value" class="imagen-ok">
+          <i class="fa-solid fa-circle-check"></i>
+          Imagen principal lista
         </div>
       </fieldset>
 
@@ -251,21 +254,16 @@
           <span class="crear-section__legend-hint">(opcional)</span>
         </legend>
 
-        <!-- Cargando -->
         <div *ngIf="cargandoServicios" class="servicios-loading">
           <i class="fa-solid fa-spinner fa-spin"></i>
           <span>Cargando servicios...</span>
         </div>
 
-        <!-- Error -->
         <div *ngIf="errorServicios && !cargandoServicios" class="servicios-error">
           <i class="fa-solid fa-triangle-exclamation"></i>
           <span>{{ errorServicios }}</span>
         </div>
 
-        <!-- Grid de servicios — ALOJ-10
-             FIX: usamos div con (click) en lugar de label+checkbox
-             para evitar que el browser active todos los checkboxes al mismo tiempo -->
         <div
           *ngIf="!cargandoServicios && serviciosDisponibles.length > 0"
           class="servicios-grid"
@@ -280,13 +278,8 @@
             tabindex="0"
             (keydown.space)="toggleServicio(servicio.id)"
           >
-            <!-- Checkmark visual — sin input nativo -->
             <span class="servicio-item__check">
-              <i
-                [class]="isSeleccionado(servicio.id)
-                  ? 'fa-solid fa-circle-check'
-                  : 'fa-regular fa-circle'"
-              ></i>
+              <i [class]="isSeleccionado(servicio.id) ? 'fa-solid fa-circle-check' : 'fa-regular fa-circle'"></i>
             </span>
             <span class="servicio-item__icon">
               <i [class]="servicio.icon || 'fa-solid fa-star'"></i>
@@ -295,7 +288,6 @@
           </div>
         </div>
 
-        <!-- Sin servicios -->
         <div
           *ngIf="!cargandoServicios && serviciosDisponibles.length === 0 && !errorServicios"
           class="servicios-empty"
@@ -304,7 +296,6 @@
           <span>No hay servicios disponibles en este momento.</span>
         </div>
 
-        <!-- Contador -->
         <div *ngIf="serviciosSeleccionados.size > 0" class="servicios-contador">
           <i class="fa-solid fa-circle-check"></i>
           {{ serviciosSeleccionados.size }} servicio{{ serviciosSeleccionados.size > 1 ? 's' : '' }} seleccionado{{ serviciosSeleccionados.size > 1 ? 's' : '' }}
@@ -318,10 +309,14 @@
           Cancelar
         </button>
 
-        <button type="submit" [disabled]="isSubmitting" class="btn btn--primary">
-          <i *ngIf="isSubmitting" class="fa-solid fa-spinner fa-spin"></i>
-          <i *ngIf="!isSubmitting" class="fa-solid fa-house-chimney-medical"></i>
-          {{ isSubmitting ? 'Publicando...' : 'Publicar alojamiento' }}
+        <button
+          type="submit"
+          [disabled]="isSubmitting || hayImagenesSubiendo"
+          class="btn btn--primary"
+        >
+          <i *ngIf="isSubmitting || hayImagenesSubiendo" class="fa-solid fa-spinner fa-spin"></i>
+          <i *ngIf="!isSubmitting && !hayImagenesSubiendo" class="fa-solid fa-house-chimney-medical"></i>
+          {{ hayImagenesSubiendo ? 'Subiendo imágenes...' : isSubmitting ? 'Publicando...' : 'Publicar alojamiento' }}
         </button>
       </div>
 

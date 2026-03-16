@@ -9,6 +9,10 @@ import jakarta.validation.constraints.*;
 @AllArgsConstructor
 public class ImagenDTO {
 
+    // FIX ALOJ-11 y 8: id necesario para que el front pueda identificar
+    // qué imágenes ya estaban en BD al editar un alojamiento
+    private Integer id;
+
     @NotNull
     private Integer lodgingId;
 

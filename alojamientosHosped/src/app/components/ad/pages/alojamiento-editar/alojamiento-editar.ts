@@ -1,22 +1,22 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, takeUntil } from 'rxjs';
+import { Subject, forkJoin, of, takeUntil } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 
 import { AlojamientoService } from '../../../../../services/AlojamientoService';
 import { AuthService }        from '../../../../../services/AuthService';
+import { ImagenService }      from '../../../../../services/ImagenService';
 import { Alojamiento }        from '../../../../models/alojamiento.model';
+import { Imagen }             from '../../../../models/imagen.model';
+import { ImagenSubida, ImagenExistente } from '../../../../components/ad/molecules/image-uploader/image-uploader';
 
 /**
- * AlojamientoEditarPageComponent — ALOJ-8
+ * AlojamientoEditarPageComponent — ALOJ-8 + ALOJ-11
  *
- * Formulario de edición de alojamiento existente.
- * - Carga los datos actuales del alojamiento por ID
- * - Permite modificar todos los campos editables
- * - Llama a AlojamientoService.update() al guardar
- * - Ruta: /alojamientos/:id/editar (protegida por anfitrionGuard)
- *
- * FIX: hostId se toma del usuario logueado en lugar de hardcodear 0
+ * ALOJ-11: Precarga las imágenes existentes en el uploader.
+ *          Al guardar sincroniza: elimina las que se borraron,
+ *          agrega las nuevas subidas a Cloudinary.
  */
 @Component({
   selector: 'app-alojamiento-editar',
@@ -29,11 +29,21 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
   form!: FormGroup;
   alojamientoId!: number;
 
-  cargando     = true;
-  guardando    = false;
-  errorCarga   = '';
-  errorGuardar = '';
-  exito        = false;
+  cargando          = true;
+  guardando         = false;
+  errorCarga        = '';
+  errorGuardar      = '';
+  exito             = false;
+  hayImagenesSubiendo = false;
+
+  // ALOJ-11: imágenes existentes para precargar en el uploader
+  imagenesExistentes: ImagenExistente[] = [];
+
+  // Estado actual del uploader
+  private imagenesActuales: ImagenSubida[] = [];
+
+  // Imágenes originales de BD para comparar al guardar
+  private imagenesBD: Imagen[] = [];
 
   private destroy$ = new Subject<void>();
 
@@ -42,7 +52,8 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
     private route:              ActivatedRoute,
     private router:             Router,
     private alojamientoService: AlojamientoService,
-    private authService:        AuthService
+    private authService:        AuthService,
+    private imagenService:      ImagenService
   ) {}
 
   ngOnInit(): void {
@@ -79,22 +90,52 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
     this.cargando   = true;
     this.errorCarga = '';
 
-    this.alojamientoService.getById(this.alojamientoId)
+    // Cargar alojamiento e imágenes en paralelo
+    forkJoin({
+      alojamiento: this.alojamientoService.getById(this.alojamientoId),
+      imagenes:    this.imagenService.getByAlojamiento(this.alojamientoId)
+        .pipe(catchError(() => of([] as Imagen[])),
+      map(result => result ?? []) 
+      )
+    })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: (aloj) => {
+        next: ({ alojamiento, imagenes }) => {
           this.form.patchValue({
-            name:          aloj.name,
-            description:   aloj.description,
-            address:       aloj.address,
-            city:          aloj.city,
-            latitude:      aloj.latitude,
-            longitude:     aloj.longitude,
-            pricePerNight: aloj.pricePerNight,
-            maxCapacity:   aloj.maxCapacity,
-            mainImage:     aloj.mainImage ?? '',
-            active:        aloj.active ?? true
+            name:          alojamiento.name,
+            description:   alojamiento.description,
+            address:       alojamiento.address,
+            city:          alojamiento.city,
+            latitude:      alojamiento.latitude,
+            longitude:     alojamiento.longitude,
+            pricePerNight: alojamiento.pricePerNight,
+            maxCapacity:   alojamiento.maxCapacity,
+            mainImage:     alojamiento.mainImage ?? '',
+            active:        alojamiento.active ?? true
           });
+
+          // Guardar referencia de BD para comparar al guardar
+          this.imagenesBD = imagenes;
+
+          // Construir lista para precargar en el uploader
+          // Si hay imágenes en tabla imagen, usarlas; si no, usar mainImage
+          if (imagenes.length > 0) {
+            this.imagenesExistentes = imagenes.map(img => ({
+              id:    img.id!,
+              url:   img.url,
+              orden: img.ordenVisualizacion ?? 0,
+              nombre: `imagen_${img.id}`
+            }));
+          } else if (alojamiento.mainImage) {
+            // Compatibilidad: alojamientos sin tabla imagen aún
+            this.imagenesExistentes = [{
+              id:    0,
+              url:   alojamiento.mainImage,
+              orden: 0,
+              nombre: 'imagen_principal'
+            }];
+          }
+
           this.cargando = false;
         },
         error: (err) => {
@@ -104,9 +145,26 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
       });
   }
 
+  // ── ALOJ-11: callbacks del uploader ───────────────────────────
+
+  onImagenPrincipalChange(url: string): void {
+    this.form.patchValue({ mainImage: url });
+  }
+
+  onImagenesChange(imagenes: ImagenSubida[]): void {
+    this.hayImagenesSubiendo = imagenes.some(img => img.subiendo);
+    this.imagenesActuales    = imagenes;
+  }
+
+  // ── Guardar ────────────────────────────────────────────────────
+
   guardar(): void {
     if (this.form.invalid) {
       this.form.markAllAsTouched();
+      return;
+    }
+    if (this.hayImagenesSubiendo) {
+      this.errorGuardar = 'Espera a que terminen de subir todas las imágenes.';
       return;
     }
 
@@ -114,35 +172,72 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
     this.errorGuardar = '';
     this.exito        = false;
 
-    // FIX ALOJ-8: tomar hostId del usuario logueado, no hardcodear 0
     const usuario = this.authService.getUsuario();
-    const payload: Alojamiento = {
-      ...this.form.value,
-      hostId: usuario?.id ?? 0
-    };
+    const payload: Alojamiento = { ...this.form.value, hostId: usuario?.id ?? 0 };
 
     this.alojamientoService.update(this.alojamientoId, payload)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
-        next: () => {
-          this.guardando = false;
-          this.exito     = true;
-          setTimeout(() => this.router.navigate(['/alojamientos', this.alojamientoId]), 1800);
-        },
+        next: () => this.sincronizarImagenes(),
         error: (err) => {
           this.guardando    = false;
-          this.errorGuardar = err.message || 'Error al guardar los cambios. Intenta de nuevo.';
+          this.errorGuardar = err.message || 'Error al guardar los cambios.';
         }
       });
+  }
+
+  /**
+   * ALOJ-11: Sincroniza imágenes en BD:
+   * - Elimina las que estaban en BD y ya no están en el uploader
+   * - Agrega las nuevas (las que no tienen bdId)
+   */
+  private sincronizarImagenes(): void {
+    const idsBD       = this.imagenesBD.map(img => img.id!);
+    const idsActuales = this.imagenesActuales
+      .filter(img => img.bdId)
+      .map(img => img.bdId!);
+
+    // Imágenes a eliminar: estaban en BD pero ya no están en el uploader
+    const aEliminar = idsBD.filter(id => !idsActuales.includes(id));
+
+    // Imágenes a agregar: nuevas (sin bdId, ya subidas a Cloudinary)
+    const aAgregar = this.imagenesActuales.filter(
+      img => !img.bdId && !img.subiendo && !img.error && img.url
+    );
+
+    const peticionesEliminar = aEliminar.map(id =>
+      this.imagenService.eliminar(id).pipe(catchError(() => of(null)))
+    );
+
+    const peticionesAgregar = aAgregar.map(img =>
+      this.imagenService.crear(this.alojamientoId, img.url, img.orden, img.nombre)
+        .pipe(catchError(() => of(null)))
+    );
+
+    const todas = [...peticionesEliminar, ...peticionesAgregar];
+
+    if (todas.length === 0) {
+      this.finalizarGuardado();
+      return;
+    }
+
+    forkJoin(todas).subscribe({
+      next: () => this.finalizarGuardado(),
+      error: () => this.finalizarGuardado()
+    });
+  }
+
+  private finalizarGuardado(): void {
+    this.guardando = false;
+    this.exito     = true;
+    setTimeout(() => this.router.navigate(['/alojamientos', this.alojamientoId]), 1800);
   }
 
   cancelar(): void {
     this.router.navigate(['/alojamientos', this.alojamientoId]);
   }
 
-  campo(name: string) {
-    return this.form.get(name);
-  }
+  campo(name: string) { return this.form.get(name); }
 
   invalido(name: string): boolean {
     const c = this.campo(name);
