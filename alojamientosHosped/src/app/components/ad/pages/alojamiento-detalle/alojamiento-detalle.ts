@@ -15,10 +15,10 @@ import { Comentario }          from '../../../../models/comentario.model';
 import { AlojamientoServicio } from '../../../../models/alojamiento-servicio.model';
 
 /**
- * AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8
+ * AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8 + nav prev/next
  *
- * Vista completa del detalle de un alojamiento.
- * ALOJ-8: muestra botón Editar solo si el usuario logueado es el dueño.
+ * Lee el query param ?ids=1,2,3,4 para habilitar navegación
+ * entre alojamientos sin volver al listado.
  */
 @Component({
   selector: 'app-alojamiento-detalle',
@@ -36,8 +36,10 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
   servicios:   AlojamientoServicio[] = [];
   comentarios: Comentario[]          = [];
   promedio     = 0;
+  mapaUrl      = '';
 
-  mapaUrl = '';
+  // ── Navegación prev/next ────────────────────────────────────────
+  private idsContexto: number[] = [];
 
   private destroy$ = new Subject<void>();
 
@@ -52,12 +54,22 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    const id = Number(this.route.snapshot.paramMap.get('id'));
-    if (!id) {
-      this.router.navigate(['/alojamientos']);
-      return;
-    }
-    this.cargarDetalle(id);
+    // Escuchar cambios de ruta para que prev/next recargue el detalle
+    this.route.paramMap
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(params => {
+        const id = Number(params.get('id'));
+        if (!id) {
+          this.router.navigate(['/alojamientos']);
+          return;
+        }
+        // Leer contexto de IDs del query param
+        const idsParam = this.route.snapshot.queryParamMap.get('ids');
+        this.idsContexto = idsParam
+          ? idsParam.split(',').map(Number).filter(n => !isNaN(n) && n > 0)
+          : [];
+        this.cargarDetalle(id);
+      });
   }
 
   ngOnDestroy(): void {
@@ -65,9 +77,51 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ─────────────────────────────────────────────────────────────────
-  // ALOJ-8: getter que indica si el usuario logueado es el dueño
-  // ─────────────────────────────────────────────────────────────────
+  // ── Getters de navegación ────────────────────────────────────────
+
+  get idActual(): number {
+    return this.alojamiento?.id ?? 0;
+  }
+
+  get indexActual(): number {
+    return this.idsContexto.indexOf(this.idActual);
+  }
+
+  get idAnterior(): number | null {
+    if (this.idsContexto.length < 2 || this.indexActual <= 0) return null;
+    return this.idsContexto[this.indexActual - 1];
+  }
+
+  get idSiguiente(): number | null {
+    if (this.idsContexto.length < 2 || this.indexActual >= this.idsContexto.length - 1) return null;
+    return this.idsContexto[this.indexActual + 1];
+  }
+
+  get hayNavegacion(): boolean {
+    return this.idsContexto.length > 1;
+  }
+
+  get posicionLabel(): string {
+    if (!this.hayNavegacion) return '';
+    return `${this.indexActual + 1} / ${this.idsContexto.length}`;
+  }
+
+  irAnterior(): void {
+    if (this.idAnterior) this.navegar(this.idAnterior);
+  }
+
+  irSiguiente(): void {
+    if (this.idSiguiente) this.navegar(this.idSiguiente);
+  }
+
+  private navegar(id: number): void {
+    const queryParams = this.idsContexto.length > 1
+      ? { ids: this.idsContexto.join(',') }
+      : {};
+    this.router.navigate(['/alojamientos', id], { queryParams });
+  }
+
+  // ── ALOJ-8 ──────────────────────────────────────────────────────
 
   get esAnfitrionDueno(): boolean {
     const usuario = this.authService.getUsuario();
@@ -75,21 +129,16 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     return usuario.id === this.alojamiento.hostId;
   }
 
-  // ─────────────────────────────────────────────────────────────────
-  // ALOJ-8: navegar al formulario de edición
-  // ─────────────────────────────────────────────────────────────────
-
   irAEditar(): void {
     this.router.navigate(['/alojamientos', this.alojamiento!.id, 'editar']);
   }
 
-  // ─────────────────────────────────────────────────────────────────
-  // Carga de datos
-  // ─────────────────────────────────────────────────────────────────
+  // ── Carga de datos ───────────────────────────────────────────────
 
   cargarDetalle(id: number): void {
-    this.cargando = true;
-    this.error    = '';
+    this.cargando    = true;
+    this.error       = '';
+    this.alojamiento = null;
 
     this.alojamientoService.getById(id)
       .pipe(takeUntil(this.destroy$))

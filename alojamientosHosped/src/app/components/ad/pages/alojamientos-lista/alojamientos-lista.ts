@@ -6,10 +6,8 @@ import { Alojamiento } from '../../../../models/alojamiento.model';
 /**
  * AlojamientosListaPageComponent — ALOJ-4 / ALOJ-6
  *
- * Página de listado de alojamientos en grid responsive.
- * - Llama a AlojamientoService.getAll() al iniciar
- * - Maneja estados: loading, error, vacío, con datos
- * - Permite filtrar por nombre o ciudad en tiempo real (ALOJ-6)
+ * Paginación frontend: muestra ITEMS_POR_PAGINA alojamientos por página.
+ * No requiere cambios en el backend — pagina el array ya cargado.
  */
 @Component({
   selector: 'app-alojamientos-lista',
@@ -19,12 +17,17 @@ import { Alojamiento } from '../../../../models/alojamiento.model';
 })
 export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
 
+  readonly ITEMS_POR_PAGINA = 8;
+
   alojamientos: Alojamiento[]          = [];
   alojamientosFiltrados: Alojamiento[] = [];
 
-  cargando         = false;
-  error            = '';
-  terminoBusqueda  = '';   // ALOJ-6: antes filtroCiudad, ahora cubre nombre y ciudad
+  cargando        = false;
+  error           = '';
+  terminoBusqueda = '';
+
+  // ── Paginación ────────────────────────────────────────────────
+  paginaActual = 1;
 
   private destroy$ = new Subject<void>();
 
@@ -39,10 +42,6 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // Carga de datos
-  // ─────────────────────────────────────────────────────────────
-
   cargarAlojamientos(): void {
     this.cargando = true;
     this.error    = '';
@@ -53,6 +52,7 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
         next: (data) => {
           this.alojamientos          = data;
           this.alojamientosFiltrados = data;
+          this.paginaActual          = 1;
           this.cargando              = false;
         },
         error: (err) => {
@@ -62,12 +62,11 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // Búsqueda por nombre o ciudad — ALOJ-6
-  // ─────────────────────────────────────────────────────────────
+  // ── Búsqueda ──────────────────────────────────────────────────
 
   filtrar(): void {
     const termino = this.terminoBusqueda.trim().toLowerCase();
+    this.paginaActual = 1; // volver a página 1 al filtrar
     if (!termino) {
       this.alojamientosFiltrados = this.alojamientos;
       return;
@@ -81,11 +80,39 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
   limpiarFiltro(): void {
     this.terminoBusqueda       = '';
     this.alojamientosFiltrados = this.alojamientos;
+    this.paginaActual          = 1;
   }
 
-  // ─────────────────────────────────────────────────────────────
-  // Helpers de template
-  // ─────────────────────────────────────────────────────────────
+  // ── Paginación ────────────────────────────────────────────────
+
+  get totalPaginas(): number {
+    return Math.ceil(this.alojamientosFiltrados.length / this.ITEMS_POR_PAGINA);
+  }
+
+  get alojamientosPagina(): Alojamiento[] {
+    const inicio = (this.paginaActual - 1) * this.ITEMS_POR_PAGINA;
+    return this.alojamientosFiltrados.slice(inicio, inicio + this.ITEMS_POR_PAGINA);
+  }
+
+  get numeroPaginas(): number[] {
+    return Array.from({ length: this.totalPaginas }, (_, i) => i + 1);
+  }
+
+  irAPagina(pagina: number): void {
+    if (pagina < 1 || pagina > this.totalPaginas) return;
+    this.paginaActual = pagina;
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  }
+
+  paginaAnterior(): void {
+    this.irAPagina(this.paginaActual - 1);
+  }
+
+  paginaSiguiente(): void {
+    this.irAPagina(this.paginaActual + 1);
+  }
+
+  // ── Helpers ───────────────────────────────────────────────────
 
   get totalMostrados(): number {
     return this.alojamientosFiltrados.length;
@@ -95,7 +122,12 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
     return this.terminoBusqueda.trim().length > 0;
   }
 
-  /** Trackby para optimizar el *ngFor */
+  get idsAlojamientosFiltrados(): number[] {
+    return this.alojamientosFiltrados
+      .map(a => a.id!)
+      .filter(id => !!id);
+  }
+
   trackById(_: number, item: Alojamiento): number | undefined {
     return item.id;
   }

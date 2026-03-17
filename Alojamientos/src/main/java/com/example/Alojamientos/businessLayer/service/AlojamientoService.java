@@ -27,7 +27,6 @@ public class AlojamientoService {
 
     /**
      * RF9, HU-009: Crear nuevo alojamiento
-     * RN11: Coordenadas geográficas obligatorias
      */
     public AlojamientoDTO crearAlojamiento(AlojamientoDTO dto) {
         if (dto.getMainImage() == null || dto.getMainImage().trim().isEmpty()) {

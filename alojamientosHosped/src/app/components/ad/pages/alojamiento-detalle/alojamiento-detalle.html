@@ -34,12 +34,45 @@
   <!-- ── Contenido principal ────────────────────────────────────────────── -->
   <ng-container *ngIf="!cargando && !error && alojamiento">
 
+    <!-- bloque .detalle-topbar -->
+
     <!-- ── Barra de navegación superior ──────────────────────────────────── -->
     <div class="detalle-topbar">
+
+      <!-- Volver al listado -->
       <button (click)="volver()" class="btn-volver" aria-label="Volver al listado">
         <i class="fa-solid fa-arrow-left"></i>
         <span>Volver</span>
       </button>
+
+      <!-- Navegación prev/next — solo visible cuando hay contexto de lista -->
+      <div *ngIf="hayNavegacion" class="detalle-nav-contexto">
+        <button
+          type="button"
+          class="btn-nav-ctx"
+          [class.btn-nav-ctx--disabled]="!idAnterior"
+          [disabled]="!idAnterior"
+          (click)="irAnterior()"
+          title="Alojamiento anterior"
+          aria-label="Ver alojamiento anterior"
+        >
+          <i class="fa-solid fa-chevron-left"></i>
+        </button>
+
+        <span class="nav-ctx-label">{{ posicionLabel }}</span>
+
+        <button
+          type="button"
+          class="btn-nav-ctx"
+          [class.btn-nav-ctx--disabled]="!idSiguiente"
+          [disabled]="!idSiguiente"
+          (click)="irSiguiente()"
+          title="Alojamiento siguiente"
+          aria-label="Ver alojamiento siguiente"
+        >
+          <i class="fa-solid fa-chevron-right"></i>
+        </button>
+      </div>
 
       <!-- ALOJ-8: botón editar solo visible para el anfitrión dueño -->
       <button
@@ -51,6 +84,7 @@
         <i class="fa-solid fa-pen-to-square"></i>
         <span>Editar</span>
       </button>
+
     </div>
 
     <!-- ── Galería ─────────────────────────────────────────────────────── -->

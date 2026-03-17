@@ -1,14 +1,13 @@
 ﻿<!-- ─────────────────────────────────────────────────────────────────────────
      AlojamientosListaPageComponent — ALOJ-4
-     Grid de tarjetas con loading states, filtro por ciudad y empty state
+     Grid de tarjetas con loading states, filtro, paginación frontend
      ───────────────────────────────────────────────────────────────────────── -->
 
-<!-- ── Barra de navegación superior ───────────────────────────────────────── -->
 <app-navbar></app-navbar>
 
 <main class="lista-page">
 
-  <!-- ── Header de la sección ──────────────────────────────────────────────── -->
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
   <section class="lista-header">
     <div class="lista-header__text">
       <h1 class="lista-header__title">Alojamientos disponibles</h1>
@@ -21,7 +20,6 @@
       </p>
     </div>
 
-    <!-- Buscador por ciudad -->
     <div class="lista-header__search">
       <div class="search-box">
         <i class="fa-solid fa-magnifying-glass search-box__icon"></i>
@@ -45,9 +43,9 @@
     </div>
   </section>
 
-  <!-- ── Loading skeleton ───────────────────────────────────────────────────── -->
+  <!-- ── Loading skeleton ─────────────────────────────────────────────────── -->
   <section *ngIf="cargando" class="lista-grid" aria-label="Cargando alojamientos">
-    <div *ngFor="let i of [1,2,3,4,5,6]" class="skeleton-card">
+    <div *ngFor="let i of [1,2,3,4,5,6,7,8]" class="skeleton-card">
       <div class="skeleton-card__img skeleton-pulse"></div>
       <div class="skeleton-card__body">
         <div class="skeleton-line skeleton-pulse" style="width: 70%"></div>
@@ -57,7 +55,7 @@
     </div>
   </section>
 
-  <!-- ── Error state ────────────────────────────────────────────────────────── -->
+  <!-- ── Error state ──────────────────────────────────────────────────────── -->
   <section *ngIf="!cargando && error" class="lista-empty">
     <div class="lista-empty__icon lista-empty__icon--error">
       <i class="fa-solid fa-triangle-exclamation"></i>
@@ -70,7 +68,7 @@
     </button>
   </section>
 
-  <!-- ── Empty state (sin resultados de filtro) ──────────────────────────────── -->
+  <!-- ── Empty state sin filtro ───────────────────────────────────────────── -->
   <section
     *ngIf="!cargando && !error && totalMostrados === 0 && hayFiltroActivo"
     class="lista-empty"
@@ -86,7 +84,7 @@
     </button>
   </section>
 
-  <!-- ── Empty state (sin alojamientos en BD) ────────────────────────────────── -->
+  <!-- ── Empty state sin alojamientos ────────────────────────────────────── -->
   <section
     *ngIf="!cargando && !error && totalMostrados === 0 && !hayFiltroActivo"
     class="lista-empty"
@@ -98,18 +96,62 @@
     <p class="lista-empty__msg">Pronto encontrarás lugares increíbles aquí.</p>
   </section>
 
-  <!-- ── Grid de tarjetas ───────────────────────────────────────────────────── -->
+  <!-- ── Grid de tarjetas ─────────────────────────────────────────────────── -->
   <section
     *ngIf="!cargando && !error && totalMostrados > 0"
     class="lista-grid"
     aria-label="Lista de alojamientos"
   >
     <app-alojamiento-card
-      *ngFor="let alojamiento of alojamientosFiltrados; trackBy: trackById"
+      *ngFor="let alojamiento of alojamientosPagina; trackBy: trackById"
       [alojamiento]="alojamiento"
+      [todos]="idsAlojamientosFiltrados"
       class="lista-grid__item"
     >
     </app-alojamiento-card>
   </section>
+
+  <!-- ── Paginación ───────────────────────────────────────────────────────── -->
+  <nav
+    *ngIf="!cargando && !error && totalPaginas > 1"
+    class="paginacion"
+    aria-label="Navegación de páginas"
+  >
+    <!-- Anterior -->
+    <button
+      type="button"
+      class="paginacion__btn"
+      [class.paginacion__btn--disabled]="paginaActual === 1"
+      [disabled]="paginaActual === 1"
+      (click)="paginaAnterior()"
+      aria-label="Página anterior"
+    >
+      <i class="fa-solid fa-chevron-left"></i>
+    </button>
+
+    <!-- Números de página -->
+    <button
+      *ngFor="let num of numeroPaginas"
+      type="button"
+      class="paginacion__btn paginacion__btn--num"
+      [class.paginacion__btn--activo]="num === paginaActual"
+      (click)="irAPagina(num)"
+      [attr.aria-current]="num === paginaActual ? 'page' : null"
+    >
+      {{ num }}
+    </button>
+
+    <!-- Siguiente -->
+    <button
+      type="button"
+      class="paginacion__btn"
+      [class.paginacion__btn--disabled]="paginaActual === totalPaginas"
+      [disabled]="paginaActual === totalPaginas"
+      (click)="paginaSiguiente()"
+      aria-label="Página siguiente"
+    >
+      <i class="fa-solid fa-chevron-right"></i>
+    </button>
+  </nav>
 
 </main>

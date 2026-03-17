@@ -161,9 +161,13 @@ export class ImageUploaderComponent implements OnInit, OnDestroy {
           this.actualizarImagen(tempId, { progreso });
         } else if (event.type === HttpEventType.Response) {
           const body = event.body;
+          // FIX calidad: insertar q_100,f_auto en la URL de Cloudinary
+          // para evitar la compresión automática agresiva del preset
+          const urlAltaCalidad = (body.secure_url as string)
+            .replace('/upload/', '/upload/q_100,f_auto/');
           this.actualizarImagen(tempId, {
             id:       body.public_id,
-            url:      body.secure_url,
+            url:      urlAltaCalidad,
             subiendo: false,
             progreso: 100
           });
