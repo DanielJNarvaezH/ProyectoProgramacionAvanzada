@@ -8,6 +8,7 @@ import { AlojamientosListaPageComponent }  from './components/ad/pages/alojamien
 import { AlojamientoEditarPageComponent }  from './components/ad/pages/alojamiento-editar/alojamiento-editar';
 import { AlojamientoDetallePageComponent } from './components/ad/pages/alojamiento-detalle/alojamiento-detalle';
 import { AlojamientoCrearPageComponent }   from './components/ad/pages/alojamiento-crear/alojamiento-crear';
+import { PanelGestionPageComponent }       from './components/ad/pages/panel-gestion/panel-gestion'; // ALOJ-9
 import { authGuard }                       from './guards/auth.guard';
 import { anfitrionGuard }                  from './guards/anfitrion.guard';
 
@@ -20,11 +21,14 @@ const routes: Routes = [
   { path: 'perfil',               component: PerfilPageComponent,            canActivate: [authGuard] },
   { path: 'alojamientos',         component: AlojamientosListaPageComponent, canActivate: [authGuard] },
 
+  // ALOJ-9: Panel de gestión del anfitrión
+  { path: 'mis-alojamientos',        component: PanelGestionPageComponent,      canActivate: [anfitrionGuard] },
+
   // rutas específicas ANTES que :id para evitar conflictos
-  { path: 'alojamientos/crear',          component: AlojamientoCrearPageComponent,  canActivate: [anfitrionGuard] },
+  { path: 'alojamientos/crear',      component: AlojamientoCrearPageComponent,  canActivate: [anfitrionGuard] },
   // ALOJ-8: editar protegido con anfitrionGuard
-  { path: 'alojamientos/:id/editar',     component: AlojamientoEditarPageComponent, canActivate: [anfitrionGuard] },
-  { path: 'alojamientos/:id',            component: AlojamientoDetallePageComponent, canActivate: [authGuard] },
+  { path: 'alojamientos/:id/editar', component: AlojamientoEditarPageComponent, canActivate: [anfitrionGuard] },
+  { path: 'alojamientos/:id',        component: AlojamientoDetallePageComponent, canActivate: [authGuard] },
 
   { path: 'home',                 component: LoginPageComponent,             canActivate: [authGuard] }
 ];

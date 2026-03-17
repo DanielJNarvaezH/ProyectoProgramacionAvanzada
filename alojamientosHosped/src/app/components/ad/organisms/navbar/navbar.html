@@ -2,6 +2,7 @@
      NavbarComponent — Organismo
      Barra superior con logo Hosped + acceso al perfil de usuario
      ALOJ-7: botón Publicar visible solo para anfitriones
+     ALOJ-9: botón Mi panel visible solo para anfitriones
      ───────────────────────────────────────────────────────────────── -->
 <nav class="navbar">
 
@@ -16,6 +17,17 @@
 
   <!-- ── Acciones ───────────────────────────────────────────────── -->
   <div class="navbar__actions">
+
+    <!-- ALOJ-9: panel de gestión solo para anfitriones -->
+    <button
+      *ngIf="esAnfitrion"
+      (click)="irAlPanel()"
+      class="navbar__panel-btn"
+      title="Panel de gestión"
+    >
+      <i class="fa-solid fa-table-columns"></i>
+      <span>Mi panel</span>
+    </button>
 
     <!-- ALOJ-7: solo anfitriones pueden publicar alojamientos -->
     <button

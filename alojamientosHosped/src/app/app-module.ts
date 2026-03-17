@@ -46,6 +46,7 @@ import { PerfilPageComponent }             from './components/ad/pages/perfil/pe
 import { AlojamientoEditarPageComponent }  from './components/ad/pages/alojamiento-editar/alojamiento-editar';
 import { AlojamientoDetallePageComponent } from './components/ad/pages/alojamiento-detalle/alojamiento-detalle';
 import { AlojamientoCrearPageComponent }   from './components/ad/pages/alojamiento-crear/alojamiento-crear';
+import { PanelGestionPageComponent }       from './components/ad/pages/panel-gestion/panel-gestion'; // ALOJ-9
 
 // -- Pipes
 import { SafeUrlPipe } from './pipes/safe-url.pipe';
@@ -81,6 +82,7 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe';
     AlojamientoDetallePageComponent,
     AlojamientoCrearPageComponent,
     AlojamientoEditarPageComponent,  // ALOJ-8
+    PanelGestionPageComponent,       // ALOJ-9
     PerfilPageComponent,
     // Pipes
     SafeUrlPipe,

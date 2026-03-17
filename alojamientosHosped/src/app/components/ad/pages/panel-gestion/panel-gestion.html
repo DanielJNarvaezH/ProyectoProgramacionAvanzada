@@ -1,0 +1,229 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     PanelGestionPageComponent — ALOJ-9
+     Dashboard del anfitrión: lista sus alojamientos con acciones CRUD
+     ───────────────────────────────────────────────────────────────────────── -->
+
+<app-navbar></app-navbar>
+
+<main class="panel-page">
+
+  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <section class="panel-header">
+    <div class="panel-header__text">
+      <h1 class="panel-header__title">
+        Hola, {{ nombreAnfitrion }}
+        <span class="panel-header__wave">👋</span>
+      </h1>
+      <p class="panel-header__subtitle">Administra tus alojamientos desde aquí</p>
+    </div>
+
+    <button class="btn-crear" (click)="irACrear()" title="Publicar nuevo alojamiento">
+      <i class="fa-solid fa-plus"></i>
+      <span>Nuevo alojamiento</span>
+    </button>
+  </section>
+
+  <!-- ── Métricas ─────────────────────────────────────────────────────────── -->
+  <section class="metricas" *ngIf="!cargando && !error">
+    <div class="metrica-card">
+      <div class="metrica-card__icon">
+        <i class="fa-solid fa-house"></i>
+      </div>
+      <div class="metrica-card__info">
+        <span class="metrica-card__valor">{{ totalAlojamientos }}</span>
+        <span class="metrica-card__label">
+          Alojamiento{{ totalAlojamientos !== 1 ? 's' : '' }} activo{{ totalAlojamientos !== 1 ? 's' : '' }}
+        </span>
+      </div>
+    </div>
+
+    <div class="metrica-card">
+      <div class="metrica-card__icon metrica-card__icon--green">
+        <i class="fa-solid fa-coins"></i>
+      </div>
+      <div class="metrica-card__info">
+        <span class="metrica-card__valor">${{ precioPromedio }}</span>
+        <span class="metrica-card__label">Precio promedio / noche</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Toast de éxito ───────────────────────────────────────────────────── -->
+  <div class="toast-success" *ngIf="successMessage" role="alert">
+    <i class="fa-solid fa-circle-check"></i>
+    <span>{{ successMessage }}</span>
+  </div>
+
+  <!-- ── Loading skeleton — W2: usar index en lugar de variable suelta ──────── -->
+  <section *ngIf="cargando" class="panel-grid" aria-label="Cargando alojamientos">
+    <div *ngFor="let item of [1,2,3,4]; let idx = index" class="skeleton-card">
+      <div class="skeleton-card__img skeleton-pulse"></div>
+      <div class="skeleton-card__body">
+        <div class="skeleton-line skeleton-pulse" style="width: 65%"></div>
+        <div class="skeleton-line skeleton-pulse" style="width: 45%"></div>
+        <div class="skeleton-line skeleton-pulse" style="width: 80%"></div>
+      </div>
+      <div class="skeleton-card__footer skeleton-pulse"></div>
+    </div>
+  </section>
+
+  <!-- ── Error state ──────────────────────────────────────────────────────── -->
+  <section *ngIf="!cargando && error" class="panel-empty">
+    <div class="panel-empty__icon panel-empty__icon--error">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    <h2 class="panel-empty__title">No pudimos cargar tus alojamientos</h2>
+    <p class="panel-empty__msg">{{ error }}</p>
+    <button (click)="cargarAlojamientos()" class="btn-retry">
+      <i class="fa-solid fa-rotate-right"></i>
+      Intentar de nuevo
+    </button>
+  </section>
+
+  <!-- ── Empty state ──────────────────────────────────────────────────────── -->
+  <section *ngIf="!cargando && !error && totalAlojamientos === 0" class="panel-empty">
+    <div class="panel-empty__icon">
+      <i class="fa-solid fa-house-circle-plus"></i>
+    </div>
+    <h2 class="panel-empty__title">Aún no tienes alojamientos</h2>
+    <p class="panel-empty__msg">
+      Publica tu primer alojamiento y comienza a recibir huéspedes.
+    </p>
+    <button class="btn-crear" (click)="irACrear()">
+      <i class="fa-solid fa-plus"></i>
+      Publicar mi primer alojamiento
+    </button>
+  </section>
+
+  <!-- ── Grid de alojamientos ─────────────────────────────────────────────── -->
+  <section
+    *ngIf="!cargando && !error && totalAlojamientos > 0"
+    class="panel-grid"
+    aria-label="Mis alojamientos"
+  >
+    <!-- W3: [attr.tabindex]="'0'" con string para evitar "Wrong attribute value" -->
+    <article
+      *ngFor="let aloj of alojamientos; trackBy: trackById"
+      class="aloj-card"
+      (click)="irADetalle(aloj.id!)"
+      (keydown.enter)="irADetalle(aloj.id!)"
+      [attr.tabindex]="'0'"
+      role="button"
+      [attr.aria-label]="'Ver detalle de ' + aloj.name"
+    >
+      <!-- Imagen -->
+      <div class="aloj-card__img-wrap">
+        <img
+          [src]="aloj.mainImage || placeholderImg"
+          [alt]="'Foto de ' + aloj.name"
+          (error)="$any($event.target).src = placeholderImg"
+          class="aloj-card__img"
+          loading="lazy"
+        />
+        <span class="aloj-card__badge aloj-card__badge--activo">
+          <i class="fa-solid fa-circle"></i> Activo
+        </span>
+      </div>
+
+      <!-- Info -->
+      <div class="aloj-card__body">
+        <h3 class="aloj-card__nombre">{{ aloj.name }}</h3>
+
+        <p class="aloj-card__meta">
+          <i class="fa-solid fa-location-dot"></i>
+          {{ aloj.city }}
+        </p>
+
+        <p class="aloj-card__meta">
+          <i class="fa-solid fa-users"></i>
+          Hasta {{ aloj.maxCapacity }} huéspedes
+        </p>
+
+        <p class="aloj-card__precio">
+          <span class="aloj-card__precio-valor">${{ precioFormateado(aloj.pricePerNight) }}</span>
+          <span class="aloj-card__precio-label"> / noche</span>
+        </p>
+      </div>
+
+      <!-- Acciones CRUD -->
+      <div class="aloj-card__actions" (click)="$event.stopPropagation()">
+        <button
+          class="aloj-card__btn aloj-card__btn--edit"
+          (click)="irAEditar(aloj.id!)"
+          title="Editar alojamiento"
+          [attr.aria-label]="'Editar ' + aloj.name"
+        >
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span>Editar</span>
+        </button>
+
+        <button
+          class="aloj-card__btn aloj-card__btn--delete"
+          (click)="abrirModalEliminar($event, aloj)"
+          title="Eliminar alojamiento"
+          [attr.aria-label]="'Eliminar ' + aloj.name"
+        >
+          <i class="fa-solid fa-trash"></i>
+          <span>Eliminar</span>
+        </button>
+      </div>
+    </article>
+  </section>
+
+</main>
+
+<!-- ─────────────────────────────────────────────────────────────────────────
+     Modal de confirmación de eliminación — ALOJ-9
+     ───────────────────────────────────────────────────────────────────────── -->
+<div
+  class="modal-overlay"
+  *ngIf="mostrarModal"
+  (click)="cerrarModal()"
+  role="dialog"
+  aria-modal="true"
+>
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal__icon">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+
+    <h2 class="modal__title">¿Eliminar alojamiento?</h2>
+
+    <p class="modal__msg">
+      Estás a punto de eliminar
+      <strong>"{{ alojamientoAEliminar?.name }}"</strong>.
+      Esta acción no se puede deshacer y solo es posible si no tiene reservas activas.
+    </p>
+
+    <!-- Error del backend (ej: reservas activas) -->
+    <div class="modal__error" *ngIf="errorEliminacion" role="alert">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span>{{ errorEliminacion }}</span>
+    </div>
+
+    <div class="modal__actions">
+      <button
+        class="modal__btn modal__btn--cancel"
+        (click)="cerrarModal()"
+        [disabled]="eliminando"
+      >
+        Cancelar
+      </button>
+
+      <button
+        class="modal__btn modal__btn--confirm"
+        (click)="confirmarEliminar()"
+        [disabled]="eliminando"
+      >
+        <span *ngIf="!eliminando">
+          <i class="fa-solid fa-trash"></i> Sí, eliminar
+        </span>
+        <span *ngIf="eliminando">
+          <i class="fa-solid fa-spinner fa-spin"></i> Eliminando...
+        </span>
+      </button>
+    </div>
+
+  </div>
+</div>

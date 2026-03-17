@@ -7,6 +7,7 @@ import { AuthService } from '../../../../../services/AuthService';
  *
  * Barra de navegación superior de Hosped.
  * - Logo con enlace a /alojamientos
+ * - Botón "Mi panel" visible SOLO para anfitriones (ALOJ-9)
  * - Botón "Publicar" visible SOLO para anfitriones (ALOJ-7)
  * - Botón de perfil para todos los usuarios autenticados
  */
@@ -40,5 +41,10 @@ export class NavbarComponent {
 
   irACrear(): void {
     this.router.navigate(['/alojamientos/crear']);
+  }
+
+  /** ALOJ-9: navega al panel de gestión del anfitrión */
+  irAlPanel(): void {
+    this.router.navigate(['/mis-alojamientos']);
   }
 }
