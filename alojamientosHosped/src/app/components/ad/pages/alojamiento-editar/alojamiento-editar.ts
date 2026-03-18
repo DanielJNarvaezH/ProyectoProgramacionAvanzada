@@ -1,4 +1,4 @@
-import { Component, OnInit, OnDestroy } from '@angular/core';
+﻿import { Component, OnInit, OnDestroy } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, forkJoin, of, takeUntil } from 'rxjs';
@@ -12,9 +12,9 @@ import { Imagen }             from '../../../../models/imagen.model';
 import { ImagenSubida, ImagenExistente } from '../../../../components/ad/molecules/image-uploader/image-uploader';
 
 /**
- * AlojamientoEditarPageComponent — ALOJ-8 + ALOJ-11
+ * AlojamientoEditarPageComponent â€” ALOJ-8 + ALOJ-11
  *
- * ALOJ-11: Precarga las imágenes existentes en el uploader.
+ * ALOJ-11: Precarga las imÃ¡genes existentes en el uploader.
  *          Al guardar sincroniza: elimina las que se borraron,
  *          agrega las nuevas subidas a Cloudinary.
  */
@@ -36,13 +36,13 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
   exito             = false;
   hayImagenesSubiendo = false;
 
-  // ALOJ-11: imágenes existentes para precargar en el uploader
+  // ALOJ-11: imÃ¡genes existentes para precargar en el uploader
   imagenesExistentes: ImagenExistente[] = [];
 
   // Estado actual del uploader
   private imagenesActuales: ImagenSubida[] = [];
 
-  // Imágenes originales de BD para comparar al guardar
+  // ImÃ¡genes originales de BD para comparar al guardar
   private imagenesBD: Imagen[] = [];
 
   private destroy$ = new Subject<void>();
@@ -55,6 +55,16 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
     private authService:        AuthService,
     private imagenService:      ImagenService
   ) {}
+
+  mostrarPreview = false;
+
+  get datosPreview(): Partial<any> {
+    return this.form?.value ?? {};
+  }
+
+  togglePreview(): void {
+    this.mostrarPreview = !this.mostrarPreview;
+  }
 
   ngOnInit(): void {
     this.alojamientoId = Number(this.route.snapshot.paramMap.get('id'));
@@ -90,7 +100,7 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
     this.cargando   = true;
     this.errorCarga = '';
 
-    // Cargar alojamiento e imágenes en paralelo
+    // Cargar alojamiento e imÃ¡genes en paralelo
     forkJoin({
       alojamiento: this.alojamientoService.getById(this.alojamientoId),
       imagenes:    this.imagenService.getByAlojamiento(this.alojamientoId)
@@ -118,7 +128,7 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
           this.imagenesBD = imagenes;
 
           // Construir lista para precargar en el uploader
-          // Si hay imágenes en tabla imagen, usarlas; si no, usar mainImage
+          // Si hay imÃ¡genes en tabla imagen, usarlas; si no, usar mainImage
           if (imagenes.length > 0) {
             this.imagenesExistentes = imagenes.map(img => ({
               id:    img.id!,
@@ -127,7 +137,7 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
               nombre: `imagen_${img.id}`
             }));
           } else if (alojamiento.mainImage) {
-            // Compatibilidad: alojamientos sin tabla imagen aún
+            // Compatibilidad: alojamientos sin tabla imagen aÃºn
             this.imagenesExistentes = [{
               id:    0,
               url:   alojamiento.mainImage,
@@ -145,7 +155,7 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  // ── ALOJ-11: callbacks del uploader ───────────────────────────
+  // â”€â”€ ALOJ-11: callbacks del uploader â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   onImagenPrincipalChange(url: string): void {
     this.form.patchValue({ mainImage: url });
@@ -156,7 +166,7 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
     this.imagenesActuales    = imagenes;
   }
 
-  // ── Guardar ────────────────────────────────────────────────────
+  // â”€â”€ Guardar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 
   guardar(): void {
     if (this.form.invalid) {
@@ -164,7 +174,7 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
       return;
     }
     if (this.hayImagenesSubiendo) {
-      this.errorGuardar = 'Espera a que terminen de subir todas las imágenes.';
+      this.errorGuardar = 'Espera a que terminen de subir todas las imÃ¡genes.';
       return;
     }
 
@@ -187,8 +197,8 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
   }
 
   /**
-   * ALOJ-11: Sincroniza imágenes en BD:
-   * - Elimina las que estaban en BD y ya no están en el uploader
+   * ALOJ-11: Sincroniza imÃ¡genes en BD:
+   * - Elimina las que estaban en BD y ya no estÃ¡n en el uploader
    * - Agrega las nuevas (las que no tienen bdId)
    */
   private sincronizarImagenes(): void {
@@ -197,10 +207,10 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
       .filter(img => img.bdId)
       .map(img => img.bdId!);
 
-    // Imágenes a eliminar: estaban en BD pero ya no están en el uploader
+    // ImÃ¡genes a eliminar: estaban en BD pero ya no estÃ¡n en el uploader
     const aEliminar = idsBD.filter(id => !idsActuales.includes(id));
 
-    // Imágenes a agregar: nuevas (sin bdId, ya subidas a Cloudinary)
+    // ImÃ¡genes a agregar: nuevas (sin bdId, ya subidas a Cloudinary)
     const aAgregar = this.imagenesActuales.filter(
       img => !img.bdId && !img.subiendo && !img.error && img.url
     );
@@ -248,10 +258,10 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
     const c = this.campo(name);
     if (!c || !c.errors) return '';
     if (c.errors['required'])  return 'Este campo es obligatorio.';
-    if (c.errors['minlength']) return `Mínimo ${c.errors['minlength'].requiredLength} caracteres.`;
-    if (c.errors['maxlength']) return `Máximo ${c.errors['maxlength'].requiredLength} caracteres.`;
-    if (c.errors['min'])       return `El valor mínimo es ${c.errors['min'].min}.`;
-    if (c.errors['max'])       return `El valor máximo es ${c.errors['max'].max}.`;
-    return 'Valor inválido.';
+    if (c.errors['minlength']) return `MÃ­nimo ${c.errors['minlength'].requiredLength} caracteres.`;
+    if (c.errors['maxlength']) return `MÃ¡ximo ${c.errors['maxlength'].requiredLength} caracteres.`;
+    if (c.errors['min'])       return `El valor mÃ­nimo es ${c.errors['min'].min}.`;
+    if (c.errors['max'])       return `El valor mÃ¡ximo es ${c.errors['max'].max}.`;
+    return 'Valor invÃ¡lido.';
   }
 }

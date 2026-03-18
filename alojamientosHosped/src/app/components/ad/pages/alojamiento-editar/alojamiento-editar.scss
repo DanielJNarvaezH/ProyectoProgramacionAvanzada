@@ -389,3 +389,18 @@ $radius-sm:  8px;
     border: 1.5px solid #E5E7EB;
   }
 }
+// -- ALOJ-14: boton y panel vista previa
+.btn--preview {
+  background: white;
+  color: #9B5CFF;
+  border: 1.5px solid #9B5CFF;
+
+  &:hover:not(:disabled) { background: #F3EEFF; }
+  &:disabled { opacity: 0.5; cursor: not-allowed; }
+}
+
+.preview-panel {
+  margin-top: 32px;
+  border-top: 2px dashed #E5E7EB;
+  padding-top: 32px;
+}

@@ -8,6 +8,9 @@ import { AppRoutingModule } from './app-routing-module';
 import { App } from './app';
 import { AlojamientosListaPageComponent } from './components/ad/pages/alojamientos-lista/alojamientos-lista';
 import { ImageUploaderComponent } from './components/ad/molecules/image-uploader/image-uploader';
+import { AlojamientoPreviewComponent } from './components/ad/molecules/alojamiento-preview/alojamiento-preview';
+
+
 
 import { provideBrowserGlobalErrorListeners } from '@angular/core';
 
@@ -67,6 +70,8 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe';
     AlojamientoCardComponent,
     ComentarioCardComponent,
     ImageUploaderComponent,
+    AlojamientoPreviewComponent,
+
     // Organismos
     LoginCardComponent,
     RegisterCardComponent,
