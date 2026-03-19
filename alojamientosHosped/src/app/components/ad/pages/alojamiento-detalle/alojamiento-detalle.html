@@ -1,6 +1,6 @@
 <!-- ─────────────────────────────────────────────────────────────────────────
-     AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8
-     ALOJ-8: botón Editar visible solo para el anfitrión dueño del alojamiento
+     AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8 + nav prev/next + ALOJ-13
+     ALOJ-13: botón Eliminar con modal de confirmación visible solo para el dueño
      ───────────────────────────────────────────────────────────────────────── -->
 <app-navbar></app-navbar>
 
@@ -34,8 +34,6 @@
   <!-- ── Contenido principal ────────────────────────────────────────────── -->
   <ng-container *ngIf="!cargando && !error && alojamiento">
 
-    <!-- bloque .detalle-topbar -->
-
     <!-- ── Barra de navegación superior ──────────────────────────────────── -->
     <div class="detalle-topbar">
 
@@ -45,7 +43,7 @@
         <span>Volver</span>
       </button>
 
-      <!-- Navegación prev/next — solo visible cuando hay contexto de lista -->
+      <!-- Navegación prev/next -->
       <div *ngIf="hayNavegacion" class="detalle-nav-contexto">
         <button
           type="button"
@@ -58,9 +56,7 @@
         >
           <i class="fa-solid fa-chevron-left"></i>
         </button>
-
         <span class="nav-ctx-label">{{ posicionLabel }}</span>
-
         <button
           type="button"
           class="btn-nav-ctx"
@@ -74,16 +70,29 @@
         </button>
       </div>
 
-      <!-- ALOJ-8: botón editar solo visible para el anfitrión dueño -->
-      <button
-        *ngIf="esAnfitrionDueno"
-        (click)="irAEditar()"
-        class="btn-editar"
-        title="Editar este alojamiento"
-      >
-        <i class="fa-solid fa-pen-to-square"></i>
-        <span>Editar</span>
-      </button>
+      <!-- Acciones del anfitrión dueño: Editar + Eliminar -->
+      <div *ngIf="esAnfitrionDueno" class="detalle-topbar__acciones">
+        <button
+          type="button"
+          (click)="irAEditar()"
+          class="btn-editar"
+          title="Editar este alojamiento"
+        >
+          <i class="fa-solid fa-pen-to-square"></i>
+          <span>Editar</span>
+        </button>
+
+        <!-- ALOJ-13: botón eliminar -->
+        <button
+          type="button"
+          (click)="abrirModalEliminar()"
+          class="btn-eliminar"
+          title="Eliminar este alojamiento"
+        >
+          <i class="fa-solid fa-trash"></i>
+          <span>Eliminar</span>
+        </button>
+      </div>
 
     </div>
 
@@ -98,10 +107,9 @@
     <!-- ── Layout de dos columnas ─────────────────────────────────────── -->
     <div class="detalle-layout">
 
-      <!-- ── Columna izquierda: info + servicios + ubicación + comentarios -->
+      <!-- ── Columna izquierda ──────────────────────────────────────────── -->
       <div class="detalle-main">
 
-        <!-- Encabezado del alojamiento -->
         <header class="detalle-header">
           <div class="detalle-header__top">
             <h1 class="detalle-header__nombre">{{ alojamiento.name }}</h1>
@@ -151,7 +159,6 @@
           <h2 id="serv-title" class="detalle-seccion__titulo">
             <i class="fa-solid fa-star"></i> Servicios disponibles
           </h2>
-
           <ng-container *ngIf="servicios.length > 0; else sinServicios">
             <ul class="servicios-grid" role="list">
               <li *ngFor="let s of servicios" class="servicio-item">
@@ -172,12 +179,10 @@
           <h2 id="mapa-title" class="detalle-seccion__titulo">
             <i class="fa-solid fa-map-location-dot"></i> Ubicación
           </h2>
-
           <p class="detalle-ubicacion">
             <i class="fa-solid fa-location-dot"></i>
             {{ alojamiento.address }}<span *ngIf="alojamiento.address">, </span>{{ alojamiento.city }}
           </p>
-
           <div *ngIf="hayMapa" class="mapa-wrap">
             <iframe
               [src]="mapaUrl | safeUrl"
@@ -204,7 +209,6 @@
             Comentarios
             <span *ngIf="comentarios.length > 0" class="badge">{{ comentarios.length }}</span>
           </h2>
-
           <ng-container *ngIf="comentarios.length > 0; else sinComentarios">
             <div class="comentarios-lista">
               <app-comentario-card
@@ -231,7 +235,6 @@
             <span class="precio-box__valor">${{ precioFormateado }}</span>
             <span class="precio-box__unidad">/ noche</span>
           </div>
-
           <div class="precio-box__calificacion">
             <div class="estrellas estrellas--sm">
               <ng-container *ngFor="let e of estrellas">
@@ -242,9 +245,7 @@
             </div>
             <span>{{ promedioLabel }} · {{ totalResenasLabel }}</span>
           </div>
-
           <hr class="divider" />
-
           <ul class="precio-box__detalles" role="list">
             <li>
               <span><i class="fa-solid fa-users"></i> Capacidad</span>
@@ -255,7 +256,6 @@
               <strong>{{ alojamiento.city }}</strong>
             </li>
           </ul>
-
           <button class="btn-reservar" disabled title="Disponible próximamente">
             <i class="fa-solid fa-calendar-check"></i>
             Reservar (próximamente)
@@ -268,3 +268,62 @@
   </ng-container>
 
 </main>
+
+<!-- ─────────────────────────────────────────────────────────────────────────
+     ALOJ-13: Modal de confirmación de eliminación
+     Mismo patrón que panel-gestion — fuera del main para escapar overflow
+     ───────────────────────────────────────────────────────────────────────── -->
+<div
+  class="modal-overlay"
+  *ngIf="mostrarModalEliminar"
+  (click)="cerrarModalEliminar()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modal-eliminar-title"
+>
+  <div class="modal" (click)="$event.stopPropagation()">
+
+    <div class="modal__icon">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+
+    <h2 id="modal-eliminar-title" class="modal__title">¿Eliminar alojamiento?</h2>
+
+    <p class="modal__msg">
+      Estás a punto de eliminar
+      <strong>"{{ alojamiento?.name }}"</strong>.
+      Esta acción no se puede deshacer y solo es posible si no tiene reservas activas.
+    </p>
+
+    <!-- Error del backend (ej: tiene reservas activas) -->
+    <div class="modal__error" *ngIf="errorEliminacion" role="alert">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span>{{ errorEliminacion }}</span>
+    </div>
+
+    <div class="modal__actions">
+      <button
+        type="button"
+        class="modal__btn modal__btn--cancel"
+        (click)="cerrarModalEliminar()"
+        [disabled]="eliminando"
+      >
+        Cancelar
+      </button>
+      <button
+        type="button"
+        class="modal__btn modal__btn--confirm"
+        (click)="confirmarEliminar()"
+        [disabled]="eliminando"
+      >
+        <span *ngIf="!eliminando">
+          <i class="fa-solid fa-trash"></i> Sí, eliminar
+        </span>
+        <span *ngIf="eliminando">
+          <i class="fa-solid fa-spinner fa-spin"></i> Eliminando...
+        </span>
+      </button>
+    </div>
+
+  </div>
+</div>

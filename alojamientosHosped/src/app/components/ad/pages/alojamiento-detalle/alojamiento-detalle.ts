@@ -15,10 +15,11 @@ import { Comentario }          from '../../../../models/comentario.model';
 import { AlojamientoServicio } from '../../../../models/alojamiento-servicio.model';
 
 /**
- * AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8 + nav prev/next
+ * AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8 + nav prev/next + ALOJ-13
  *
- * Lee el query param ?ids=1,2,3,4 para habilitar navegación
- * entre alojamientos sin volver al listado.
+ * ALOJ-13: Botón Eliminar con modal de confirmación visible solo
+ * para el anfitrión dueño del alojamiento. Tras eliminar redirige
+ * al listado y actualiza la lista (el alojamiento queda inactivo).
  */
 @Component({
   selector: 'app-alojamiento-detalle',
@@ -38,8 +39,13 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
   promedio     = 0;
   mapaUrl      = '';
 
-  // ── Navegación prev/next ────────────────────────────────────────
+  // ── Navegación prev/next ─────────────────────────────────────────
   private idsContexto: number[] = [];
+
+  // ── ALOJ-13: Modal de eliminación ────────────────────────────────
+  mostrarModalEliminar = false;
+  eliminando           = false;
+  errorEliminacion     = '';
 
   private destroy$ = new Subject<void>();
 
@@ -54,7 +60,6 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
   ) {}
 
   ngOnInit(): void {
-    // Escuchar cambios de ruta para que prev/next recargue el detalle
     this.route.paramMap
       .pipe(takeUntil(this.destroy$))
       .subscribe(params => {
@@ -63,7 +68,6 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
           this.router.navigate(['/alojamientos']);
           return;
         }
-        // Leer contexto de IDs del query param
         const idsParam = this.route.snapshot.queryParamMap.get('ids');
         this.idsContexto = idsParam
           ? idsParam.split(',').map(Number).filter(n => !isNaN(n) && n > 0)
@@ -77,15 +81,10 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ── Getters de navegación ────────────────────────────────────────
+  // ── Navegación prev/next ─────────────────────────────────────────
 
-  get idActual(): number {
-    return this.alojamiento?.id ?? 0;
-  }
-
-  get indexActual(): number {
-    return this.idsContexto.indexOf(this.idActual);
-  }
+  get idActual(): number { return this.alojamiento?.id ?? 0; }
+  get indexActual(): number { return this.idsContexto.indexOf(this.idActual); }
 
   get idAnterior(): number | null {
     if (this.idsContexto.length < 2 || this.indexActual <= 0) return null;
@@ -97,31 +96,22 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     return this.idsContexto[this.indexActual + 1];
   }
 
-  get hayNavegacion(): boolean {
-    return this.idsContexto.length > 1;
-  }
+  get hayNavegacion(): boolean { return this.idsContexto.length > 1; }
 
   get posicionLabel(): string {
     if (!this.hayNavegacion) return '';
     return `${this.indexActual + 1} / ${this.idsContexto.length}`;
   }
 
-  irAnterior(): void {
-    if (this.idAnterior) this.navegar(this.idAnterior);
-  }
-
-  irSiguiente(): void {
-    if (this.idSiguiente) this.navegar(this.idSiguiente);
-  }
+  irAnterior(): void { if (this.idAnterior) this.navegar(this.idAnterior); }
+  irSiguiente(): void { if (this.idSiguiente) this.navegar(this.idSiguiente); }
 
   private navegar(id: number): void {
-    const queryParams = this.idsContexto.length > 1
-      ? { ids: this.idsContexto.join(',') }
-      : {};
+    const queryParams = this.idsContexto.length > 1 ? { ids: this.idsContexto.join(',') } : {};
     this.router.navigate(['/alojamientos', id], { queryParams });
   }
 
-  // ── ALOJ-8 ──────────────────────────────────────────────────────
+  // ── ALOJ-8 ───────────────────────────────────────────────────────
 
   get esAnfitrionDueno(): boolean {
     const usuario = this.authService.getUsuario();
@@ -131,6 +121,41 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
 
   irAEditar(): void {
     this.router.navigate(['/alojamientos', this.alojamiento!.id, 'editar']);
+  }
+
+  // ── ALOJ-13: Eliminación ─────────────────────────────────────────
+
+  abrirModalEliminar(): void {
+    this.errorEliminacion    = '';
+    this.mostrarModalEliminar = true;
+  }
+
+  cerrarModalEliminar(): void {
+    if (this.eliminando) return;
+    this.mostrarModalEliminar = false;
+    this.errorEliminacion    = '';
+  }
+
+  confirmarEliminar(): void {
+    if (!this.alojamiento?.id) return;
+
+    this.eliminando       = true;
+    this.errorEliminacion = '';
+
+    this.alojamientoService.delete(this.alojamiento.id)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.eliminando           = false;
+          this.mostrarModalEliminar = false;
+          // Redirigir al panel del anfitrión o al listado
+          this.router.navigate(['/mis-alojamientos']);
+        },
+        error: (err: Error) => {
+          this.eliminando       = false;
+          this.errorEliminacion = err.message || 'No se pudo eliminar el alojamiento.';
+        }
+      });
   }
 
   // ── Carga de datos ───────────────────────────────────────────────
@@ -186,14 +211,11 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     }
   }
 
-  volver(): void {
-    this.router.navigate(['/alojamientos']);
-  }
+  volver(): void { this.router.navigate(['/alojamientos']); }
 
   get precioFormateado(): string {
     return this.alojamiento?.pricePerNight
-      ? this.alojamiento.pricePerNight.toLocaleString('es-CO')
-      : '0';
+      ? this.alojamiento.pricePerNight.toLocaleString('es-CO') : '0';
   }
 
   get estrellas(): Array<'full' | 'half' | 'empty'> {
@@ -215,7 +237,5 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     return n === 1 ? '1 reseña' : `${n} reseñas`;
   }
 
-  get hayMapa(): boolean {
-    return !!this.mapaUrl;
-  }
+  get hayMapa(): boolean { return !!this.mapaUrl; }
 }
