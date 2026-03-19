@@ -44,15 +44,49 @@ To execute unit tests with the [Karma](https://karma-runner.github.io) test runn
 ng test
 ```
 
-## Running end-to-end tests
+## Running end-to-end tests (ALOJ-16 — Cypress)
 
-For end-to-end (e2e) testing, run:
+Los tests E2E del CRUD de alojamientos están implementados con Cypress.
+
+### Requisitos
+
+- Backend corriendo en `http://localhost:8080` (`./gradlew bootRun`)
+- Frontend corriendo en `http://localhost:4200` (`ng serve`)
+
+### Instalación
 
 ```bash
-ng e2e
+npm install --save-dev cypress
 ```
 
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
+### Credenciales de prueba
+
+Configuradas en `cypress.config.ts`:
+- Email: `juanjo@gmail.com`
+- Password: `Juanjo123!`
+
+### Ejecutar los tests
+
+```bash
+# Modo visual (recomendado)
+npx cypress open
+
+# Modo headless
+npx cypress run
+
+# Solo CRUD alojamientos
+npx cypress run --spec cypress/e2e/alojamiento-crud.cy.ts
+```
+
+### Tests incluidos (17 tests)
+
+| Suite | Descripción |
+|-------|-------------|
+| Crear | Validaciones, creación via API, verificar en lista |
+| Leer  | Listado, detalle, filtro, paginación, botones del dueño |
+| Editar | Precarga datos, actualizar campos, validaciones, desde panel |
+| Eliminar | Modal, cancelar, soft delete, toast, acceso post-delete |
+| Guards | Protección de rutas sin sesión |
 
 ## Additional Resources
 

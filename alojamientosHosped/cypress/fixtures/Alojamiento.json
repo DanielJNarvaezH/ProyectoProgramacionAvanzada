@@ -1,0 +1,19 @@
+{
+  "crear": {
+    "name": "Cabaña Test Cypress E2E",
+    "description": "Alojamiento creado automáticamente por los tests E2E de Cypress para verificar el flujo CRUD completo de la plataforma Hosped.",
+    "address": "Vereda Test, km 1 vía Cypress",
+    "city": "Armenia",
+    "pricePerNight": "120000",
+    "maxCapacity": "4",
+    "latitude": "4.5339",
+    "longitude": "-75.6811",
+    "mainImage": "https://images.unsplash.com/photo-1564013799919-ab600027ffc6?w=800&q=80"
+  },
+  "editar": {
+    "name": "Cabaña Test Cypress E2E — EDITADA",
+    "description": "Descripción actualizada por el test de edición E2E. Verifica que el formulario de edición persiste correctamente todos los campos.",
+    "city": "Calarcá",
+    "pricePerNight": "150000"
+  }
+}
