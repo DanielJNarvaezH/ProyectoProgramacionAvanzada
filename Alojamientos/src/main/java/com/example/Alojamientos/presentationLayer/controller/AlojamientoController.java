@@ -145,6 +145,25 @@ public class AlojamientoController {
         return ResponseEntity.ok(alojamientos);
     }
 
+    // ── Fix 4: panel anfitrión — todos sus alojamientos (activos e inactivos) ──
+    @GetMapping("/anfitrion/{hostId}/todos")
+    @Operation(summary = "Listar TODOS los alojamientos de un anfitrión (activos e inactivos)",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Lista completa obtenida correctamente"),
+                    @ApiResponse(responseCode = "204", description = "El anfitrión no tiene alojamientos"),
+                    @ApiResponse(responseCode = "400", description = "ID de anfitrión inválido")
+            })
+    public ResponseEntity<?> listarTodosPorAnfitrion(@PathVariable Integer hostId) {
+        if (hostId == null || hostId <= 0) {
+            return ResponseEntity.badRequest().body("El ID del anfitrión es inválido");
+        }
+        List<AlojamientoDTO> alojamientos = alojamientoService.listarTodosPorAnfitrion(hostId);
+        if (alojamientos.isEmpty()) {
+            return ResponseEntity.noContent().build();
+        }
+        return ResponseEntity.ok(alojamientos);
+    }
+
     // ============================================================
     // RF14, HU-014: Buscar alojamientos por ciudad
     // ============================================================

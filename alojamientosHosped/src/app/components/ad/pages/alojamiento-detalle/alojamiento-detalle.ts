@@ -41,6 +41,7 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
 
   // ── Navegación prev/next ─────────────────────────────────────────
   private idsContexto: number[] = [];
+  origen = '/alojamientos'; // Fix: destino del botón Volver
 
   // ── ALOJ-13: Modal de eliminación ────────────────────────────────
   mostrarModalEliminar = false;
@@ -72,6 +73,8 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
         this.idsContexto = idsParam
           ? idsParam.split(',').map(Number).filter(n => !isNaN(n) && n > 0)
           : [];
+        const origenParam = this.route.snapshot.queryParamMap.get('origen');
+        if (origenParam) this.origen = origenParam;
         this.cargarDetalle(id);
       });
   }
@@ -120,7 +123,11 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
   }
 
   irAEditar(): void {
-    this.router.navigate(['/alojamientos', this.alojamiento!.id, 'editar']);
+    // Fix: pasar origen para que cancelar en editar vuelva al detalle
+    this.router.navigate(
+      ['/alojamientos', this.alojamiento!.id, 'editar'],
+      { queryParams: { origen: `/alojamientos/${this.alojamiento!.id}` } }
+    );
   }
 
   // ── ALOJ-13: Eliminación ─────────────────────────────────────────
@@ -211,7 +218,7 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     }
   }
 
-  volver(): void { this.router.navigate(['/alojamientos']); }
+  volver(): void { this.router.navigate([this.origen]); }
 
   get precioFormateado(): string {
     return this.alojamiento?.pricePerNight

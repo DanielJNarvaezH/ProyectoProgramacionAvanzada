@@ -75,8 +75,8 @@ public class AlojamientoService {
         AlojamientoEntity entity = alojamientoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Alojamiento no encontrado con id: " + id));
 
-        // RN9: No actualizar si está eliminado
-        if (!entity.getActivo()) {
+        // Fix-4: solo bloquear si fue soft-deleted, permitir editar inactivos temporales
+        if (Boolean.TRUE.equals(entity.getEliminado())) {
             throw new IllegalArgumentException("No se puede actualizar un alojamiento eliminado");
         }
 
@@ -122,13 +122,23 @@ public class AlojamientoService {
         }
 
         entity.setActivo(false);
+        entity.setEliminado(true);   // Fix-4: marca como soft-deleted, distinto de "pausado"
         alojamientoRepository.save(entity);
     }
 
     @Transactional(readOnly = true)
     public List<AlojamientoDTO> listarPorAnfitrion(Integer hostId) {
         return alojamientoRepository.findByAnfitrion_Id(hostId).stream()
-                .filter(AlojamientoEntity::getActivo)
+                .filter(a -> Boolean.TRUE.equals(a.getActivo()) && Boolean.FALSE.equals(a.getEliminado()))
+                .map(alojamientoMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    // ── Fix 4: panel anfitrión — activos e inactivos, EXCLUYE los soft-deleted ──
+    @Transactional(readOnly = true)
+    public List<AlojamientoDTO> listarTodosPorAnfitrion(Integer hostId) {
+        return alojamientoRepository.findByAnfitrion_Id(hostId).stream()
+                .filter(a -> Boolean.FALSE.equals(a.getEliminado()))
                 .map(alojamientoMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -136,7 +146,7 @@ public class AlojamientoService {
     @Transactional(readOnly = true)
     public List<AlojamientoDTO> buscarPorCiudad(String ciudad) {
         return alojamientoRepository.findByCiudadIgnoreCase(ciudad).stream()
-                .filter(AlojamientoEntity::getActivo)
+                .filter(a -> Boolean.TRUE.equals(a.getActivo()) && Boolean.FALSE.equals(a.getEliminado()))
                 .map(alojamientoMapper::toDTO)
                 .collect(Collectors.toList());
     }
@@ -154,7 +164,8 @@ public class AlojamientoService {
         AlojamientoEntity entity = alojamientoRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Alojamiento no encontrado con id: " + id));
 
-        if (!entity.getActivo()) {
+        // Fix-4: solo bloquear si fue soft-deleted, no si está pausado temporalmente
+        if (Boolean.TRUE.equals(entity.getEliminado())) {
             throw new IllegalArgumentException("Alojamiento no disponible");
         }
 
@@ -164,6 +175,7 @@ public class AlojamientoService {
     @Transactional(readOnly = true)
     public List<AlojamientoDTO> listarActivos() {
         return alojamientoRepository.findByActivoTrue().stream()
+                .filter(a -> Boolean.FALSE.equals(a.getEliminado()))
                 .map(alojamientoMapper::toDTO)
                 .collect(Collectors.toList());
     }

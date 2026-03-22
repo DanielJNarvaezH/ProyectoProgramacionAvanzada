@@ -56,13 +56,27 @@ $shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
 
 // ── Topbar: volver + editar — ALOJ-8 ─────────────────────────────────────────
 .detalle-topbar {
+  position: relative;          // ancla para las flechas centradas
   display: flex;
   align-items: center;
   justify-content: space-between;
+  min-height: 2.5rem;          // altura mínima para que position:absolute tenga referencia
   margin-bottom: 1.25rem;
 
-  // Si solo hay botón volver (huésped), alinear a la izquierda
   .btn-volver { margin-bottom: 0; }
+}
+
+// Flechas SIEMPRE centradas horizontalmente — fix usabilidad ALOJ-3
+// position:absolute las saca del flujo, left:50%+translateX(-50%) las centra
+// sin importar si hay acciones del dueño a la derecha o no
+.detalle-nav-contexto {
+  position: absolute;
+  left: 50%;
+  transform: translateX(-50%);
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;  // evita que se parta en varias líneas
 }
 
 // Botón editar — visible solo para el anfitrión dueño
@@ -527,11 +541,7 @@ $shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
 }
 
 // ── Navegación prev/next en detalle ─────────────────────────────────────────
-.detalle-nav-contexto {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-}
+// .detalle-nav-contexto movido al bloque .detalle-topbar (position: absolute)
  
 .btn-nav-ctx {
   display: flex;

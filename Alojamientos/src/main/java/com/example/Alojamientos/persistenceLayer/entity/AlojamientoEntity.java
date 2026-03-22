@@ -54,6 +54,13 @@ public class AlojamientoEntity {
     @Builder.Default
     private Boolean activo = true;
 
+    // Opción A Fix-4: distingue "desactivado temporalmente" de "eliminado"
+    // El soft delete pone eliminado=true. El anfitrión que pausa pone activo=false.
+    // El panel muestra los que tienen eliminado=false (activos e inactivos).
+    @Column(nullable = false)
+    @Builder.Default
+    private Boolean eliminado = false;
+
     @Column(name = "fecha_creacion", insertable = false, updatable = false)
     private Timestamp fechaCreacion;
 

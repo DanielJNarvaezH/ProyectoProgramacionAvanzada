@@ -28,6 +28,7 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
 
   form!: FormGroup;
   alojamientoId!: number;
+  private origen = ''; // Fix: para volver al anterior al cancelar
 
   cargando          = true;
   guardando         = false;
@@ -72,6 +73,9 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
       this.router.navigate(['/alojamientos']);
       return;
     }
+    // Fix: guardar origen para cancelar vuelva al anterior
+    this.origen = this.route.snapshot.queryParamMap.get('origen')
+      || `/alojamientos/${this.alojamientoId}`;
     this.inicializarForm();
     this.cargarAlojamiento();
   }
@@ -244,7 +248,8 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
   }
 
   cancelar(): void {
-    this.router.navigate(['/alojamientos', this.alojamientoId]);
+    // Fix: volver al inmediatamente anterior
+    this.router.navigate([this.origen]);
   }
 
   campo(name: string) { return this.form.get(name); }

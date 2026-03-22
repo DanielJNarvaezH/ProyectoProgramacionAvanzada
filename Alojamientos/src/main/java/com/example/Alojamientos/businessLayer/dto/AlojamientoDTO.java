@@ -55,4 +55,7 @@ public class AlojamientoDTO {
     private String mainImage; // URL
 
     private boolean active;
+
+    // Fix-4: true = soft deleted, false = solo inactivo temporalmente
+    private boolean deleted;
 }

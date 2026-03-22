@@ -21,6 +21,7 @@ public interface AlojamientoDataMapper {
     @Mapping(target = "maxCapacity", source = "capacidadMaxima")
     @Mapping(target = "mainImage", source = "imagenPrincipal")
     @Mapping(target = "active", source = "activo")
+    @Mapping(target = "deleted", source = "eliminado")
     AlojamientoDTO toDTO(AlojamientoEntity entity);
 
     @Mapping(target = "anfitrion", source = "hostId", qualifiedByName = "hostIdToEntity")
@@ -34,6 +35,7 @@ public interface AlojamientoDataMapper {
     @Mapping(target = "capacidadMaxima", source = "maxCapacity")
     @Mapping(target = "imagenPrincipal", source = "mainImage")
     @Mapping(target = "activo", source = "active")
+    @Mapping(target = "eliminado", source = "deleted")
     AlojamientoEntity toEntity(AlojamientoDTO dto);
 
     @Named("hostIdToEntity")

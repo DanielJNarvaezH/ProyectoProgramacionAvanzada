@@ -115,6 +115,18 @@ export class AlojamientoService {
     );
   }
 
+  // Fix 4: panel anfitrión — activos e inactivos
+  getByAnfitrionTodos(hostId: number): Observable<Alojamiento[]> {
+    return this.http.get<Alojamiento[]>(`${this.apiUrl}/anfitrion/${hostId}/todos`).pipe(
+      catchError(error => {
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || 'Error al obtener los alojamientos del anfitrión');
+        return throwError(() => new Error(mensaje));
+      })
+    );
+  }
+
   // ─────────────────────────────────────────────────────────────────
   // BUSCAR POR CIUDAD
   // ─────────────────────────────────────────────────────────────────

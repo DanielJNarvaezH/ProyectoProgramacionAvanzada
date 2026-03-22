@@ -7,13 +7,10 @@ import { AuthService }        from '../../../../../services/AuthService';
 import { Alojamiento }        from '../../../../models/alojamiento.model';
 
 /**
- * PanelGestionPageComponent — ALOJ-9
+ * PanelGestionPageComponent — ALOJ-9 + Fix-4
  *
- * Dashboard exclusivo del anfitrión:
- * - Lista sus alojamientos (GET /api/alojamientos/anfitrion/:hostId)
- * - Acceso directo a Crear, Editar y Eliminar (soft delete)
- * - Confirmación modal antes de eliminar
- * - Estados: cargando, vacío, error
+ * Fix-4: carga TODOS los alojamientos del anfitrión (activos e inactivos)
+ * para que pueda ver y reactivar los que desactivó.
  */
 @Component({
   selector: 'app-panel-gestion',
@@ -35,6 +32,9 @@ export class PanelGestionPageComponent implements OnInit, OnDestroy {
   eliminando            = false;
   errorEliminacion      = '';
 
+  // ── Fix-4: reactivar ─────────────────────────────────────────────
+  reactivando: number | null = null;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -52,7 +52,7 @@ export class PanelGestionPageComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
-  // ── Carga ────────────────────────────────────────────────────────
+  // ── Carga — ahora trae activos E inactivos ────────────────────────
 
   cargarAlojamientos(): void {
     const usuario = this.authService.getUsuario();
@@ -66,7 +66,7 @@ export class PanelGestionPageComponent implements OnInit, OnDestroy {
     this.cargando = true;
     this.error    = '';
 
-    this.alojamientoService.getByAnfitrion(hostId)
+    this.alojamientoService.getByAnfitrionTodos(hostId)
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (data) => {
@@ -74,7 +74,6 @@ export class PanelGestionPageComponent implements OnInit, OnDestroy {
           this.cargando     = false;
         },
         error: (err: Error) => {
-          // 204 No Content llega como error en algunos entornos: tratar como lista vacía
           this.alojamientos = [];
           this.error        = err.message?.includes('Http failure')
             ? ''
@@ -91,19 +90,48 @@ export class PanelGestionPageComponent implements OnInit, OnDestroy {
   }
 
   irAEditar(id: number): void {
-    this.router.navigate(['/alojamientos', id, 'editar']);
+    // Fix: pasar origen para que cancelar en editar vuelva al panel
+    this.router.navigate(['/alojamientos', id, 'editar'], { queryParams: { origen: '/mis-alojamientos' } });
   }
 
   irADetalle(id: number): void {
-    this.router.navigate(['/alojamientos', id]);
+    // Fix: pasar origen para que el botón Volver del detalle regrese al panel
+    this.router.navigate(['/alojamientos', id], { queryParams: { origen: '/mis-alojamientos' } });
+  }
+
+  // ── Fix-4: Reactivar alojamiento ─────────────────────────────────
+
+  reactivarAlojamiento(event: Event, aloj: Alojamiento): void {
+    event.stopPropagation();
+    if (!aloj.id) return;
+
+    this.reactivando = aloj.id;
+
+    const payload: Alojamiento = { ...aloj, active: true };
+
+    this.alojamientoService.update(aloj.id, payload)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (actualizado) => {
+          // Actualizar en la lista local sin recargar
+          this.alojamientos = this.alojamientos.map(a =>
+            a.id === aloj.id ? { ...a, active: true } : a
+          );
+          this.reactivando    = null;
+          this.successMessage = `"${aloj.name}" fue reactivado correctamente.`;
+          setTimeout(() => this.successMessage = '', 4000);
+        },
+        error: (err: Error) => {
+          this.reactivando    = null;
+          this.successMessage = '';
+          this.error = err.message || 'No se pudo reactivar el alojamiento.';
+          setTimeout(() => this.error = '', 4000);
+        }
+      });
   }
 
   // ── Eliminación con modal de confirmación ─────────────────────────
 
-  /**
-   * ALOJ-9: Abre el modal de confirmación para el alojamiento seleccionado.
-   * Detiene la propagación para no activar irADetalle() de la fila.
-   */
   abrirModalEliminar(event: Event, alojamiento: Alojamiento): void {
     event.stopPropagation();
     this.alojamientoAEliminar = alojamiento;
@@ -152,10 +180,20 @@ export class PanelGestionPageComponent implements OnInit, OnDestroy {
     return this.alojamientos.length;
   }
 
+  // Fix-4: métricas separadas activos/inactivos
+  get totalActivos(): number {
+    return this.alojamientos.filter(a => a.active).length;
+  }
+
+  get totalInactivos(): number {
+    return this.alojamientos.filter(a => !a.active).length;
+  }
+
   get precioPromedio(): string {
-    if (this.alojamientos.length === 0) return '—';
-    const suma = this.alojamientos.reduce((acc, a) => acc + (a.pricePerNight ?? 0), 0);
-    return (suma / this.alojamientos.length).toLocaleString('es-CO', { maximumFractionDigits: 0 });
+    const activos = this.alojamientos.filter(a => a.active);
+    if (activos.length === 0) return '—';
+    const suma = activos.reduce((acc, a) => acc + (a.pricePerNight ?? 0), 0);
+    return (suma / activos.length).toLocaleString('es-CO', { maximumFractionDigits: 0 });
   }
 
   precioFormateado(precio: number): string {

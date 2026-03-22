@@ -613,3 +613,33 @@ $shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
     grid-template-columns: 1fr;
   }
 }
+
+// ── Fix-4: badge inactivo ────────────────────────────────────────────────────
+// Agregar junto a los estilos de .aloj-card__badge existentes en panel-gestion.scss
+
+.aloj-card__badge--inactivo {
+  background: rgba(100, 116, 139, 0.85);  // gris slate
+}
+
+// ── Fix-4: card inactiva — apagada visualmente ────────────────────────────────
+.aloj-card--inactivo {
+  opacity: 0.65;
+  cursor: pointer;
+
+  .aloj-card__img { filter: grayscale(40%); }
+}
+
+// ── Fix-4: ícono de métrica inactivos ─────────────────────────────────────────
+.metrica-card__icon--gray {
+  background: rgba(100, 116, 139, 0.1);
+  color: #64748b;
+}
+
+// ── Fix-4: botón reactivar ────────────────────────────────────────────────────
+.aloj-card__btn--reactivar {
+  background: #10b981;    // verde esmeralda
+  color: #fff;
+
+  &:hover:not(:disabled) { background: #059669; }
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+}

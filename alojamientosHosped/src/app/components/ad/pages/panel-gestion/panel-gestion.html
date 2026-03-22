@@ -1,6 +1,6 @@
 <!-- ─────────────────────────────────────────────────────────────────────────
-     PanelGestionPageComponent — ALOJ-9
-     Dashboard del anfitrión: lista sus alojamientos con acciones CRUD
+     PanelGestionPageComponent — ALOJ-9 + Fix-4
+     Fix-4: muestra activos e inactivos, botón reactivar en inactivos
      ───────────────────────────────────────────────────────────────────────── -->
 
 <app-navbar></app-navbar>
@@ -30,9 +30,22 @@
         <i class="fa-solid fa-house"></i>
       </div>
       <div class="metrica-card__info">
-        <span class="metrica-card__valor">{{ totalAlojamientos }}</span>
+        <span class="metrica-card__valor">{{ totalActivos }}</span>
         <span class="metrica-card__label">
-          Alojamiento{{ totalAlojamientos !== 1 ? 's' : '' }} activo{{ totalAlojamientos !== 1 ? 's' : '' }}
+          Activo{{ totalActivos !== 1 ? 's' : '' }}
+        </span>
+      </div>
+    </div>
+
+    <!-- Fix-4: métrica de inactivos solo si hay alguno -->
+    <div class="metrica-card" *ngIf="totalInactivos > 0">
+      <div class="metrica-card__icon metrica-card__icon--gray">
+        <i class="fa-solid fa-house-circle-xmark"></i>
+      </div>
+      <div class="metrica-card__info">
+        <span class="metrica-card__valor">{{ totalInactivos }}</span>
+        <span class="metrica-card__label">
+          Inactivo{{ totalInactivos !== 1 ? 's' : '' }}
         </span>
       </div>
     </div>
@@ -54,7 +67,7 @@
     <span>{{ successMessage }}</span>
   </div>
 
-  <!-- ── Loading skeleton — W2: usar index en lugar de variable suelta ──────── -->
+  <!-- ── Loading skeleton ──────────────────────────────────────────────────── -->
   <section *ngIf="cargando" class="panel-grid" aria-label="Cargando alojamientos">
     <div *ngFor="let item of [1,2,3,4]; let idx = index" class="skeleton-card">
       <div class="skeleton-card__img skeleton-pulse"></div>
@@ -101,15 +114,15 @@
     class="panel-grid"
     aria-label="Mis alojamientos"
   >
-    <!-- W3: [attr.tabindex]="'0'" con string para evitar "Wrong attribute value" -->
     <article
       *ngFor="let aloj of alojamientos; trackBy: trackById"
       class="aloj-card"
+      [class.aloj-card--inactivo]="!aloj.active"
       (click)="irADetalle(aloj.id!)"
       (keydown.enter)="irADetalle(aloj.id!)"
       [attr.tabindex]="'0'"
       role="button"
-      [attr.aria-label]="'Ver detalle de ' + aloj.name"
+      [attr.aria-label]="(aloj.active ? 'Ver detalle de ' : 'Alojamiento inactivo: ') + aloj.name"
     >
       <!-- Imagen -->
       <div class="aloj-card__img-wrap">
@@ -120,8 +133,14 @@
           class="aloj-card__img"
           loading="lazy"
         />
-        <span class="aloj-card__badge aloj-card__badge--activo">
-          <i class="fa-solid fa-circle"></i> Activo
+        <!-- Fix-4: badge dinámico según estado -->
+        <span
+          class="aloj-card__badge"
+          [class.aloj-card__badge--activo]="aloj.active"
+          [class.aloj-card__badge--inactivo]="!aloj.active"
+        >
+          <i class="fa-solid fa-circle"></i>
+          {{ aloj.active ? 'Activo' : 'Inactivo' }}
         </span>
       </div>
 
@@ -147,6 +166,8 @@
 
       <!-- Acciones CRUD -->
       <div class="aloj-card__actions" (click)="$event.stopPropagation()">
+
+        <!-- Editar — siempre disponible -->
         <button
           class="aloj-card__btn aloj-card__btn--edit"
           (click)="irAEditar(aloj.id!)"
@@ -157,6 +178,20 @@
           <span>Editar</span>
         </button>
 
+        <!-- Fix-4: Reactivar — solo si inactivo -->
+        <button
+          *ngIf="!aloj.active"
+          class="aloj-card__btn aloj-card__btn--reactivar"
+          (click)="reactivarAlojamiento($event, aloj)"
+          [disabled]="reactivando === aloj.id"
+          title="Reactivar alojamiento"
+          [attr.aria-label]="'Reactivar ' + aloj.name"
+        >
+          <i class="fa-solid fa-rotate-right" [class.fa-spin]="reactivando === aloj.id"></i>
+          <span>{{ reactivando === aloj.id ? 'Reactivando...' : 'Reactivar' }}</span>
+        </button>
+
+        <!-- Eliminar — disponible para activos e inactivos -->
         <button
           class="aloj-card__btn aloj-card__btn--delete"
           (click)="abrirModalEliminar($event, aloj)"
@@ -166,15 +201,14 @@
           <i class="fa-solid fa-trash"></i>
           <span>Eliminar</span>
         </button>
+
       </div>
     </article>
   </section>
 
 </main>
 
-<!-- ─────────────────────────────────────────────────────────────────────────
-     Modal de confirmación de eliminación — ALOJ-9
-     ───────────────────────────────────────────────────────────────────────── -->
+<!-- Modal de confirmación de eliminación — ALOJ-9 -->
 <div
   class="modal-overlay"
   *ngIf="mostrarModal"
@@ -196,32 +230,18 @@
       Esta acción no se puede deshacer y solo es posible si no tiene reservas activas.
     </p>
 
-    <!-- Error del backend (ej: reservas activas) -->
     <div class="modal__error" *ngIf="errorEliminacion" role="alert">
       <i class="fa-solid fa-circle-exclamation"></i>
       <span>{{ errorEliminacion }}</span>
     </div>
 
     <div class="modal__actions">
-      <button
-        class="modal__btn modal__btn--cancel"
-        (click)="cerrarModal()"
-        [disabled]="eliminando"
-      >
+      <button class="modal__btn modal__btn--cancel" (click)="cerrarModal()" [disabled]="eliminando">
         Cancelar
       </button>
-
-      <button
-        class="modal__btn modal__btn--confirm"
-        (click)="confirmarEliminar()"
-        [disabled]="eliminando"
-      >
-        <span *ngIf="!eliminando">
-          <i class="fa-solid fa-trash"></i> Sí, eliminar
-        </span>
-        <span *ngIf="eliminando">
-          <i class="fa-solid fa-spinner fa-spin"></i> Eliminando...
-        </span>
+      <button class="modal__btn modal__btn--confirm" (click)="confirmarEliminar()" [disabled]="eliminando">
+        <span *ngIf="!eliminando"><i class="fa-solid fa-trash"></i> Sí, eliminar</span>
+        <span *ngIf="eliminando"><i class="fa-solid fa-spinner fa-spin"></i> Eliminando...</span>
       </button>
     </div>
 
