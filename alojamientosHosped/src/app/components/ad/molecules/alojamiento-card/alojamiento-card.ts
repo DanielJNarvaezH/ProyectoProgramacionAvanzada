@@ -24,6 +24,9 @@ export class AlojamientoCardComponent {
   /** IDs de todos los alojamientos visibles en la lista (para nav prev/next) */
   @Input() todos: number[] = [];
 
+  /** Ruta de origen: se pasa al detalle para que el botón Volver regrese aquí */
+  @Input() origen: string = '/alojamientos';
+
   readonly placeholderImg = 'https://placehold.co/400x260/e2e8f0/94a3b8?text=Sin+imagen';
 
   constructor(private router: Router) {}
@@ -31,17 +34,10 @@ export class AlojamientoCardComponent {
   verDetalle(): void {
     if (!this.alojamiento?.id) return;
 
-    const queryParams = this.todos.length > 1
-      ? { ids: this.todos.join(',') }
-      : {};
+    const queryParams: Record<string, string> = { origen: this.origen };
+    if (this.todos.length > 1) queryParams['ids'] = this.todos.join(',');
 
     this.router.navigate(['/alojamientos', this.alojamiento.id], { queryParams });
-  }
-
-  get precioFormateado(): string {
-    return this.alojamiento?.pricePerNight
-      ? this.alojamiento.pricePerNight.toLocaleString('es-CO')
-      : '0';
   }
 
   get estrellas(): Array<'full' | 'half' | 'empty'> {

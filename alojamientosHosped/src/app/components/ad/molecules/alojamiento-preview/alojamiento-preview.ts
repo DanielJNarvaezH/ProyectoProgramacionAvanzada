@@ -42,12 +42,6 @@ export class AlojamientoPreviewComponent implements OnChanges {
     }
   }
 
-  get precioFormateado(): string {
-    return this.alojamiento?.pricePerNight
-      ? this.alojamiento.pricePerNight.toLocaleString('es-CO')
-      : '0';
-  }
-
   get hayMapa(): boolean {
     return !!this.mapaUrl;
   }

@@ -123,10 +123,19 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
   }
 
   irAEditar(): void {
-    // Fix: pasar origen para que cancelar en editar vuelva al detalle
+    // Fix nav: pasar origen (URL del detalle) + origenDetalle (de dónde vino el usuario
+    // al detalle, p.ej. /mis-alojamientos) para que al volver del editar el detalle
+    // restaure tanto las flechas prev/next como el destino correcto del botón Volver.
+    const queryParams: Record<string, string> = {
+      origen:        `/alojamientos/${this.alojamiento!.id}`,
+      origenDetalle: this.origen   // preserva /mis-alojamientos o /alojamientos
+    };
+    if (this.idsContexto.length > 1) {
+      queryParams['ids'] = this.idsContexto.join(',');
+    }
     this.router.navigate(
       ['/alojamientos', this.alojamiento!.id, 'editar'],
-      { queryParams: { origen: `/alojamientos/${this.alojamiento!.id}` } }
+      { queryParams }
     );
   }
 
@@ -219,11 +228,6 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
   }
 
   volver(): void { this.router.navigate([this.origen]); }
-
-  get precioFormateado(): string {
-    return this.alojamiento?.pricePerNight
-      ? this.alojamiento.pricePerNight.toLocaleString('es-CO') : '0';
-  }
 
   get estrellas(): Array<'full' | 'half' | 'empty'> {
     return Array.from({ length: 5 }, (_, i) => {

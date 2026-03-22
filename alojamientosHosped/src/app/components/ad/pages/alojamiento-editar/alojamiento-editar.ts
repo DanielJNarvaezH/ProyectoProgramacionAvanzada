@@ -28,7 +28,9 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
 
   form!: FormGroup;
   alojamientoId!: number;
-  private origen = ''; // Fix: para volver al anterior al cancelar
+  private origen = '';           // Fix: para volver al anterior al cancelar
+  private idsContexto = '';      // Fix: ids de contexto para restaurar flechas prev/next al volver
+  private origenDetalle = '';    // Fix nav: origen original del detalle (p.ej. /mis-alojamientos)
 
   cargando          = true;
   guardando         = false;
@@ -76,6 +78,10 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
     // Fix: guardar origen para cancelar vuelva al anterior
     this.origen = this.route.snapshot.queryParamMap.get('origen')
       || `/alojamientos/${this.alojamientoId}`;
+    // Fix: preservar ids de contexto para restaurar flechas prev/next en el detalle
+    this.idsContexto = this.route.snapshot.queryParamMap.get('ids') || '';
+    // Fix nav: preservar el origen original del detalle para restaurar su botón Volver
+    this.origenDetalle = this.route.snapshot.queryParamMap.get('origenDetalle') || '';
     this.inicializarForm();
     this.cargarAlojamiento();
   }
@@ -244,12 +250,24 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
   private finalizarGuardado(): void {
     this.guardando = false;
     this.exito     = true;
-    setTimeout(() => this.router.navigate(['/alojamientos', this.alojamientoId]), 1800);
+    // Fix nav: reenviar ids Y origenDetalle al detalle para restaurar flechas y botón Volver
+    const queryParams: Record<string, string> = {};
+    if (this.idsContexto)    queryParams['ids']    = this.idsContexto;
+    if (this.origenDetalle)  queryParams['origen']  = this.origenDetalle;
+    setTimeout(() => this.router.navigate(
+      ['/alojamientos', this.alojamientoId],
+      { queryParams }
+    ), 1800);
   }
 
   cancelar(): void {
-    // Fix: volver al inmediatamente anterior
-    this.router.navigate([this.origen]);
+    // Fix nav: volver al detalle preservando ids y origenDetalle para restaurar
+    // flechas prev/next y el destino correcto del botón Volver del detalle
+    const queryParams: Record<string, string> = {};
+    if (this.idsContexto)    queryParams['ids']    = this.idsContexto;
+    if (this.origenDetalle)  queryParams['origen']  = this.origenDetalle;
+    const tieneParams = Object.keys(queryParams).length > 0;
+    this.router.navigate([this.origen], tieneParams ? { queryParams } : {});
   }
 
   campo(name: string) { return this.form.get(name); }

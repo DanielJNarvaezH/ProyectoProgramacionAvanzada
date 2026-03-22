@@ -54,6 +54,7 @@ import { PanelGestionPageComponent }       from './components/ad/pages/panel-ges
 
 // -- Pipes
 import { SafeUrlPipe } from './pipes/safe-url.pipe';
+import { PesoPipe }    from './pipes/peso.pipe';
 
 @NgModule({
   declarations: [
@@ -93,6 +94,7 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe';
     PerfilPageComponent,
     // Pipes
     SafeUrlPipe,
+    PesoPipe,
   ],
   imports: [
     BrowserModule,

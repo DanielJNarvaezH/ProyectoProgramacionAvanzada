@@ -196,10 +196,6 @@ export class PanelGestionPageComponent implements OnInit, OnDestroy {
     return (suma / activos.length).toLocaleString('es-CO', { maximumFractionDigits: 0 });
   }
 
-  precioFormateado(precio: number): string {
-    return precio?.toLocaleString('es-CO') ?? '0';
-  }
-
   readonly placeholderImg = 'https://placehold.co/400x260/e2e8f0/94a3b8?text=Sin+imagen';
 
   trackById(_: number, item: Alojamiento): number | undefined {
