@@ -269,61 +269,12 @@
 
 </main>
 
-<!-- ─────────────────────────────────────────────────────────────────────────
-     ALOJ-13: Modal de confirmación de eliminación
-     Mismo patrón que panel-gestion — fuera del main para escapar overflow
-     ───────────────────────────────────────────────────────────────────────── -->
-<div
-  class="modal-overlay"
-  *ngIf="mostrarModalEliminar"
-  (click)="cerrarModalEliminar()"
-  role="dialog"
-  aria-modal="true"
-  aria-labelledby="modal-eliminar-title"
->
-  <div class="modal" (click)="$event.stopPropagation()">
-
-    <div class="modal__icon">
-      <i class="fa-solid fa-triangle-exclamation"></i>
-    </div>
-
-    <h2 id="modal-eliminar-title" class="modal__title">¿Eliminar alojamiento?</h2>
-
-    <p class="modal__msg">
-      Estás a punto de eliminar
-      <strong>"{{ alojamiento?.name }}"</strong>.
-      Esta acción no se puede deshacer y solo es posible si no tiene reservas activas.
-    </p>
-
-    <!-- Error del backend (ej: tiene reservas activas) -->
-    <div class="modal__error" *ngIf="errorEliminacion" role="alert">
-      <i class="fa-solid fa-circle-exclamation"></i>
-      <span>{{ errorEliminacion }}</span>
-    </div>
-
-    <div class="modal__actions">
-      <button
-        type="button"
-        class="modal__btn modal__btn--cancel"
-        (click)="cerrarModalEliminar()"
-        [disabled]="eliminando"
-      >
-        Cancelar
-      </button>
-      <button
-        type="button"
-        class="modal__btn modal__btn--confirm"
-        (click)="confirmarEliminar()"
-        [disabled]="eliminando"
-      >
-        <span *ngIf="!eliminando">
-          <i class="fa-solid fa-trash"></i> Sí, eliminar
-        </span>
-        <span *ngIf="eliminando">
-          <i class="fa-solid fa-spinner fa-spin"></i> Eliminando...
-        </span>
-      </button>
-    </div>
-
-  </div>
-</div>
+<!-- fix6: modal extraído a molécula confirm-modal -->
+<app-confirm-modal
+  [visible]="mostrarModalEliminar"
+  [nombreElemento]="alojamiento?.name || ''"
+  [cargando]="eliminando"
+  [error]="errorEliminacion"
+  (confirmar)="confirmarEliminar()"
+  (cancelar)="cerrarModalEliminar()"
+></app-confirm-modal>

@@ -309,6 +309,12 @@
           Cancelar
         </button>
 
+        <!-- Fix-5: botón Vista previa igual que en editar -->
+        <button type="button" class="btn btn--preview" (click)="togglePreview()" [disabled]="isSubmitting">
+          <i class="fa-solid fa-eye"></i>
+          {{ mostrarPreview ? 'Ocultar vista previa' : 'Vista previa' }}
+        </button>
+
         <button
           type="submit"
           [disabled]="isSubmitting || hayImagenesSubiendo"
@@ -318,6 +324,11 @@
           <i *ngIf="!isSubmitting && !hayImagenesSubiendo" class="fa-solid fa-house-chimney-medical"></i>
           {{ hayImagenesSubiendo ? 'Subiendo imágenes...' : isSubmitting ? 'Publicando...' : 'Publicar alojamiento' }}
         </button>
+      </div>
+
+      <!-- Fix-5: panel de vista previa — mismo patrón que editar -->
+      <div class="preview-panel" *ngIf="mostrarPreview">
+        <app-alojamiento-preview [alojamiento]="datosPreview"></app-alojamiento-preview>
       </div>
 
     </form>

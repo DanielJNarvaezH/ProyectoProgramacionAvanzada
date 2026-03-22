@@ -30,6 +30,7 @@ import { LoginFormComponent }        from './components/ad/molecules/login-form/
 import { RegisterFormComponent }     from './components/ad/molecules/register-form/register-form';
 import { AlojamientoCardComponent }  from './components/ad/molecules/alojamiento-card/alojamiento-card';
 import { ComentarioCardComponent }   from './components/ad/molecules/comentario-card/comentario-card';
+import { ConfirmModalComponent }      from './components/ad/molecules/confirm-modal/confirm-modal';
 
 // -- Organismos
 import { LoginCardComponent }             from './components/ad/organisms/login-card/login-card';
@@ -71,6 +72,7 @@ import { SafeUrlPipe } from './pipes/safe-url.pipe';
     ComentarioCardComponent,
     ImageUploaderComponent,
     AlojamientoPreviewComponent,
+    ConfirmModalComponent,
 
     // Organismos
     LoginCardComponent,

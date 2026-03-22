@@ -97,6 +97,16 @@ export class AlojamientoCrearPageComponent implements OnInit {
   }
 
   // ── Getters ───────────────────────────────────────────────────
+  mostrarPreview = false;
+
+  get datosPreview(): Partial<any> {
+    return this.form?.value ?? {};
+  }
+
+  togglePreview(): void {
+    this.mostrarPreview = !this.mostrarPreview;
+  }
+
   get name()          { return this.form.get('name'); }
   get description()   { return this.form.get('description'); }
   get address()       { return this.form.get('address'); }

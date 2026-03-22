@@ -208,42 +208,12 @@
 
 </main>
 
-<!-- Modal de confirmación de eliminación — ALOJ-9 -->
-<div
-  class="modal-overlay"
-  *ngIf="mostrarModal"
-  (click)="cerrarModal()"
-  role="dialog"
-  aria-modal="true"
->
-  <div class="modal" (click)="$event.stopPropagation()">
-
-    <div class="modal__icon">
-      <i class="fa-solid fa-triangle-exclamation"></i>
-    </div>
-
-    <h2 class="modal__title">¿Eliminar alojamiento?</h2>
-
-    <p class="modal__msg">
-      Estás a punto de eliminar
-      <strong>"{{ alojamientoAEliminar?.name }}"</strong>.
-      Esta acción no se puede deshacer y solo es posible si no tiene reservas activas.
-    </p>
-
-    <div class="modal__error" *ngIf="errorEliminacion" role="alert">
-      <i class="fa-solid fa-circle-exclamation"></i>
-      <span>{{ errorEliminacion }}</span>
-    </div>
-
-    <div class="modal__actions">
-      <button class="modal__btn modal__btn--cancel" (click)="cerrarModal()" [disabled]="eliminando">
-        Cancelar
-      </button>
-      <button class="modal__btn modal__btn--confirm" (click)="confirmarEliminar()" [disabled]="eliminando">
-        <span *ngIf="!eliminando"><i class="fa-solid fa-trash"></i> Sí, eliminar</span>
-        <span *ngIf="eliminando"><i class="fa-solid fa-spinner fa-spin"></i> Eliminando...</span>
-      </button>
-    </div>
-
-  </div>
-</div>
+<!-- fix6: modal extraído a molécula confirm-modal -->
+<app-confirm-modal
+  [visible]="mostrarModal"
+  [nombreElemento]="alojamientoAEliminar?.name || ''"
+  [cargando]="eliminando"
+  [error]="errorEliminacion"
+  (confirmar)="confirmarEliminar()"
+  (cancelar)="cerrarModal()"
+></app-confirm-modal>
