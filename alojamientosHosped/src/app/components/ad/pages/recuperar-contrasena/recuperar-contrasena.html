@@ -16,7 +16,6 @@
         Ingresa tu correo y te enviaremos un código de recuperación.
       </p>
 
-      <!-- Mensajes -->
       <div *ngIf="error" class="w-full mb-4 px-4 py-2 bg-red-50 border border-red-300 text-red-600 text-sm rounded-md">
         {{ error }}
       </div>
@@ -24,7 +23,6 @@
         {{ exito }}
       </div>
 
-      <!-- Formulario paso 1 -->
       <div class="space-y-4 w-full">
         <div>
           <label class="block text-sm font-medium text-neutral-700">Correo electrónico</label>
@@ -37,18 +35,12 @@
           />
         </div>
 
-        <!-- ALOJ-15: botón con spinner -->
         <button
           (click)="solicitarCodigo()"
           [disabled]="cargando"
           class="w-full flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 rounded-md transition disabled:opacity-50"
         >
-          <svg
-            *ngIf="cargando"
-            class="animate-spin h-4 w-4 text-white"
-            [attr.fill]="'none'"
-            viewBox="0 0 24 24"
-          >
+          <svg *ngIf="cargando" class="animate-spin h-4 w-4 text-white" [attr.fill]="'none'" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" [attr.fill]="'currentColor'" d="M4 12a8 8 0 018-8v8H4z"></path>
           </svg>
@@ -56,17 +48,14 @@
         </button>
       </div>
 
-      <!-- Volver al login -->
       <div class="flex items-center gap-3 w-full my-4">
         <hr class="flex-1 border-neutral-200" />
         <span class="text-xs text-neutral-400">¿Deseas Volver?</span>
         <hr class="flex-1 border-neutral-200" />
       </div>
 
-      <a
-        routerLink="/login"
-        class="w-full text-center py-2 border-2 border-primary-500 text-primary-600 font-semibold rounded-md hover:bg-primary-50 transition"
-      >
+      <a routerLink="/login"
+        class="w-full text-center py-2 border-2 border-primary-500 text-primary-600 font-semibold rounded-md hover:bg-primary-50 transition">
         Volver al login
       </a>
 
@@ -80,7 +69,6 @@
         Ingresa el código enviado a <strong>{{ email }}</strong>
       </p>
 
-      <!-- Mensajes -->
       <div *ngIf="error" class="w-full mb-4 px-4 py-2 bg-red-50 border border-red-300 text-red-600 text-sm rounded-md">
         {{ error }}
       </div>
@@ -88,8 +76,9 @@
         {{ exito }}
       </div>
 
-      <!-- Formulario paso 2 -->
       <div class="space-y-4 w-full">
+
+        <!-- Código -->
         <div>
           <label class="block text-sm font-medium text-neutral-700">Código de verificación</label>
           <input
@@ -101,17 +90,39 @@
           />
         </div>
 
+        <!-- Nueva contraseña -->
         <div>
           <label class="block text-sm font-medium text-neutral-700">Nueva contraseña</label>
           <input
             [(ngModel)]="nuevaContrasena"
             name="nuevaContrasena"
             type="password"
-            placeholder="Mínimo 8 caracteres"
+            placeholder="Ej: MiClave123!"
             class="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            [ngClass]="{
+              'border-green-400': nuevaContrasena.length > 0 && contrasenaValida,
+              'border-red-400':   nuevaContrasena.length > 0 && !contrasenaValida
+            }"
           />
+
+          <!-- Requisitos reactivos — visibles apenas empieza a escribir -->
+          <div *ngIf="nuevaContrasena.length > 0" class="mt-2 space-y-1">
+            <p class="text-xs" [ngClass]="req8Chars ? 'text-green-600' : 'text-red-500'">
+              {{ req8Chars ? '✓' : '✗' }} Mínimo 8 caracteres
+            </p>
+            <p class="text-xs" [ngClass]="reqMayuscula ? 'text-green-600' : 'text-red-500'">
+              {{ reqMayuscula ? '✓' : '✗' }} Al menos una mayúscula
+            </p>
+            <p class="text-xs" [ngClass]="reqNumero ? 'text-green-600' : 'text-red-500'">
+              {{ reqNumero ? '✓' : '✗' }} Al menos un número
+            </p>
+            <p class="text-xs" [ngClass]="reqEspecial ? 'text-green-600' : 'text-red-500'">
+              {{ reqEspecial ? '✓' : '✗' }} Al menos un carácter especial (!@#$%...)
+            </p>
+          </div>
         </div>
 
+        <!-- Confirmar contraseña -->
         <div>
           <label class="block text-sm font-medium text-neutral-700">Confirmar contraseña</label>
           <input
@@ -120,29 +131,31 @@
             type="password"
             placeholder="Repite la contraseña"
             class="w-full mt-1 px-3 py-2 border border-neutral-300 rounded-md focus:outline-none focus:ring-2 focus:ring-primary-500"
+            [ngClass]="{
+              'border-green-400': confirmarContrasena.length > 0 && reqCoinciden,
+              'border-red-400':   confirmarContrasena.length > 0 && !reqCoinciden
+            }"
           />
+          <p *ngIf="confirmarContrasena.length > 0" class="mt-1 text-xs"
+            [ngClass]="reqCoinciden ? 'text-green-600' : 'text-red-500'">
+            {{ reqCoinciden ? '✓ Las contraseñas coinciden' : '✗ Las contraseñas no coinciden' }}
+          </p>
         </div>
 
-        <!-- ALOJ-15: botón con spinner -->
         <button
           (click)="resetContrasena()"
-          [disabled]="cargando"
+          [disabled]="cargando || !contrasenaValida || !reqCoinciden"
           class="w-full flex items-center justify-center gap-2 bg-primary-500 hover:bg-primary-600 text-white font-semibold py-2 rounded-md transition disabled:opacity-50"
         >
-          <svg
-            *ngIf="cargando"
-            class="animate-spin h-4 w-4 text-white"
-            [attr.fill]="'none'"
-            viewBox="0 0 24 24"
-          >
+          <svg *ngIf="cargando" class="animate-spin h-4 w-4 text-white" [attr.fill]="'none'" viewBox="0 0 24 24">
             <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
             <path class="opacity-75" [attr.fill]="'currentColor'" d="M4 12a8 8 0 018-8v8H4z"></path>
           </svg>
           {{ cargando ? 'Guardando...' : 'Cambiar contraseña' }}
         </button>
+
       </div>
 
-      <!-- Volver al paso 1 -->
       <div class="flex items-center gap-3 w-full my-4">
         <hr class="flex-1 border-neutral-200" />
         <span class="text-xs text-neutral-400">¿Email incorrecto?</span>
@@ -151,14 +164,12 @@
 
       <button
         (click)="paso = 'email'"
-        class="w-full text-center py-2 border-2 border-primary-500 text-primary-600 font-semibold rounded-md hover:bg-primary-50 transition"
-      >
+        class="w-full text-center py-2 border-2 border-primary-500 text-primary-600 font-semibold rounded-md hover:bg-primary-50 transition">
         ← Cambiar email
       </button>
 
     </ng-container>
 
-    <!-- Pie de página -->
     <footer class="text-center text-sm text-neutral-500 mt-6">
       © 2025 Hosped | Sistema de Alojamiento Inteligente
     </footer>

@@ -70,8 +70,8 @@ public class AuthService {
                 .email(guardado.getCorreo())
                 .rol(guardado.getRol().name())
                 .mensaje("Registro exitoso")
-                .userId(guardado.getId())    // ← ALOJ-7
-                .name(guardado.getNombre())  // ← ALOJ-7
+                .userId(guardado.getId())
+                .name(guardado.getNombre())
                 .build();
     }
 
@@ -94,8 +94,8 @@ public class AuthService {
                 .email(usuario.getCorreo())
                 .rol(usuario.getRol().name())
                 .mensaje("Login exitoso")
-                .userId(usuario.getId())    // ← ALOJ-7
-                .name(usuario.getNombre())  // ← ALOJ-7
+                .userId(usuario.getId())
+                .name(usuario.getNombre())
                 .build();
     }
 
@@ -176,6 +176,10 @@ public class AuthService {
         }
         if (!password.matches(".*\\d.*")) {
             throw new IllegalArgumentException("La contraseña debe tener al menos un número");
+        }
+        // Alineado con el registro del frontend — exige carácter especial
+        if (!password.matches(".*[!@#$%^&*(),.?\":{}|<>].*")) {
+            throw new IllegalArgumentException("La contraseña debe tener al menos un carácter especial (!@#$%^&*...)");
         }
     }
 }
