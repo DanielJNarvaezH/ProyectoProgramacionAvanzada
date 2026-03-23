@@ -8,6 +8,7 @@ import { ImagenService }              from '../../../../../services/ImagenServic
 import { ComentarioService }          from '../../../../../services/ComentarioService';
 import { AlojamientoServicioService } from '../../../../../services/AlojamientoServicioService';
 import { AuthService }                from '../../../../../services/AuthService';
+import { MapService }                 from '../../../../../services/MapService';
 
 import { Alojamiento }         from '../../../../models/alojamiento.model';
 import { Imagen }              from '../../../../models/imagen.model';
@@ -57,7 +58,8 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     private imagenService:            ImagenService,
     private comentarioService:        ComentarioService,
     private alojamientoServicioSvc:   AlojamientoServicioService,
-    private authService:              AuthService
+    private authService:              AuthService,
+    private mapService:               MapService
   ) {}
 
   ngOnInit(): void {
@@ -218,13 +220,10 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
 
   private construirMapaUrl(): void {
     if (!this.alojamiento) return;
-    const { latitude: lat, longitude: lng } = this.alojamiento;
-    if (lat && lng) {
-      this.mapaUrl =
-        `https://www.openstreetmap.org/export/embed.html` +
-        `?bbox=${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}` +
-        `&layer=mapnik&marker=${lat},${lng}`;
-    }
+    this.mapaUrl = this.mapService.buildEmbedUrl(
+      this.alojamiento.latitude,
+      this.alojamiento.longitude
+    );
   }
 
   volver(): void { this.router.navigate([this.origen]); }

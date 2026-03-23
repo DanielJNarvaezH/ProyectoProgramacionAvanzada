@@ -1,5 +1,6 @@
 import { Component, Input, OnChanges, SimpleChanges } from '@angular/core';
 import { Alojamiento } from '../../../../models/alojamiento.model';
+import { MapService }  from '../../../../../services/MapService';
 
 /**
  * AlojamientoPreviewComponent — ALOJ-14
@@ -23,22 +24,14 @@ export class AlojamientoPreviewComponent implements OnChanges {
 
   mapaUrl = '';
 
+  constructor(private mapService: MapService) {}
+
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['alojamiento']) {
-      this.construirMapaUrl();
-    }
-  }
-
-  private construirMapaUrl(): void {
-    const lat = this.alojamiento?.latitude;
-    const lng = this.alojamiento?.longitude;
-    if (lat && lng) {
-      this.mapaUrl =
-        `https://www.openstreetmap.org/export/embed.html` +
-        `?bbox=${lng - 0.01},${lat - 0.01},${lng + 0.01},${lat + 0.01}` +
-        `&layer=mapnik&marker=${lat},${lng}`;
-    } else {
-      this.mapaUrl = '';
+      this.mapaUrl = this.mapService.buildEmbedUrl(
+        this.alojamiento?.latitude,
+        this.alojamiento?.longitude
+      );
     }
   }
 
