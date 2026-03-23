@@ -1,26 +1,25 @@
-﻿<!-- ─────────────────────────────────────────────────────────────────────────
-     AlojamientosListaPageComponent — ALOJ-4
-     Grid de tarjetas con loading states, filtro, paginación frontend
-     ───────────────────────────────────────────────────────────────────────── -->
-
+﻿<!--
+    AlojamientosListaPageComponent — ALOJ-4 / ALOJ-6 / ALOJ-19
+    Grid de tarjetas con loading states, búsqueda, filtros avanzados y paginación frontend
+-->
 <app-navbar></app-navbar>
 
 <main class="lista-page">
 
-  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <!-- ── Header ── -->
   <section class="lista-header">
     <div class="lista-header__text">
       <h1 class="lista-header__title">Alojamientos disponibles</h1>
       <p class="lista-header__subtitle" *ngIf="!cargando && !error">
         <span *ngIf="!hayFiltroActivo">{{ totalMostrados }} lugares para hospedarte</span>
         <span *ngIf="hayFiltroActivo">
-          {{ totalMostrados }} resultado{{ totalMostrados !== 1 ? 's' : '' }}
-          para <strong>"{{ terminoBusqueda }}"</strong>
+          {{ totalMostrados }} resultado{{ totalMostrados !== 1 ? 's' : '' }} con los filtros aplicados
         </span>
       </p>
     </div>
 
-    <div class="lista-header__search">
+    <div class="lista-header__controles">
+      <!-- Búsqueda por texto -->
       <div class="search-box">
         <i class="fa-solid fa-magnifying-glass search-box__icon"></i>
         <input
@@ -32,7 +31,7 @@
           autocomplete="off"
         />
         <button
-          *ngIf="hayFiltroActivo"
+          *ngIf="terminoBusqueda"
           (click)="limpiarFiltro()"
           class="search-box__clear"
           aria-label="Limpiar búsqueda"
@@ -40,10 +39,130 @@
           <i class="fa-solid fa-xmark"></i>
         </button>
       </div>
+
+      <!-- Botón toggle filtros avanzados -->
+      <button
+        type="button"
+        class="btn-filtros"
+        [class.btn-filtros--activo]="mostrarFiltros"
+        (click)="toggleFiltros()"
+        [attr.aria-expanded]="mostrarFiltros"
+        aria-controls="panel-filtros"
+      >
+        <i class="fa-solid fa-sliders"></i>
+        <span>Filtros</span>
+        <span *ngIf="cantidadFiltrosActivos > 0" class="filtros-badge">
+          {{ cantidadFiltrosActivos }}
+        </span>
+      </button>
     </div>
   </section>
 
-  <!-- ── Loading skeleton ─────────────────────────────────────────────────── -->
+  <!-- ── Panel de filtros avanzados (ALOJ-19) ── -->
+  <section
+    id="panel-filtros"
+    class="filtros-panel"
+    *ngIf="mostrarFiltros"
+  >
+    <div class="filtros-panel__grid">
+
+      <!-- Rango de precio -->
+      <div class="filtro-grupo">
+        <label class="filtro-grupo__label">
+          <i class="fa-solid fa-tag"></i>
+          Precio por noche
+        </label>
+        <div class="filtro-rango">
+          <div class="filtro-rango__campo">
+            <span class="filtro-rango__prefix">$</span>
+            <input
+              type="number"
+              [(ngModel)]="precioMin"
+              (ngModelChange)="filtrar()"
+              placeholder="Mínimo"
+              class="filtro-input"
+              min="0"
+            />
+          </div>
+          <span class="filtro-rango__sep">—</span>
+          <div class="filtro-rango__campo">
+            <span class="filtro-rango__prefix">$</span>
+            <input
+              type="number"
+              [(ngModel)]="precioMax"
+              (ngModelChange)="filtrar()"
+              placeholder="Máximo"
+              class="filtro-input"
+              min="0"
+            />
+          </div>
+        </div>
+      </div>
+
+      <!-- Capacidad mínima -->
+      <div class="filtro-grupo">
+        <label class="filtro-grupo__label">
+          <i class="fa-solid fa-users"></i>
+          Huéspedes mínimos
+        </label>
+        <div class="filtro-capacidad">
+          <button
+            type="button"
+            class="filtro-capacidad__btn"
+            [disabled]="!capacidadMin || capacidadMin <= 1"
+            (click)="capacidadMin = (capacidadMin || 1) - 1 || null; filtrar()"
+            aria-label="Reducir capacidad"
+          >
+            <i class="fa-solid fa-minus"></i>
+          </button>
+          <span class="filtro-capacidad__valor">
+            {{ capacidadMin ?? 'Cualquiera' }}
+          </span>
+          <button
+            type="button"
+            class="filtro-capacidad__btn"
+            (click)="capacidadMin = (capacidadMin || 0) + 1; filtrar()"
+            aria-label="Aumentar capacidad"
+          >
+            <i class="fa-solid fa-plus"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Servicios disponibles -->
+      <div class="filtro-grupo filtro-grupo--servicios" *ngIf="serviciosDisponibles.length > 0">
+        <label class="filtro-grupo__label">
+          <i class="fa-solid fa-star"></i>
+          Servicios incluidos
+        </label>
+        <div class="filtro-servicios">
+          <button
+            *ngFor="let s of serviciosDisponibles; trackBy: trackByServicioId"
+            type="button"
+            class="filtro-servicio-chip"
+            [class.filtro-servicio-chip--activo]="estaSeleccionado(s.id)"
+            (click)="toggleServicio(s.id)"
+            [attr.aria-pressed]="estaSeleccionado(s.id)"
+            [title]="s.description || s.name"
+          >
+            <i *ngIf="s.icon" [class]="s.icon"></i>
+            {{ s.name }}
+          </button>
+        </div>
+      </div>
+
+    </div>
+
+    <!-- Footer del panel -->
+    <div class="filtros-panel__footer" *ngIf="hayFiltroActivo">
+      <button type="button" class="btn-limpiar-filtros" (click)="limpiarFiltro()">
+        <i class="fa-solid fa-rotate-left"></i>
+        Limpiar todos los filtros
+      </button>
+    </div>
+  </section>
+
+  <!-- ── Loading skeleton ── -->
   <section *ngIf="cargando" class="lista-grid" aria-label="Cargando alojamientos">
     <div *ngFor="let i of [1,2,3,4,5,6,7,8]" class="skeleton-card">
       <div class="skeleton-card__img skeleton-pulse"></div>
@@ -55,7 +174,7 @@
     </div>
   </section>
 
-  <!-- ── Error state ──────────────────────────────────────────────────────── -->
+  <!-- ── Error state ── -->
   <section *ngIf="!cargando && error" class="lista-empty">
     <div class="lista-empty__icon lista-empty__icon--error">
       <i class="fa-solid fa-triangle-exclamation"></i>
@@ -68,23 +187,23 @@
     </button>
   </section>
 
-  <!-- ── Empty state sin filtro ───────────────────────────────────────────── -->
+  <!-- ── Empty state con filtros activos ── -->
   <section
     *ngIf="!cargando && !error && totalMostrados === 0 && hayFiltroActivo"
     class="lista-empty"
   >
     <div class="lista-empty__icon">
-      <i class="fa-solid fa-map-location-dot"></i>
+      <i class="fa-solid fa-filter-circle-xmark"></i>
     </div>
-    <h2 class="lista-empty__title">Sin resultados en "{{ terminoBusqueda }}"</h2>
-    <p class="lista-empty__msg">Intenta con otro nombre o ciudad.</p>
+    <h2 class="lista-empty__title">Sin resultados</h2>
+    <p class="lista-empty__msg">Ningún alojamiento coincide con los filtros aplicados.</p>
     <button (click)="limpiarFiltro()" class="btn-retry">
-      <i class="fa-solid fa-xmark"></i>
-      Limpiar filtro
+      <i class="fa-solid fa-rotate-left"></i>
+      Limpiar filtros
     </button>
   </section>
 
-  <!-- ── Empty state sin alojamientos ────────────────────────────────────── -->
+  <!-- ── Empty state sin alojamientos ── -->
   <section
     *ngIf="!cargando && !error && totalMostrados === 0 && !hayFiltroActivo"
     class="lista-empty"
@@ -96,7 +215,7 @@
     <p class="lista-empty__msg">Pronto encontrarás lugares increíbles aquí.</p>
   </section>
 
-  <!-- ── Grid de tarjetas ─────────────────────────────────────────────────── -->
+  <!-- ── Grid de tarjetas ── -->
   <section
     *ngIf="!cargando && !error && totalMostrados > 0"
     class="lista-grid"
@@ -111,13 +230,12 @@
     </app-alojamiento-card>
   </section>
 
-  <!-- ── Paginación ───────────────────────────────────────────────────────── -->
+  <!-- ── Paginación ── -->
   <nav
     *ngIf="!cargando && !error && totalPaginas > 1"
     class="paginacion"
     aria-label="Navegación de páginas"
   >
-    <!-- Anterior -->
     <button
       type="button"
       class="paginacion__btn"
@@ -128,8 +246,6 @@
     >
       <i class="fa-solid fa-chevron-left"></i>
     </button>
-
-    <!-- Números de página -->
     <button
       *ngFor="let num of numeroPaginas"
       type="button"
@@ -140,8 +256,6 @@
     >
       {{ num }}
     </button>
-
-    <!-- Siguiente -->
     <button
       type="button"
       class="paginacion__btn"

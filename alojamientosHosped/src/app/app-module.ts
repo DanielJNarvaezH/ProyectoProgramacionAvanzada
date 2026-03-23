@@ -56,6 +56,9 @@ import { PanelGestionPageComponent }       from './components/ad/pages/panel-ges
 import { SafeUrlPipe } from './pipes/safe-url.pipe';
 import { PesoPipe }    from './pipes/peso.pipe';
 
+// -- Servicios adicionales
+import { FiltroListaService } from '../services/FiltroListaService';
+
 @NgModule({
   declarations: [
     App,
@@ -111,7 +114,8 @@ import { PesoPipe }    from './pipes/peso.pipe';
       provide:  HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi:    true
-    }
+    },
+    FiltroListaService
   ],
   bootstrap: [App]
 })

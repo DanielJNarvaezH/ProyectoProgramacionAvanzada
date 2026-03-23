@@ -6,14 +6,15 @@ import { AlojamientoServicio} from '../app/models/alojamiento-servicio.model';
 import { ServicioDisponible } from '../app/models/servicio.model';
 
 /**
- * AlojamientoServicioService — ALOJ-5 / ALOJ-10
+ * AlojamientoServicioService — ALOJ-5 / ALOJ-10 / ALOJ-19
  *
  * Gestiona las llamadas al backend para los servicios de un alojamiento.
  *
  * Endpoints consumidos:
- * - GET    /api/servicios                                        → listar servicios disponibles (ALOJ-10)
- * - GET    /api/alojamientos-servicios/alojamiento/:id/servicios → servicios de un alojamiento
- * - POST   /api/alojamientos-servicios                          → asociar servicio a alojamiento (ALOJ-10)
+ * - GET    /api/servicios                                             → listar servicios disponibles (ALOJ-10)
+ * - GET    /api/alojamientos-servicios/alojamiento/:id/servicios     → servicios de un alojamiento
+ * - GET    /api/alojamientos-servicios/servicio/:id/alojamientos     → alojamientos con un servicio (ALOJ-19)
+ * - POST   /api/alojamientos-servicios                               → asociar servicio a alojamiento (ALOJ-10)
  * - DELETE /api/alojamientos-servicios/alojamiento/:aId/servicio/:sId → desasociar (ALOJ-10)
  */
 @Injectable({
@@ -61,6 +62,23 @@ export class AlojamientoServicioService {
   }
 
   // ─────────────────────────────────────────────────────────────────
+  // ALOJ-19: LISTAR ALOJAMIENTOS QUE TIENEN UN SERVICIO (para filtro)
+  // ─────────────────────────────────────────────────────────────────
+
+  getAlojamientosByServicio(servicioId: number): Observable<AlojamientoServicio[]> {
+    return this.http
+      .get<AlojamientoServicio[]>(`${this.apiUrl}/servicio/${servicioId}/alojamientos`)
+      .pipe(
+        catchError(error => {
+          const mensaje = typeof error.error === 'string'
+            ? error.error
+            : (error.error?.mensaje || 'Error al obtener alojamientos por servicio');
+          return throwError(() => new Error(mensaje));
+        })
+      );
+  }
+
+  // ─────────────────────────────────────────────────────────────────
   // ALOJ-10: ASOCIAR SERVICIO A ALOJAMIENTO
   // ─────────────────────────────────────────────────────────────────
 
@@ -94,4 +112,3 @@ export class AlojamientoServicioService {
       );
   }
 }
-

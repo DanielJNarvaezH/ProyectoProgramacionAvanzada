@@ -319,3 +319,280 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
     }
   }
 }
+// ── ALOJ-19: Controles del header (search + botón filtros) ───────────────────
+.lista-header {
+  &__controles {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    flex-wrap: wrap;
+  }
+}
+
+// ── ALOJ-19: Botón toggle de filtros ─────────────────────────────────────────
+.btn-filtros {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  background: $white;
+  border: 1.5px solid #e2d9f3;
+  border-radius: $radius-input;
+  color: $text-mid;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  cursor: pointer;
+  box-shadow: $shadow-sm;
+  transition: border-color 0.2s, color 0.2s, background 0.2s;
+  position: relative;
+
+  &:hover {
+    border-color: $primary-light;
+    color: $primary;
+  }
+
+  &--activo {
+    background: $primary;
+    border-color: $primary;
+    color: $white;
+
+    &:hover {
+      background: $primary-dark;
+      border-color: $primary-dark;
+      color: $white;
+    }
+  }
+}
+
+.filtros-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  background: $white;
+  color: $primary;
+  font-size: 0.7rem;
+  font-weight: 700;
+  width: 1.2rem;
+  height: 1.2rem;
+  border-radius: 50%;
+  line-height: 1;
+
+  .btn-filtros:not(.btn-filtros--activo) & {
+    background: $primary;
+    color: $white;
+  }
+}
+
+// ── ALOJ-19: Panel de filtros avanzados ──────────────────────────────────────
+.filtros-panel {
+  background: $white;
+  border: 1.5px solid #e2d9f3;
+  border-radius: $radius-card;
+  padding: 1.5rem;
+  margin-bottom: 1.75rem;
+  box-shadow: $shadow-sm;
+  animation: slideDown 0.2s ease;
+
+  @keyframes slideDown {
+    from { opacity: 0; transform: translateY(-8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  &__grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 1.5rem;
+    align-items: start;
+  }
+
+  &__footer {
+    margin-top: 1.25rem;
+    padding-top: 1rem;
+    border-top: 1px solid #f0ebff;
+    display: flex;
+    justify-content: flex-end;
+  }
+}
+
+// ── Grupo de filtro genérico ──────────────────────────────────────────────────
+.filtro-grupo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  &--servicios {
+    grid-column: 1 / -1;  // ocupa todo el ancho disponible
+  }
+
+  &__label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: $text-dark;
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+
+    i { color: $primary; font-size: 0.75rem; }
+  }
+}
+
+// ── Filtro de rango de precio ─────────────────────────────────────────────────
+.filtro-rango {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+
+  &__campo {
+    display: flex;
+    align-items: center;
+    background: #f9f6ff;
+    border: 1.5px solid #e2d9f3;
+    border-radius: 0.625rem;
+    padding: 0.45rem 0.75rem;
+    flex: 1;
+    transition: border-color 0.2s;
+
+    &:focus-within {
+      border-color: $primary;
+    }
+  }
+
+  &__prefix {
+    color: $primary;
+    font-weight: 600;
+    font-size: 0.875rem;
+    margin-right: 0.25rem;
+  }
+
+  &__sep {
+    color: $text-light;
+    font-size: 0.875rem;
+    flex-shrink: 0;
+  }
+}
+
+.filtro-input {
+  border: none;
+  outline: none;
+  background: transparent;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.875rem;
+  color: $text-dark;
+  width: 100%;
+
+  &::placeholder { color: $text-light; }
+  &::-webkit-outer-spin-button,
+  &::-webkit-inner-spin-button { -webkit-appearance: none; }
+}
+
+// ── Filtro de capacidad (stepper) ─────────────────────────────────────────────
+.filtro-capacidad {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: #f9f6ff;
+  border: 1.5px solid #e2d9f3;
+  border-radius: 0.625rem;
+  padding: 0.4rem 0.75rem;
+  width: fit-content;
+
+  &__btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.75rem;
+    height: 1.75rem;
+    border: 1.5px solid #e2d9f3;
+    border-radius: 50%;
+    background: $white;
+    color: $primary;
+    cursor: pointer;
+    font-size: 0.7rem;
+    transition: background 0.15s, border-color 0.15s;
+
+    &:hover:not(:disabled) {
+      background: $primary;
+      border-color: $primary;
+      color: $white;
+    }
+
+    &:disabled {
+      opacity: 0.35;
+      cursor: not-allowed;
+    }
+  }
+
+  &__valor {
+    font-size: 0.9rem;
+    font-weight: 600;
+    color: $text-dark;
+    min-width: 4.5rem;
+    text-align: center;
+  }
+}
+
+// ── Chips de servicios ────────────────────────────────────────────────────────
+.filtro-servicios {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.filtro-servicio-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+  padding: 0.35rem 0.85rem;
+  border: 1.5px solid #e2d9f3;
+  border-radius: 2rem;
+  background: $white;
+  color: $text-mid;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s, color 0.15s;
+
+  i { font-size: 0.75rem; }
+
+  &:hover {
+    border-color: $primary-light;
+    color: $primary;
+  }
+
+  &--activo {
+    background: $primary;
+    border-color: $primary;
+    color: $white;
+
+    &:hover {
+      background: $primary-dark;
+      border-color: $primary-dark;
+    }
+  }
+}
+
+// ── Botón limpiar filtros ─────────────────────────────────────────────────────
+.btn-limpiar-filtros {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 1rem;
+  background: transparent;
+  border: 1.5px solid #e2d9f3;
+  border-radius: $radius-input;
+  color: $text-mid;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.8rem;
+  font-weight: 500;
+  cursor: pointer;
+  transition: border-color 0.2s, color 0.2s;
+
+  &:hover {
+    border-color: $error;
+    color: $error;
+  }
+}
