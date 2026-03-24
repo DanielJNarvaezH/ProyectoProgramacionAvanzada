@@ -53,11 +53,11 @@ import { AlojamientoCrearPageComponent }   from './components/ad/pages/alojamien
 import { PanelGestionPageComponent }       from './components/ad/pages/panel-gestion/panel-gestion'; // ALOJ-9
 
 // -- Pipes
-import { SafeUrlPipe } from './pipes/safe-url.pipe';
-import { PesoPipe }    from './pipes/peso.pipe';
+import { SafeUrlPipe }    from './pipes/safe-url.pipe';
+import { PesoPipe }       from './pipes/peso.pipe';
 
-// -- Servicios adicionales
-import { FiltroListaService } from '../services/FiltroListaService';
+// -- Directivas
+import { LazyImgDirective } from './directives/lazy-img.directive';
 
 @NgModule({
   declarations: [
@@ -98,6 +98,8 @@ import { FiltroListaService } from '../services/FiltroListaService';
     // Pipes
     SafeUrlPipe,
     PesoPipe,
+    // Directivas
+    LazyImgDirective,
   ],
   imports: [
     BrowserModule,
@@ -114,8 +116,7 @@ import { FiltroListaService } from '../services/FiltroListaService';
       provide:  HTTP_INTERCEPTORS,
       useClass: AuthInterceptor,
       multi:    true
-    },
-    FiltroListaService
+    }
   ],
   bootstrap: [App]
 })

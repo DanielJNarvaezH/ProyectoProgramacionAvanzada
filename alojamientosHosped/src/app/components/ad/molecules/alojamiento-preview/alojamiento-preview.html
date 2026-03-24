@@ -26,9 +26,11 @@
   <div class="preview-imagen">
     <img
       *ngIf="tieneImagen"
-      [src]="alojamiento!.mainImage"
-      [alt]="alojamiento!.name"
+      appLazyImg
+      [appLazyImg]="alojamiento!.mainImage || ''"
+      [alt]="alojamiento!.name || ''"
       class="preview-imagen__img"
+      loading="lazy"
     />
     <div class="preview-imagen__placeholder" *ngIf="!tieneImagen">
       <svg viewBox="0 0 48 48" fill="none">

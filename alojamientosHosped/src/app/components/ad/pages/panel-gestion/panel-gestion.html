@@ -127,7 +127,8 @@
       <!-- Imagen -->
       <div class="aloj-card__img-wrap">
         <img
-          [src]="aloj.mainImage || placeholderImg"
+          appLazyImg
+          [appLazyImg]="aloj.mainImage || placeholderImg"
           [alt]="'Foto de ' + aloj.name"
           (error)="$any($event.target).src = placeholderImg"
           class="aloj-card__img"

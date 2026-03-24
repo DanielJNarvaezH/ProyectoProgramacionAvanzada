@@ -31,7 +31,8 @@
         (click)="abrirLightbox(img.url)"
       >
         <img
-          [src]="img.url"
+          appLazyImg
+          [appLazyImg]="img.url"
           [alt]="img.descripcion || ('Foto ' + (i + 2) + ' de ' + nombre)"
           (error)="onImageError($event)"
           class="galeria__img"
