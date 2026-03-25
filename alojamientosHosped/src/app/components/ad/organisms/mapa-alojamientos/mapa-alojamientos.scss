@@ -1,0 +1,161 @@
+﻿$primary:    #9B5CFF;
+$primary-lt: #F3EEFF;
+$gray-50:    #F9FAFB;
+$gray-200:   #E5E7EB;
+$gray-400:   #9CA3AF;
+$gray-600:   #4B5563;
+$gray-800:   #1F2937;
+$radius:     12px;
+$radius-sm:  8px;
+
+// â”€â”€ Wrapper â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.mapa-wrap {
+  border-radius: $radius;
+  overflow: hidden;
+  border: 1.5px solid $gray-200;
+  background: $gray-50;
+  font-family: 'Poppins', sans-serif;
+}
+
+// â”€â”€ Info bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.mapa-info {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  font-size: 12px;
+  font-weight: 500;
+  color: $primary;
+  background: $primary-lt;
+  border-bottom: 1px solid rgba(155,92,255,0.15);
+
+  &__icon {
+    width: 14px;
+    height: 14px;
+    flex-shrink: 0;
+  }
+
+  &--vacio {
+    color: $gray-400;
+    background: $gray-50;
+    border-bottom-color: $gray-200;
+  }
+}
+
+// â”€â”€ Contenedor del mapa â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+.mapa-container {
+  width: 100%;
+  height: 420px;
+
+  @media (max-width: 600px) {
+    height: 300px;
+  }
+}
+
+// â”€â”€ Marcador personalizado â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+::ng-deep .marcador-hosped {
+  &__pin {
+    width: 32px;
+    height: 40px;
+    color: $primary;
+    filter: drop-shadow(0 2px 6px rgba(155,92,255,0.5));
+    transition: transform 0.15s ease;
+
+    &:hover { transform: scale(1.15); }
+
+    svg {
+      width: 100%;
+      height: 100%;
+    }
+  }
+}
+
+// â”€â”€ Popup â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+::ng-deep .leaflet-popup-content-wrapper {
+  border-radius: $radius-sm !important;
+  padding: 0 !important;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.12) !important;
+  border: 1px solid $gray-200;
+}
+
+::ng-deep .leaflet-popup-content {
+  margin: 0 !important;
+  width: 200px !important;
+}
+
+::ng-deep .leaflet-popup-tip {
+  background: white !important;
+}
+
+::ng-deep .popup-alojamiento {
+  font-family: 'Poppins', sans-serif;
+}
+
+::ng-deep .popup-img {
+  width: 100%;
+  height: 110px;
+  object-fit: cover;
+  display: block;
+}
+
+::ng-deep .popup-img-placeholder {
+  width: 100%;
+  height: 80px;
+  background: #F3F4F6;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  span {
+    font-size: 11px;
+    color: $gray-400;
+  }
+}
+
+::ng-deep .popup-body {
+  padding: 10px 12px 12px;
+}
+
+::ng-deep .popup-nombre {
+  font-size: 13px;
+  font-weight: 700;
+  color: $gray-800;
+  margin: 0 0 4px;
+  line-height: 1.3;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+::ng-deep .popup-ciudad {
+  font-size: 11px;
+  color: $gray-600;
+  margin: 0 0 4px;
+  display: flex;
+  align-items: center;
+  gap: 3px;
+}
+
+::ng-deep .popup-precio {
+  font-size: 13px;
+  font-weight: 700;
+  color: $primary;
+  margin: 0 0 10px;
+}
+
+::ng-deep .popup-btn {
+  width: 100%;
+  padding: 7px;
+  background: $primary;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s;
+
+  &:hover { background: #7B3FE4; }
+}

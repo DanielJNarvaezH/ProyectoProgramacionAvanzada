@@ -9,6 +9,8 @@ import { App } from './app';
 import { AlojamientosListaPageComponent } from './components/ad/pages/alojamientos-lista/alojamientos-lista';
 import { ImageUploaderComponent } from './components/ad/molecules/image-uploader/image-uploader';
 import { AlojamientoPreviewComponent } from './components/ad/molecules/alojamiento-preview/alojamiento-preview';
+import { MapaAlojamientosComponent } from './components/ad/organisms/mapa-alojamientos/mapa-alojamientos';
+
 
 
 
@@ -83,6 +85,8 @@ import { LazyImgDirective } from './directives/lazy-img.directive';
     RegisterCardComponent,
     NavbarComponent,
     GaleriaAlojamientoComponent,
+    MapaAlojamientosComponent,
+
     // Templates
     LoginTemplateComponent,
     RegisterTemplateComponent,

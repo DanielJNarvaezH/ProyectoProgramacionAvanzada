@@ -215,6 +215,11 @@
     <p class="lista-empty__msg">Pronto encontrarás lugares increíbles aquí.</p>
   </section>
 
+  <!-- ── Mapa interactivo ALOJ-17 ── -->
+  <section *ngIf="!cargando && !error && totalMostrados > 0" class="lista-mapa">
+    <app-mapa-alojamientos [alojamientos]="alojamientosFiltrados"></app-mapa-alojamientos>
+  </section>
+
   <!-- ── Grid de tarjetas ── -->
   <section
     *ngIf="!cargando && !error && totalMostrados > 0"
