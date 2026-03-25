@@ -1,6 +1,7 @@
 ﻿<!--
-    AlojamientosListaPageComponent — ALOJ-4 / ALOJ-6 / ALOJ-19
-    Grid de tarjetas con loading states, búsqueda, filtros avanzados y paginación frontend
+    AlojamientosListaPageComponent — ALOJ-4 / ALOJ-6 / ALOJ-18 / ALOJ-19
+    Grid de tarjetas con loading states, búsqueda, filtros avanzados,
+    búsqueda por ubicación (ALOJ-18) y paginación frontend
 -->
 <app-navbar></app-navbar>
 
@@ -11,8 +12,14 @@
     <div class="lista-header__text">
       <h1 class="lista-header__title">Alojamientos disponibles</h1>
       <p class="lista-header__subtitle" *ngIf="!cargando && !error">
-        <span *ngIf="!hayFiltroActivo">{{ totalMostrados }} lugares para hospedarte</span>
-        <span *ngIf="hayFiltroActivo">
+        <!-- ALOJ-18: subtítulo distinto en modo ubicación -->
+        <span *ngIf="modoUbicacion">
+          <i class="fa-solid fa-location-dot"></i>
+          {{ totalMostrados }} alojamiento{{ totalMostrados !== 1 ? 's' : '' }}
+          en un radio de <strong>{{ radioKm }} km</strong>
+        </span>
+        <span *ngIf="!modoUbicacion && !hayFiltroActivo">{{ totalMostrados }} lugares para hospedarte</span>
+        <span *ngIf="!modoUbicacion && hayFiltroActivo">
           {{ totalMostrados }} resultado{{ totalMostrados !== 1 ? 's' : '' }} con los filtros aplicados
         </span>
       </p>
@@ -40,6 +47,21 @@
         </button>
       </div>
 
+      <!-- ALOJ-18: Botón "Cerca de mí" -->
+      <button
+        type="button"
+        class="btn-ubicacion"
+        [class.btn-ubicacion--activo]="modoUbicacion"
+        (click)="buscarCercaDeMi()"
+        [disabled]="buscandoUbicacion"
+        title="Buscar alojamientos cerca de tu ubicación actual"
+        aria-label="Buscar cerca de mí"
+      >
+        <i *ngIf="!buscandoUbicacion" class="fa-solid fa-location-crosshairs"></i>
+        <i *ngIf="buscandoUbicacion"  class="fa-solid fa-spinner fa-spin"></i>
+        <span>{{ buscandoUbicacion ? 'Localizando...' : 'Cerca de mí' }}</span>
+      </button>
+
       <!-- Botón toggle filtros avanzados -->
       <button
         type="button"
@@ -56,6 +78,48 @@
         </span>
       </button>
     </div>
+  </section>
+
+  <!-- ALOJ-18: Banner modo ubicación con selector de radio -->
+  <section *ngIf="modoUbicacion" class="ubicacion-banner">
+    <div class="ubicacion-banner__info">
+      <i class="fa-solid fa-location-dot"></i>
+      <span>Mostrando alojamientos cercanos a tu ubicación</span>
+    </div>
+
+    <!-- Selector de radio -->
+    <div class="ubicacion-banner__radio">
+      <span class="ubicacion-banner__radio-label">Radio:</span>
+      <button
+        *ngFor="let r of RADIOS_DISPONIBLES"
+        type="button"
+        class="radio-chip"
+        [class.radio-chip--activo]="radioKm === r"
+        (click)="cambiarRadio(r)"
+      >
+        {{ r }} km
+      </button>
+    </div>
+
+    <!-- Cerrar modo ubicación -->
+    <button
+      type="button"
+      class="ubicacion-banner__cerrar"
+      (click)="salirModoUbicacion()"
+      aria-label="Salir de búsqueda por ubicación"
+    >
+      <i class="fa-solid fa-xmark"></i>
+      Volver al listado
+    </button>
+  </section>
+
+  <!-- ALOJ-18: Error de geolocalización -->
+  <section *ngIf="errorUbicacion" class="ubicacion-error">
+    <i class="fa-solid fa-triangle-exclamation"></i>
+    <span>{{ errorUbicacion }}</span>
+    <button type="button" (click)="errorUbicacion = ''" aria-label="Cerrar error">
+      <i class="fa-solid fa-xmark"></i>
+    </button>
   </section>
 
   <!-- ── Panel de filtros avanzados (ALOJ-19) ── -->
@@ -164,7 +228,7 @@
 
   <!-- ── Loading skeleton ── -->
   <section *ngIf="cargando" class="lista-grid" aria-label="Cargando alojamientos">
-    <div *ngFor="let i of [1,2,3,4,5,6,7,8]" class="skeleton-card">
+    <div *ngFor="let num of [1,2,3,4,5,6,7,8]" [attr.data-skeleton]="num" class="skeleton-card">
       <div class="skeleton-card__img skeleton-pulse"></div>
       <div class="skeleton-card__body">
         <div class="skeleton-line skeleton-pulse" style="width: 70%"></div>

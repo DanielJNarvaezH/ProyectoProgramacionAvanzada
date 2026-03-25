@@ -1,15 +1,20 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject, forkJoin, of, takeUntil } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { AlojamientoService }        from '../../../../../services/AlojamientoService';
+import { AlojamientoService } from '../../../../../services/AlojamientoService';
 import { AlojamientoServicioService } from '../../../../../services/AlojamientoServicioService';
-import { FiltroListaService }         from '../../../../../services/FiltroListaService';
-import { Alojamiento }        from '../../../../models/alojamiento.model';
-import { ServicioDisponible } from '../../../../models/servicio.model';
-import { AlojamientoServicio } from '../../../../models/alojamiento-servicio.model';
+import { FiltroListaService } from '../../../../../services/FiltroListaService';
+import { Alojamiento, ServicioDisponible, AlojamientoServicio } from '../../../../models';
 
 /**
- * AlojamientosListaPageComponent — ALOJ-4 / ALOJ-6 / ALOJ-19
+ * AlojamientosListaPageComponent — ALOJ-4 / ALOJ-6 / ALOJ-18 / ALOJ-19
+ *
+ * ALOJ-18: Búsqueda por ubicación — botón "Cerca de mí" que usa la
+ *   Geolocation API del navegador y llama al endpoint
+ *   GET /api/alojamientos/cercanos?lat=&lng=&radio=
+ *   El radio es configurable (5 / 10 / 25 / 50 km).
+ *   Si el navegador no soporta geolocalización o el usuario la deniega,
+ *   se muestra un mensaje de error descriptivo.
  *
  * ALOJ-19: Filtros avanzados frontend sobre el array ya cargado:
  *   - Rango de precio (precioMin / precioMax)
@@ -36,6 +41,13 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
 
   cargando = false;
   error    = '';
+
+  // ── ALOJ-18: Búsqueda por ubicación ──────────────────────────
+  buscandoUbicacion = false;   // spinner del botón "Cerca de mí"
+  errorUbicacion    = '';      // mensaje si falla la geolocalización
+  modoUbicacion     = false;   // true cuando los resultados son por cercanía
+  radioKm           = 10;      // radio seleccionado por el usuario
+  readonly RADIOS_DISPONIBLES = [5, 10, 25, 50]; // opciones de radio
 
   // ── ALOJ-19: Estado de filtros — delegado a FiltroListaService ──
   // Los getters/setters sincronizan con el servicio para preservar
@@ -92,7 +104,7 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
     forkJoin({
       alojamientos: this.alojamientoService.getAll(),
       servicios:    this.alojamientoServicioSvc.getServiciosDisponibles()
-                      .pipe(catchError(() => of([] as ServicioDisponible[])))
+        .pipe(catchError(() => of([] as ServicioDisponible[])))
     })
       .pipe(takeUntil(this.destroy$))
       .subscribe({
@@ -181,7 +193,81 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
 
   limpiarFiltro(): void {
     this.filtroSvc.limpiar();
+    this.modoUbicacion  = false;
+    this.errorUbicacion = '';
     this.alojamientosFiltrados = this.alojamientos;
+  }
+
+  // ── ALOJ-18: Búsqueda por ubicación ──────────────────────────
+
+  /**
+   * Solicita la posición del navegador y llama al endpoint /cercanos.
+   * Actualiza alojamientosFiltrados con los resultados ordenados por distancia.
+   */
+  buscarCercaDeMi(): void {
+    if (!navigator.geolocation) {
+      this.errorUbicacion = 'Tu navegador no soporta geolocalización.';
+      return;
+    }
+
+    this.buscandoUbicacion = true;
+    this.errorUbicacion    = '';
+
+    navigator.geolocation.getCurrentPosition(
+      (posicion) => {
+        const { latitude, longitude } = posicion.coords;
+
+        this.alojamientoService.getCercanos(latitude, longitude, this.radioKm)
+          .pipe(takeUntil(this.destroy$))
+          .subscribe({
+            next: (resultados) => {
+              this.buscandoUbicacion     = false;
+              this.modoUbicacion         = true;
+              this.alojamientosFiltrados = resultados;
+              this.paginaActual          = 1;
+              // Limpiar filtros de texto para no mezclar criterios
+              this.filtroSvc.limpiar();
+            },
+            error: (err: Error) => {
+              this.buscandoUbicacion = false;
+              this.errorUbicacion    = err.message || 'Error al buscar alojamientos cercanos.';
+            }
+          });
+      },
+      (geoError) => {
+        this.buscandoUbicacion = false;
+        switch (geoError.code) {
+          case GeolocationPositionError.PERMISSION_DENIED:
+            this.errorUbicacion = 'Permiso de ubicación denegado. Actívalo en tu navegador.';
+            break;
+          case GeolocationPositionError.POSITION_UNAVAILABLE:
+            this.errorUbicacion = 'No se pudo obtener tu ubicación actual.';
+            break;
+          case GeolocationPositionError.TIMEOUT:
+            this.errorUbicacion = 'La solicitud de ubicación tardó demasiado.';
+            break;
+          default:
+            this.errorUbicacion = 'Error desconocido al obtener la ubicación.';
+        }
+      },
+      { timeout: 10000, maximumAge: 60000 }
+    );
+  }
+
+  /** Cambia el radio y relanza la búsqueda si ya estamos en modo ubicación */
+  cambiarRadio(nuevoRadio: number): void {
+    this.radioKm = nuevoRadio;
+    if (this.modoUbicacion) {
+      this.buscarCercaDeMi();
+    }
+  }
+
+  /** Sale del modo ubicación y vuelve al listado completo */
+  salirModoUbicacion(): void {
+    this.modoUbicacion         = false;
+    this.errorUbicacion        = '';
+    this.alojamientosFiltrados = this.alojamientos;
+    this.paginaActual          = 1;
   }
 
   toggleFiltros(): void {

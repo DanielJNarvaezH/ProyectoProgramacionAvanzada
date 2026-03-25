@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
+import java.util.Comparator;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -186,5 +187,76 @@ public class AlojamientoService {
             throw new IllegalArgumentException("Alojamiento no encontrado con ID: " + alojamientoId);
         }
         return (long) reservaRepository.findByAlojamiento_Id(alojamientoId).size();
+    }
+
+    // ============================================================
+    // ALOJ-18: Búsqueda por ubicación (Haversine)
+    // Retorna alojamientos activos dentro del radio indicado (km)
+    // ordenados de más cercano a más lejano.
+    // ============================================================
+
+    /**
+     * Busca alojamientos activos cercanos a un punto geográfico.
+     *
+     * @param latRef   Latitud del punto de referencia (-90 a 90)
+     * @param lngRef   Longitud del punto de referencia (-180 a 180)
+     * @param radioKm  Radio de búsqueda en kilómetros (> 0)
+     * @return Lista de AlojamientoDTO dentro del radio, ordenada por distancia ascendente
+     */
+    @Transactional(readOnly = true)
+    public List<AlojamientoDTO> buscarCercanos(Double latRef, Double lngRef, Double radioKm) {
+
+        // Validar parámetros
+        if (latRef == null || lngRef == null || radioKm == null) {
+            throw new IllegalArgumentException("Los parámetros de ubicación y radio son obligatorios");
+        }
+        if (latRef < -90 || latRef > 90) {
+            throw new IllegalArgumentException("La latitud debe estar entre -90 y 90");
+        }
+        if (lngRef < -180 || lngRef > 180) {
+            throw new IllegalArgumentException("La longitud debe estar entre -180 y 180");
+        }
+        if (radioKm <= 0) {
+            throw new IllegalArgumentException("El radio de búsqueda debe ser mayor a 0");
+        }
+
+        return alojamientoRepository.findByActivoTrue().stream()
+                .filter(a -> Boolean.FALSE.equals(a.getEliminado()))
+                .filter(a -> a.getLatitud() != null && a.getLongitud() != null)
+                .filter(a -> calcularDistanciaKm(
+                        latRef, lngRef,
+                        a.getLatitud().doubleValue(),
+                        a.getLongitud().doubleValue()) <= radioKm)
+                .sorted(Comparator.comparingDouble(a -> calcularDistanciaKm(
+                        latRef, lngRef,
+                        a.getLatitud().doubleValue(),
+                        a.getLongitud().doubleValue())))
+                .map(alojamientoMapper::toDTO)
+                .collect(Collectors.toList());
+    }
+
+    /**
+     * Fórmula de Haversine: calcula la distancia en km entre dos puntos
+     * geográficos dados en grados decimales.
+     *
+     * @param lat1 Latitud del punto 1
+     * @param lon1 Longitud del punto 1
+     * @param lat2 Latitud del punto 2
+     * @param lon2 Longitud del punto 2
+     * @return Distancia en kilómetros
+     */
+    private double calcularDistanciaKm(double lat1, double lon1, double lat2, double lon2) {
+        final double RADIO_TIERRA_KM = 6371.0;
+
+        double dLat = Math.toRadians(lat2 - lat1);
+        double dLon = Math.toRadians(lon2 - lon1);
+
+        double a = Math.sin(dLat / 2) * Math.sin(dLat / 2)
+                + Math.cos(Math.toRadians(lat1)) * Math.cos(Math.toRadians(lat2))
+                * Math.sin(dLon / 2) * Math.sin(dLon / 2);
+
+        double c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+
+        return RADIO_TIERRA_KM * c;
     }
 }

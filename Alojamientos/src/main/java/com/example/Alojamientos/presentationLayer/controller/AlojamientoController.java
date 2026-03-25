@@ -274,14 +274,43 @@ public class AlojamientoController {
             return ResponseEntity.badRequest().body("El ID del alojamiento es inválido");
         }
 
-
         try {
             Long reservas = alojamientoService.obtenerNumeroReservas(id);
             return ResponseEntity.ok(Map.of("numeroReservas", reservas));
         } catch (IllegalArgumentException e) {
-
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage());
         }
+    }
 
+    // ============================================================
+    // ALOJ-18: Búsqueda por ubicación
+    // GET /api/alojamientos/cercanos?lat=&lng=&radio=
+    // ============================================================
+    @GetMapping("/cercanos")
+    @Operation(
+            summary = "Buscar alojamientos cercanos a una ubicación",
+            description = "Devuelve los alojamientos activos dentro del radio indicado (km), " +
+                    "ordenados por distancia ascendente. Usa la fórmula de Haversine.",
+            responses = {
+                    @ApiResponse(responseCode = "200", description = "Lista de alojamientos cercanos",
+                            content = @Content(array = @ArraySchema(
+                                    schema = @Schema(implementation = AlojamientoDTO.class)))),
+                    @ApiResponse(responseCode = "204", description = "No se encontraron alojamientos en ese radio"),
+                    @ApiResponse(responseCode = "400", description = "Parámetros inválidos")
+            })
+    public ResponseEntity<?> buscarCercanos(
+            @RequestParam Double lat,
+            @RequestParam Double lng,
+            @RequestParam(defaultValue = "10") Double radio) {
+
+        try {
+            List<AlojamientoDTO> resultados = alojamientoService.buscarCercanos(lat, lng, radio);
+            if (resultados.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.ok(resultados);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

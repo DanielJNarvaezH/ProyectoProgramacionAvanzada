@@ -2,7 +2,7 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../environments/environment';
-import { Alojamiento } from '../app/models/alojamiento.model';
+import { Alojamiento } from '../app/models';
 
 /**
  * AlojamientoService — Servicio para gestión de alojamientos en la plataforma Hosped.
@@ -139,6 +139,36 @@ export class AlojamientoService {
         const mensaje = typeof error.error === 'string'
           ? error.error
           : (error.error?.mensaje || 'Error al buscar alojamientos por ciudad');
+        return throwError(() => new Error(mensaje));
+      })
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────────
+  // ALOJ-18: BUSCAR POR UBICACIÓN (cercanos a un punto)
+  // GET /api/alojamientos/cercanos?lat=&lng=&radio=
+  // ─────────────────────────────────────────────────────────────────
+
+  /**
+   * Devuelve alojamientos activos dentro del radio indicado (km),
+   * ordenados por distancia ascendente.
+   *
+   * @param lat    Latitud del punto de referencia
+   * @param lng    Longitud del punto de referencia
+   * @param radioKm Radio de búsqueda en kilómetros (por defecto 10)
+   */
+  getCercanos(lat: number, lng: number, radioKm: number = 10): Observable<Alojamiento[]> {
+    return this.http.get<Alojamiento[]>(`${this.apiUrl}/cercanos`, {
+      params: {
+        lat:   lat.toString(),
+        lng:   lng.toString(),
+        radio: radioKm.toString()
+      }
+    }).pipe(
+      catchError(error => {
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || 'Error al buscar alojamientos cercanos');
         return throwError(() => new Error(mensaje));
       })
     );
