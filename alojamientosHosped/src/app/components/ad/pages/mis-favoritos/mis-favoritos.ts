@@ -65,7 +65,8 @@ export class MisFavoritosPageComponent implements OnInit, OnDestroy {
       .pipe(
         takeUntil(this.destroy$),
         switchMap(favoritos => {
-          if (favoritos.length === 0) return of([] as Alojamiento[]);
+          // Guardia contra null/undefined por si el backend responde inesperadamente
+          if (!favoritos || favoritos.length === 0) return of([] as Alojamiento[]);
           // Cargar el alojamiento completo de cada favorito en paralelo
           const peticiones = favoritos.map(f =>
             this.alojamientoService.getById(f.lodgingId)

@@ -60,6 +60,7 @@ export class FavoritoService {
 
   listarPorUsuario(userId: number): Observable<Favorito[]> {
     return this.http.get<Favorito[]>(`${this.apiUrl}/usuario/${userId}`).pipe(
+      // El backend siempre devuelve 200 con [] cuando no hay favoritos.
       catchError(error => {
         const mensaje = typeof error.error === 'string'
           ? error.error

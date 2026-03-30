@@ -19,7 +19,7 @@
   box-shadow: 0 1px 4px rgba(0, 0, 0, 0.06);
   position: sticky;
   top: 0;
-  z-index: 100;
+  z-index: 1001; /* Por encima de Leaflet (z-index máx ~1000) */
 
   // ── Logo ──────────────────────────────────────────────────────
   &__logo {
@@ -127,26 +127,26 @@
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-}
 
-// ── Botón favoritos — ALOJ-21 ──────────────────────────────────
-&__favoritos-btn {
-  display: flex;
-  align-items: center;
-  gap: 0.4rem;
-  background: none;
-  border: none;
-  cursor: pointer;
-  padding: 0.4rem 0.75rem;
-  border-radius: 9999px;
-  transition: background-color 0.2s;
-  color: #f43f5e;
-  font-size: 0.875rem;
-  font-weight: 500;
+  // ── Botón favoritos — ALOJ-21 ──────────────────────────────────
+  &__favoritos-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.4rem 0.75rem;
+    border-radius: 9999px;
+    transition: background-color 0.2s;
+    color: #f43f5e;
+    font-size: 0.875rem;
+    font-weight: 500;
 
-  &:hover {
-    background-color: #fff1f2;
+    &:hover {
+      background-color: #fff1f2;
+    }
+
+    i { font-size: 1rem; }
   }
-
-  i { font-size: 1rem; }
 }

@@ -15,6 +15,10 @@ $radius-sm:  8px;
   border: 1.5px solid $gray-200;
   background: $gray-50;
   font-family: 'Poppins', sans-serif;
+  /* Crea stacking context para contener los z-indexes de Leaflet
+     y evitar que el mapa se solape con el navbar sticky */
+  position: relative;
+  z-index: 0;
 }
 
 // â”€â”€ Info bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€

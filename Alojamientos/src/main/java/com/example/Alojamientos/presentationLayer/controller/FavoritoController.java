@@ -59,18 +59,16 @@ public class FavoritoController {
     @GetMapping("/usuario/{usuarioId}")
     @Operation(summary = "Listar favoritos de un usuario específico",
             responses = {
-                    @ApiResponse(responseCode = "200", description = "Lista de favoritos obtenida correctamente",
+                    @ApiResponse(responseCode = "200", description = "Lista de favoritos obtenida correctamente (vacía si no tiene)",
                             content = @Content(array = @ArraySchema(schema = @Schema(implementation = FavoritoDTO.class)))),
-                    @ApiResponse(responseCode = "204", description = "El usuario no tiene favoritos"),
                     @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
             })
     public ResponseEntity<?> listarPorUsuario(@PathVariable Integer usuarioId) {
         try {
             List<FavoritoDTO> lista = favoritoService.listarPorUsuario(usuarioId);
-            if (lista.isEmpty()) {
-                return ResponseEntity.noContent().build(); // 204
-            }
-            return ResponseEntity.ok(lista); // 200
+            // Siempre 200 con el array (vacío o no) — mejor práctica para colecciones.
+            // El frontend no debe distinguir entre "sin favoritos" y "error real".
+            return ResponseEntity.ok(lista);
         } catch (IllegalArgumentException e) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(e.getMessage()); // 404
         }
@@ -172,4 +170,3 @@ public class FavoritoController {
         }
     }
 }
-
