@@ -1,0 +1,170 @@
+// ─── mis-favoritos.scss — ALOJ-21 ────────────────────────────────────────────
+
+.favoritos-page {
+  min-height: calc(100vh - 64px);
+  background: #f8f9fb;
+  padding: 2rem 1.5rem 4rem;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+// ── Header ────────────────────────────────────────────────────────────────────
+.favoritos-header {
+  margin-bottom: 1.75rem;
+
+  &__title {
+    font-size: 1.6rem;
+    font-weight: 700;
+    color: #1e293b;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+
+    i { color: #f43f5e; }
+  }
+
+  &__subtitle {
+    margin-top: 0.25rem;
+    font-size: 0.875rem;
+    color: #64748b;
+  }
+}
+
+// ── Grid ──────────────────────────────────────────────────────────────────────
+.favoritos-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+// ── Item (card + botón quitar) ────────────────────────────────────────────────
+.favorito-item {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+// ── Botón quitar favorito ─────────────────────────────────────────────────────
+.btn-quitar-fav {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  width: 100%;
+  padding: 0.45rem;
+  background: #fff1f2;
+  border: 1.5px solid #fecdd3;
+  border-radius: 8px;
+  color: #f43f5e;
+  font-size: 0.8rem;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s, border-color 0.2s;
+
+  &:hover:not(:disabled) {
+    background: #ffe4e6;
+    border-color: #f43f5e;
+  }
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+}
+
+// ── Empty state ───────────────────────────────────────────────────────────────
+.favoritos-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 4rem 1rem;
+  text-align: center;
+  gap: 0.75rem;
+
+  &__icon {
+    font-size: 3rem;
+    color: #f43f5e;
+    margin-bottom: 0.5rem;
+
+    &--error { color: #ef4444; }
+  }
+
+  &__title {
+    font-size: 1.25rem;
+    font-weight: 600;
+    color: #1e293b;
+  }
+
+  &__msg {
+    font-size: 0.9rem;
+    color: #64748b;
+    max-width: 360px;
+  }
+}
+
+// ── Botones de acción ────────────────────────────────────────────────────────
+.btn-retry,
+.btn-explorar {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.55rem 1.25rem;
+  border-radius: 8px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+  border: none;
+}
+
+.btn-retry {
+  background: #f1f5f9;
+  color: #475569;
+  &:hover { background: #e2e8f0; }
+}
+
+.btn-explorar {
+  background: #6366f1;
+  color: #fff;
+  &:hover { background: #4f46e5; }
+}
+
+// ── Skeleton ──────────────────────────────────────────────────────────────────
+.skeleton-card {
+  border-radius: 12px;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+
+  &__img {
+    width: 100%;
+    height: 200px;
+  }
+
+  &__body {
+    padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+}
+
+.skeleton-line {
+  height: 14px;
+  border-radius: 6px;
+}
+
+.skeleton-pulse {
+  background: linear-gradient(90deg, #f0f0f0 25%, #e0e0e0 50%, #f0f0f0 75%);
+  background-size: 200% 100%;
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}

@@ -9,6 +9,7 @@ import { AlojamientoEditarPageComponent }  from './components/ad/pages/alojamien
 import { AlojamientoDetallePageComponent } from './components/ad/pages/alojamiento-detalle/alojamiento-detalle';
 import { AlojamientoCrearPageComponent }   from './components/ad/pages/alojamiento-crear/alojamiento-crear';
 import { PanelGestionPageComponent }       from './components/ad/pages/panel-gestion/panel-gestion'; // ALOJ-9
+import { MisFavoritosPageComponent }       from './components/ad/pages/mis-favoritos/mis-favoritos';  // ALOJ-21
 import { authGuard }                       from './guards/auth.guard';
 import { anfitrionGuard }                  from './guards/anfitrion.guard';
 
@@ -23,6 +24,9 @@ const routes: Routes = [
 
   // ALOJ-9: Panel de gestión del anfitrión
   { path: 'mis-alojamientos',        component: PanelGestionPageComponent,      canActivate: [anfitrionGuard] },
+
+  // ALOJ-21: Vista de favoritos del usuario
+  { path: 'mis-favoritos',           component: MisFavoritosPageComponent,       canActivate: [authGuard] },
 
   // rutas específicas ANTES que :id para evitar conflictos
   { path: 'alojamientos/crear',      component: AlojamientoCrearPageComponent,  canActivate: [anfitrionGuard] },

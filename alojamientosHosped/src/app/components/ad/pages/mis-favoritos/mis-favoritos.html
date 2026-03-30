@@ -1,0 +1,99 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     MisFavoritosPageComponent — ALOJ-21
+     Lista de alojamientos marcados como favoritos por el usuario
+     ───────────────────────────────────────────────────────────────────────── -->
+<app-navbar></app-navbar>
+
+<main class="favoritos-page">
+
+  <!-- ── Header ── -->
+  <section class="favoritos-header">
+    <h1 class="favoritos-header__title">
+      <i class="fa-solid fa-heart"></i>
+      Mis favoritos
+    </h1>
+    <p class="favoritos-header__subtitle" *ngIf="!cargando && !error">
+      {{ alojamientos.length }}
+      alojamiento{{ alojamientos.length !== 1 ? 's' : '' }} guardado{{ alojamientos.length !== 1 ? 's' : '' }}
+    </p>
+  </section>
+
+  <!-- ── Loading skeleton ── -->
+  <section *ngIf="cargando" class="favoritos-grid" aria-label="Cargando favoritos">
+    <div *ngFor="let num of [1,2,3,4]" [attr.data-skeleton]="num" class="skeleton-card">
+      <div class="skeleton-card__img skeleton-pulse"></div>
+      <div class="skeleton-card__body">
+        <div class="skeleton-line skeleton-pulse" style="width: 70%"></div>
+        <div class="skeleton-line skeleton-pulse" style="width: 45%"></div>
+        <div class="skeleton-line skeleton-pulse" style="width: 55%"></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── Error ── -->
+  <section *ngIf="!cargando && error" class="favoritos-empty">
+    <div class="favoritos-empty__icon favoritos-empty__icon--error">
+      <i class="fa-solid fa-triangle-exclamation"></i>
+    </div>
+    <h2 class="favoritos-empty__title">No pudimos cargar tus favoritos</h2>
+    <p class="favoritos-empty__msg">{{ error }}</p>
+    <button (click)="cargarFavoritos()" class="btn-retry">
+      <i class="fa-solid fa-rotate-right"></i>
+      Intentar de nuevo
+    </button>
+  </section>
+
+  <!-- ── Empty state ── -->
+  <section
+    *ngIf="!cargando && !error && alojamientos.length === 0"
+    class="favoritos-empty"
+  >
+    <div class="favoritos-empty__icon">
+      <i class="fa-regular fa-heart"></i>
+    </div>
+    <h2 class="favoritos-empty__title">Aún no tienes favoritos</h2>
+    <p class="favoritos-empty__msg">
+      Explora alojamientos y guarda los que más te gusten con el botón
+      <i class="fa-regular fa-heart"></i>.
+    </p>
+    <a routerLink="/alojamientos" class="btn-explorar">
+      <i class="fa-solid fa-magnifying-glass"></i>
+      Explorar alojamientos
+    </a>
+  </section>
+
+  <!-- ── Grid de favoritos ── -->
+  <section
+    *ngIf="!cargando && !error && alojamientos.length > 0"
+    class="favoritos-grid"
+    aria-label="Mis alojamientos favoritos"
+  >
+    <div
+      *ngFor="let alojamiento of alojamientos; trackBy: trackById"
+      class="favorito-item"
+    >
+      <!-- Card del alojamiento -->
+      <app-alojamiento-card
+        [alojamiento]="alojamiento"
+        [todos]="idsAlojamientos"
+        origen="/mis-favoritos"
+      ></app-alojamiento-card>
+
+      <!-- Botón quitar favorito -->
+      <button
+        type="button"
+        class="btn-quitar-fav"
+        [disabled]="estaQuitando(alojamiento.id!)"
+        (click)="quitarFavorito(alojamiento)"
+        title="Quitar de favoritos"
+        aria-label="Quitar de favoritos"
+      >
+        <i
+          [class]="estaQuitando(alojamiento.id!) ? 'fa-solid fa-spinner fa-spin' : 'fa-solid fa-heart-crack'"
+        ></i>
+        <span>{{ estaQuitando(alojamiento.id!) ? 'Quitando...' : 'Quitar' }}</span>
+      </button>
+    </div>
+  </section>
+
+</main>

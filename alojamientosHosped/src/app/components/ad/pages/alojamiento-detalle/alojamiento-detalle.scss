@@ -539,7 +539,7 @@ $shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
 }
 
 // ── Navegación prev/next en detalle — estilos movidos al bloque .detalle-topbar ──
- 
+
 .btn-nav-ctx {
   display: flex;
   align-items: center;
@@ -553,12 +553,12 @@ $shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
   cursor: pointer;
   font-size: 0.85rem;
   transition: background 0.18s, color 0.18s;
- 
+
   &:hover:not(:disabled) {
     background: $primary;
     color: #fff;
   }
- 
+
   &--disabled,
   &:disabled {
     border-color: #d1d5db;
@@ -566,7 +566,7 @@ $shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
     cursor: not-allowed;
   }
 }
- 
+
 .nav-ctx-label {
   font-size: 0.8rem;
   font-weight: 600;
@@ -609,3 +609,36 @@ $shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
 }
 
 // ── Modal de confirmación — estilos movidos a molecules/confirm-modal/confirm-modal.scss ──
+// ── ALOJ-21: Botón favorito ───────────────────────────────────────────────────
+.btn-favorito {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.45rem 1rem;
+  background: transparent;
+  border: 1.5px solid #e2d9f3;
+  border-radius: 9999px;
+  color: #9ca3af;
+  font-size: 0.875rem;
+  font-weight: 600;
+  font-family: 'Poppins', sans-serif;
+  cursor: pointer;
+  transition: background 0.2s, color 0.2s, border-color 0.2s;
+
+  i { font-size: 1rem; transition: transform 0.15s; }
+
+  &:hover:not(:disabled) {
+    border-color: #f43f5e;
+    color: #f43f5e;
+    i { transform: scale(1.2); }
+  }
+
+  &:disabled { opacity: 0.6; cursor: not-allowed; }
+
+  // Estado activo: ya es favorito
+  &--activo {
+    background: #fff1f2;
+    border-color: #f43f5e;
+    color: #f43f5e;
+  }
+}

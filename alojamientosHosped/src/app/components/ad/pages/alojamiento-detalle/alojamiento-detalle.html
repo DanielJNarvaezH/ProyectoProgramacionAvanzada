@@ -94,6 +94,25 @@
         </button>
       </div>
 
+      <!-- ALOJ-21: Botón favorito — visible solo para usuarios USUARIO -->
+      <button
+        *ngIf="puedeMarcarFavorito"
+        type="button"
+        class="btn-favorito"
+        [class.btn-favorito--activo]="esFavorito"
+        [disabled]="toggleandoFav"
+        (click)="toggleFavorito()"
+        [title]="esFavorito ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+        [attr.aria-label]="esFavorito ? 'Quitar de favoritos' : 'Agregar a favoritos'"
+        [attr.aria-pressed]="esFavorito"
+      >
+        <i
+          [class]="esFavorito ? 'fa-solid fa-heart' : 'fa-regular fa-heart'"
+          [class.fa-spin-pulse]="toggleandoFav"
+        ></i>
+        <span>{{ esFavorito ? 'Guardado' : 'Favorito' }}</span>
+      </button>
+
     </div>
 
     <!-- ── Galería ─────────────────────────────────────────────────────── -->
@@ -187,10 +206,7 @@
             <iframe
               [src]="mapaUrl | safeUrl"
               class="mapa-iframe"
-              frameborder="0"
-              scrolling="no"
-              marginheight="0"
-              marginwidth="0"
+              style="border:0; overflow:hidden; margin:0;"
               title="Ubicación del alojamiento en el mapa"
               loading="lazy"
             ></iframe>

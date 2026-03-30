@@ -1,6 +1,6 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
-import { Subject, forkJoin, of, takeUntil } from 'rxjs';
+import { Subject, forkJoin, of, takeUntil, Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
 
 import { AlojamientoService }        from '../../../../../services/AlojamientoService';
@@ -9,18 +9,19 @@ import { ComentarioService }          from '../../../../../services/ComentarioSe
 import { AlojamientoServicioService } from '../../../../../services/AlojamientoServicioService';
 import { AuthService }                from '../../../../../services/AuthService';
 import { MapService }                 from '../../../../../services/MapService';
+import { FavoritoService }            from '../../../../../services/FavoritoService'; // ALOJ-21
 
-import { Alojamiento }         from '../../../../models/alojamiento.model';
-import { Imagen }              from '../../../../models/imagen.model';
-import { Comentario }          from '../../../../models/comentario.model';
-import { AlojamientoServicio } from '../../../../models/alojamiento-servicio.model';
+import { Alojamiento, Imagen, Comentario, AlojamientoServicio } from '../../../../models';
 
 /**
- * AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8 + nav prev/next + ALOJ-13
+ * AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8 + nav prev/next + ALOJ-13 + ALOJ-21
  *
  * ALOJ-13: Botón Eliminar con modal de confirmación visible solo
  * para el anfitrión dueño del alojamiento. Tras eliminar redirige
  * al listado y actualiza la lista (el alojamiento queda inactivo).
+ *
+ * ALOJ-21: Botón de favorito (corazón) visible para usuarios USUARIO.
+ * Verifica el estado al cargar y permite agregar/quitar con un clic.
  */
 @Component({
   selector: 'app-alojamiento-detalle',
@@ -49,6 +50,10 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
   eliminando           = false;
   errorEliminacion     = '';
 
+  // ── ALOJ-21: Favoritos ────────────────────────────────────────────
+  esFavorito       = false;
+  toggleandoFav    = false;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -59,7 +64,8 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     private comentarioService:        ComentarioService,
     private alojamientoServicioSvc:   AlojamientoServicioService,
     private authService:              AuthService,
-    private mapService:               MapService
+    private mapService:               MapService,
+    private favoritoService:          FavoritoService  // ALOJ-21
   ) {}
 
   ngOnInit(): void {
@@ -190,6 +196,8 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
           this.alojamiento = aloj;
           this.construirMapaUrl();
           this.cargarDatosSoporte(id);
+          // ALOJ-21: verificar si el usuario ya marcó este alojamiento como favorito
+          this.verificarFavorito(id);
         },
         error: (err) => {
           this.error    = err.message || 'No se pudo cargar el alojamiento';
@@ -224,6 +232,48 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
       this.alojamiento.latitude,
       this.alojamiento.longitude
     );
+  }
+
+  // ── ALOJ-21: Favoritos ────────────────────────────────────────────
+
+  /** Solo los usuarios con rol USUARIO pueden marcar favoritos */
+  get puedeMarcarFavorito(): boolean {
+    return this.authService.getUsuario()?.role === 'USUARIO';
+  }
+
+  /** Consulta al backend si este alojamiento ya es favorito del usuario */
+  private verificarFavorito(alojamientoId: number): void {
+    const usuario = this.authService.getUsuario();
+    if (!usuario?.id || !this.puedeMarcarFavorito) return;
+
+    this.favoritoService.esFavorito(usuario.id, alojamientoId)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: (resultado) => { this.esFavorito = resultado; },
+        error: ()         => { this.esFavorito = false; }
+      });
+  }
+
+  /** Agrega o quita el alojamiento de favoritos */
+  toggleFavorito(): void {
+    const usuario = this.authService.getUsuario();
+    if (!usuario?.id || !this.alojamiento?.id || this.toggleandoFav) return;
+
+    this.toggleandoFav = true;
+    const alojId = this.alojamiento.id;
+    const userId = usuario.id;
+
+    const accion$: Observable<unknown> = this.esFavorito
+      ? this.favoritoService.eliminar(userId, alojId)
+      : this.favoritoService.agregar(userId, alojId);
+
+    accion$.pipe(takeUntil(this.destroy$)).subscribe({
+      next: () => {
+        this.esFavorito    = !this.esFavorito;
+        this.toggleandoFav = false;
+      },
+      error: () => { this.toggleandoFav = false; }
+    });
   }
 
   volver(): void { this.router.navigate([this.origen]); }

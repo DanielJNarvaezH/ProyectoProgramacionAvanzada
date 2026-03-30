@@ -40,6 +40,17 @@
       <span>Publicar</span>
     </button>
 
+    <!-- ALOJ-21: favoritos solo para usuarios USUARIO -->
+    <button
+      *ngIf="esUsuario"
+      (click)="irAFavoritos()"
+      class="navbar__favoritos-btn"
+      title="Mis favoritos"
+    >
+      <i class="fa-regular fa-heart"></i>
+      <span>Favoritos</span>
+    </button>
+
     <button
       (click)="irAlPerfil()"
       class="navbar__profile-btn"

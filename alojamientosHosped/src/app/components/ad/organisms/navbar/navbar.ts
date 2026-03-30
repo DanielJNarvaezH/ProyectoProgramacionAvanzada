@@ -35,6 +35,11 @@ export class NavbarComponent {
     return this.authService.esAnfitrion();
   }
 
+  /** ALOJ-21: solo usuarios USUARIO ven el botón Favoritos */
+  get esUsuario(): boolean {
+    return this.authService.getUsuario()?.role === 'USUARIO';
+  }
+
   irAlPerfil(): void {
     this.router.navigate(['/perfil']);
   }
@@ -46,5 +51,10 @@ export class NavbarComponent {
   /** ALOJ-9: navega al panel de gestión del anfitrión */
   irAlPanel(): void {
     this.router.navigate(['/mis-alojamientos']);
+  }
+
+  /** ALOJ-21: navega a la vista de favoritos */
+  irAFavoritos(): void {
+    this.router.navigate(['/mis-favoritos']);
   }
 }
