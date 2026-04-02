@@ -7,20 +7,18 @@ import { FiltroListaService } from '../../../../../services/FiltroListaService';
 import { Alojamiento, ServicioDisponible, AlojamientoServicio } from '../../../../models';
 
 /**
- * AlojamientosListaPageComponent — ALOJ-4 / ALOJ-6 / ALOJ-18 / ALOJ-19
+ * AlojamientosListaPageComponent — ALOJ-4 / ALOJ-6 / ALOJ-18 / ALOJ-19 / ALOJ-23
+ *
+ * ALOJ-23: Ordenamiento de resultados por precio y capacidad.
  *
  * ALOJ-18: Búsqueda por ubicación — botón "Cerca de mí" que usa la
  *   Geolocation API del navegador y llama al endpoint
  *   GET /api/alojamientos/cercanos?lat=&lng=&radio=
- *   El radio es configurable (5 / 10 / 25 / 50 km).
- *   Si el navegador no soporta geolocalización o el usuario la deniega,
- *   se muestra un mensaje de error descriptivo.
  *
  * ALOJ-19: Filtros avanzados frontend sobre el array ya cargado:
  *   - Rango de precio (precioMin / precioMax)
  *   - Capacidad mínima de huéspedes
  *   - Servicios disponibles (checkboxes múltiples)
- * Se combinan con la búsqueda por texto existente (ALOJ-6).
  * El estado de los filtros se preserva entre navegaciones gracias
  * a FiltroListaService (lista → detalle → lista mantiene filtros).
  * Paginación frontend: ITEMS_POR_PAGINA alojamientos por página.
@@ -43,15 +41,13 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
   error    = '';
 
   // ── ALOJ-18: Búsqueda por ubicación ──────────────────────────
-  buscandoUbicacion = false;   // spinner del botón "Cerca de mí"
-  errorUbicacion    = '';      // mensaje si falla la geolocalización
-  modoUbicacion     = false;   // true cuando los resultados son por cercanía
-  radioKm           = 10;      // radio seleccionado por el usuario
-  readonly RADIOS_DISPONIBLES = [5, 10, 25, 50]; // opciones de radio
+  buscandoUbicacion = false;
+  errorUbicacion    = '';
+  modoUbicacion     = false;
+  radioKm           = 10;
+  readonly RADIOS_DISPONIBLES = [5, 10, 25, 50];
 
   // ── ALOJ-19: Estado de filtros — delegado a FiltroListaService ──
-  // Los getters/setters sincronizan con el servicio para preservar
-  // el estado al navegar lista → detalle → lista.
 
   get terminoBusqueda():         string            { return this.filtroSvc.terminoBusqueda; }
   set terminoBusqueda(v:         string)            { this.filtroSvc.terminoBusqueda = v; }
@@ -74,8 +70,11 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
   get paginaActual():            number             { return this.filtroSvc.paginaActual; }
   set paginaActual(v:            number)            { this.filtroSvc.paginaActual = v; }
 
+  // ── ALOJ-23: Ordenamiento ─────────────────────────────────────
+  get ordenamiento(): string { return this.filtroSvc.ordenamiento; }
+  set ordenamiento(v: any)   { this.filtroSvc.ordenamiento = v; }
+
   // Mapa servicioId → Set de alojamientoIds que lo tienen (ALOJ-19)
-  // Se construye una vez al cargar con GET /servicio/:id/alojamientos
   private mapaServicioAlojamientos = new Map<number, Set<number>>();
 
   private destroy$ = new Subject<void>();
@@ -112,9 +111,7 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
           this.alojamientos         = alojamientos;
           this.serviciosDisponibles = servicios.filter(s => s.active);
           this.cargando             = false;
-          // Construir mapa y luego aplicar filtros (restaura estado si venimos del detalle)
           this.construirMapaServicios(this.serviciosDisponibles.map(s => s.id));
-          // Si no hay filtros activos, mostrar todo; si los hay, reaplicarlos
           if (this.filtroSvc.hayFiltroActivo) {
             this.filtrar();
           } else {
@@ -128,7 +125,6 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
       });
   }
 
-  // Alias para el botón "Intentar de nuevo"
   cargarAlojamientos(): void { this.cargarDatos(); }
 
   // ── ALOJ-19: Construir mapa servicioId → Set<alojamientoId> ──
@@ -137,7 +133,6 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
     this.mapaServicioAlojamientos.clear();
     if (servicioIds.length === 0) return;
 
-    // N llamadas paralelas (N = nº de servicios activos, normalmente 8-15)
     const peticiones = servicioIds.map(id =>
       this.alojamientoServicioSvc.getAlojamientosByServicio(id)
         .pipe(catchError(() => of([] as AlojamientoServicio[])))
@@ -151,43 +146,45 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
           const alojIds    = new Set(lista.map(r => r.lodgingId));
           this.mapaServicioAlojamientos.set(servicioId, alojIds);
         });
-        // Re-aplicar filtros si ya hay servicios seleccionados
         if (this.serviciosSeleccionados.length > 0) this.filtrar();
       });
   }
 
-  // ── ALOJ-6 + ALOJ-19: Filtrado combinado ─────────────────────
+  // ── ALOJ-6 + ALOJ-19 + ALOJ-23: Filtrado y ordenamiento ──────
 
   filtrar(): void {
     this.paginaActual = 1;
     const termino     = this.terminoBusqueda.trim().toLowerCase();
 
-    // Filtrado frontend sobre array ya cargado — consistente con la estrategia
-    // de paginación local de ALOJ-4. El backend expone GET /filtro/precio?min=&max=
-    // para cuando se migre a paginación real en backend (ver ALOJ-20).
     this.alojamientosFiltrados = this.alojamientos.filter(a => {
-      // Búsqueda por texto (ALOJ-6)
       if (termino) {
         const coincideTexto =
           a.name.toLowerCase().includes(termino) ||
           a.city.toLowerCase().includes(termino);
         if (!coincideTexto) return false;
       }
-      // Filtro precio mínimo
       if (this.precioMin !== null && a.pricePerNight < this.precioMin) return false;
-      // Filtro precio máximo
       if (this.precioMax !== null && a.pricePerNight > this.precioMax) return false;
-      // Filtro capacidad mínima
       if (this.capacidadMin !== null && a.maxCapacity < this.capacidadMin) return false;
-      // Filtro servicios: el alojamiento debe tener TODOS los servicios seleccionados
       if (this.serviciosSeleccionados.length > 0) {
-        const tieneToodos = this.serviciosSeleccionados.every(sId => {
+        const tieneTodos = this.serviciosSeleccionados.every(sId => {
           const alojIds = this.mapaServicioAlojamientos.get(sId);
           return alojIds ? alojIds.has(a.id!) : false;
         });
-        if (!tieneToodos) return false;
+        if (!tieneTodos) return false;
       }
       return true;
+    });
+
+    // ALOJ-23: Ordenamiento de resultados
+    this.alojamientosFiltrados = [...this.alojamientosFiltrados].sort((a, b) => {
+      switch (this.ordenamiento) {
+        case 'precio-asc':     return a.pricePerNight - b.pricePerNight;
+        case 'precio-desc':    return b.pricePerNight - a.pricePerNight;
+        case 'capacidad-asc':  return a.maxCapacity - b.maxCapacity;
+        case 'capacidad-desc': return b.maxCapacity - a.maxCapacity;
+        default: return 0;
+      }
     });
   }
 
@@ -200,10 +197,6 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
 
   // ── ALOJ-18: Búsqueda por ubicación ──────────────────────────
 
-  /**
-   * Solicita la posición del navegador y llama al endpoint /cercanos.
-   * Actualiza alojamientosFiltrados con los resultados ordenados por distancia.
-   */
   buscarCercaDeMi(): void {
     if (!navigator.geolocation) {
       this.errorUbicacion = 'Tu navegador no soporta geolocalización.';
@@ -225,7 +218,6 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
               this.modoUbicacion         = true;
               this.alojamientosFiltrados = resultados;
               this.paginaActual          = 1;
-              // Limpiar filtros de texto para no mezclar criterios
               this.filtroSvc.limpiar();
             },
             error: (err: Error) => {
@@ -254,15 +246,11 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
     );
   }
 
-  /** Cambia el radio y relanza la búsqueda si ya estamos en modo ubicación */
   cambiarRadio(nuevoRadio: number): void {
     this.radioKm = nuevoRadio;
-    if (this.modoUbicacion) {
-      this.buscarCercaDeMi();
-    }
+    if (this.modoUbicacion) this.buscarCercaDeMi();
   }
 
-  /** Sale del modo ubicación y vuelve al listado completo */
   salirModoUbicacion(): void {
     this.modoUbicacion         = false;
     this.errorUbicacion        = '';

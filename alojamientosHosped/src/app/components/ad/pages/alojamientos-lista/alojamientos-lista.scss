@@ -1,6 +1,5 @@
 // ─────────────────────────────────────────────────────────────────────────────
-// AlojamientosListaPageComponent — ALOJ-4
-// Estilos del grid, header, loading skeleton y estados vacíos
+// AlojamientosListaPageComponent — ALOJ-4 / ALOJ-17 / ALOJ-18 / ALOJ-19 / ALOJ-23
 // ─────────────────────────────────────────────────────────────────────────────
 
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
@@ -64,9 +63,7 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
     }
   }
 
-  &__search {
-    flex-shrink: 0;
-  }
+  &__search { flex-shrink: 0; }
 
   &__controles {
     display: flex;
@@ -125,6 +122,28 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
     flex-shrink: 0;
 
     &:hover { color: $error; }
+  }
+}
+
+// ── ALOJ-23: Select de ordenamiento ──────────────────────────────────────────
+.select-orden {
+  padding: 0.6rem 2rem 0.6rem 1rem;
+  border: 1.5px solid #e2d9f3;
+  border-radius: $radius-input;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: $text-mid;
+  cursor: pointer;
+  appearance: none;
+  background: $white;
+  box-shadow: $shadow-sm;
+  transition: border-color 0.2s, box-shadow 0.2s;
+
+  &:focus {
+    outline: none;
+    border-color: $primary;
+    box-shadow: 0 0 0 3px rgba(155, 92, 255, 0.12);
   }
 }
 
@@ -256,18 +275,9 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
 
 // ── Responsive ───────────────────────────────────────────────────────────────
 @media (max-width: 640px) {
-  .lista-page {
-    padding: 1.5rem 1rem 3rem;
-  }
-
-  .lista-header {
-    flex-direction: column;
-    align-items: stretch;
-  }
-
-  .search-box {
-    min-width: unset;
-  }
+  .lista-page { padding: 1.5rem 1rem 3rem; }
+  .lista-header { flex-direction: column; align-items: stretch; }
+  .search-box { min-width: unset; }
 }
 
 // ── Paginación ────────────────────────────────────────────────────────────────
@@ -338,10 +348,7 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
   transition: border-color 0.2s, color 0.2s, background 0.2s;
   position: relative;
 
-  &:hover {
-    border-color: $primary-light;
-    color: $primary;
-  }
+  &:hover { border-color: $primary-light; color: $primary; }
 
   &--activo {
     background: $primary;
@@ -406,15 +413,12 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
   }
 }
 
-// ── Grupo de filtro genérico ──────────────────────────────────────────────────
 .filtro-grupo {
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
 
-  &--servicios {
-    grid-column: 1 / -1;
-  }
+  &--servicios { grid-column: 1 / -1; }
 
   &__label {
     font-size: 0.8rem;
@@ -430,7 +434,6 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
   }
 }
 
-// ── Filtro de rango de precio ─────────────────────────────────────────────────
 .filtro-rango {
   display: flex;
   align-items: center;
@@ -477,7 +480,6 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
   &::-webkit-inner-spin-button { -webkit-appearance: none; }
 }
 
-// ── Filtro de capacidad (stepper) ─────────────────────────────────────────────
 .filtro-capacidad {
   display: flex;
   align-items: center;
@@ -508,10 +510,7 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
       color: $white;
     }
 
-    &:disabled {
-      opacity: 0.35;
-      cursor: not-allowed;
-    }
+    &:disabled { opacity: 0.35; cursor: not-allowed; }
   }
 
   &__valor {
@@ -523,7 +522,6 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
   }
 }
 
-// ── Chips de servicios ────────────────────────────────────────────────────────
 .filtro-servicios {
   display: flex;
   flex-wrap: wrap;
@@ -547,24 +545,17 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
 
   i { font-size: 0.75rem; }
 
-  &:hover {
-    border-color: $primary-light;
-    color: $primary;
-  }
+  &:hover { border-color: $primary-light; color: $primary; }
 
   &--activo {
     background: $primary;
     border-color: $primary;
     color: $white;
 
-    &:hover {
-      background: $primary-dark;
-      border-color: $primary-dark;
-    }
+    &:hover { background: $primary-dark; border-color: $primary-dark; }
   }
 }
 
-// ── Botón limpiar filtros ─────────────────────────────────────────────────────
 .btn-limpiar-filtros {
   display: flex;
   align-items: center;
@@ -580,10 +571,7 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
   cursor: pointer;
   transition: border-color 0.2s, color 0.2s;
 
-  &:hover {
-    border-color: $error;
-    color: $error;
-  }
+  &:hover { border-color: $error; color: $error; }
 }
 
 // ── ALOJ-17: Mapa interactivo ─────────────────────────────────────────────────
@@ -608,21 +596,9 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
   transition: background 0.2s, color 0.2s;
   white-space: nowrap;
 
-  &:hover:not(:disabled) {
-    background: #6366f1;
-    color: #fff;
-  }
-
-  &:disabled {
-    opacity: 0.65;
-    cursor: not-allowed;
-  }
-
-  // Estado activo: ya está en modo ubicación
-  &--activo {
-    background: #6366f1;
-    color: #fff;
-  }
+  &:hover:not(:disabled) { background: #6366f1; color: #fff; }
+  &:disabled { opacity: 0.65; cursor: not-allowed; }
+  &--activo { background: #6366f1; color: #fff; }
 }
 
 // ── ALOJ-18: Banner de modo ubicación ────────────────────────────────────────
@@ -678,7 +654,6 @@ $shadow-md:    0 8px 24px rgba(155, 92, 255, 0.14);
   }
 }
 
-// Chips de radio (5 km, 10 km, etc.)
 .radio-chip {
   padding: 0.25rem 0.65rem;
   border-radius: 9999px;

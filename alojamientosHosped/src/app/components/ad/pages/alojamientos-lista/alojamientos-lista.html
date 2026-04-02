@@ -1,7 +1,7 @@
 ﻿<!--
-    AlojamientosListaPageComponent — ALOJ-4 / ALOJ-6 / ALOJ-18 / ALOJ-19
+    AlojamientosListaPageComponent — ALOJ-4 / ALOJ-6 / ALOJ-18 / ALOJ-19 / ALOJ-23
     Grid de tarjetas con loading states, búsqueda, filtros avanzados,
-    búsqueda por ubicación (ALOJ-18) y paginación frontend
+    búsqueda por ubicación (ALOJ-18), paginación frontend y ordenamiento (ALOJ-23)
 -->
 <app-navbar></app-navbar>
 
@@ -12,7 +12,6 @@
     <div class="lista-header__text">
       <h1 class="lista-header__title">Alojamientos disponibles</h1>
       <p class="lista-header__subtitle" *ngIf="!cargando && !error">
-        <!-- ALOJ-18: subtítulo distinto en modo ubicación -->
         <span *ngIf="modoUbicacion">
           <i class="fa-solid fa-location-dot"></i>
           {{ totalMostrados }} alojamiento{{ totalMostrados !== 1 ? 's' : '' }}
@@ -26,6 +25,7 @@
     </div>
 
     <div class="lista-header__controles">
+
       <!-- Búsqueda por texto -->
       <div class="search-box">
         <i class="fa-solid fa-magnifying-glass search-box__icon"></i>
@@ -77,6 +77,21 @@
           {{ cantidadFiltrosActivos }}
         </span>
       </button>
+
+      <!-- ALOJ-23: Ordenamiento -->
+      <select
+        class="select-orden"
+        [(ngModel)]="ordenamiento"
+        (ngModelChange)="filtrar()"
+        aria-label="Ordenar resultados"
+      >
+        <option value="ninguno">Ordenar por…</option>
+        <option value="precio-asc">Precio: menor a mayor</option>
+        <option value="precio-desc">Precio: mayor a menor</option>
+        <option value="capacidad-asc">Capacidad: menor a mayor</option>
+        <option value="capacidad-desc">Capacidad: mayor a menor</option>
+      </select>
+
     </div>
   </section>
 
@@ -86,8 +101,6 @@
       <i class="fa-solid fa-location-dot"></i>
       <span>Mostrando alojamientos cercanos a tu ubicación</span>
     </div>
-
-    <!-- Selector de radio -->
     <div class="ubicacion-banner__radio">
       <span class="ubicacion-banner__radio-label">Radio:</span>
       <button
@@ -100,8 +113,6 @@
         {{ r }} km
       </button>
     </div>
-
-    <!-- Cerrar modo ubicación -->
     <button
       type="button"
       class="ubicacion-banner__cerrar"

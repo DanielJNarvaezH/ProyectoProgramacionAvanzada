@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 
 /**
- * FiltroListaService — ALOJ-19
+ * FiltroListaService — ALOJ-19 / ALOJ-23
  *
  * Preserva el estado de los filtros de la lista de alojamientos
  * entre navegaciones (lista → detalle → lista).
@@ -26,6 +26,9 @@ export class FiltroListaService {
   paginaActual     = 1;
   mostrarFiltros   = false;
 
+  // ALOJ-23: Ordenamiento de resultados
+  ordenamiento: 'ninguno' | 'precio-asc' | 'precio-desc' | 'capacidad-asc' | 'capacidad-desc' = 'ninguno';
+
   get hayFiltroActivo(): boolean {
     return (
       this.terminoBusqueda.trim().length > 0 ||
@@ -44,5 +47,6 @@ export class FiltroListaService {
     this.serviciosSeleccionados = [];
     this.paginaActual           = 1;
     this.mostrarFiltros         = false;
+    this.ordenamiento           = 'ninguno';
   }
 }
