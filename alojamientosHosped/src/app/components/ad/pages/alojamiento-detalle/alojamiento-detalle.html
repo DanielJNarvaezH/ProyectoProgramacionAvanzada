@@ -244,8 +244,8 @@
 
       </div><!-- /detalle-main -->
 
-      <!-- ── Columna derecha: caja de precio ────────────────────────────── -->
-      <aside class="detalle-aside">
+      <!-- ── Columna derecha: caja de precio — solo para huéspedes (RESERV-3) ── -->
+      <aside class="detalle-aside" *ngIf="puedeReservar">
         <!-- RESERV-3: Calendario de disponibilidad -->
         <app-calendario-disponibilidad
           [lodgingId]="alojamiento.id!"
@@ -282,6 +282,63 @@
             Reservar (próximamente)
           </button>
         </div>
+      </aside>
+
+      <!-- ── Columna derecha: panel del anfitrión dueño ── -->
+      <aside class="detalle-aside" *ngIf="esAnfitrionDueno">
+
+        <!-- Stats rápidos -->
+        <div class="host-stats">
+          <div class="host-stat">
+            <span class="host-stat__valor">{{ comentarios.length }}</span>
+            <span class="host-stat__label">reseñas</span>
+          </div>
+          <div class="host-stat">
+            <span class="host-stat__valor">{{ promedioLabel }} ★</span>
+            <span class="host-stat__label">promedio</span>
+          </div>
+          <div class="host-stat">
+            <span class="host-stat__valor">{{ imagenes.length }}</span>
+            <span class="host-stat__label">fotos</span>
+          </div>
+        </div>
+
+        <!-- Precio destacado -->
+        <div class="precio-box">
+          <div class="precio-box__precio">
+            <span class="precio-box__valor">${{ alojamiento.pricePerNight | peso }}</span>
+            <span class="precio-box__unidad">/ noche</span>
+          </div>
+          <p class="host-capacidad">
+            <i class="fa-solid fa-users"></i>
+            Capacidad máx. {{ alojamiento.maxCapacity }} huéspedes
+          </p>
+
+          <hr class="divider" />
+
+          <!-- Acciones rápidas -->
+          <p class="host-acciones__titulo">Gestión rápida</p>
+          <div class="host-acciones">
+            <button class="host-accion-btn" (click)="irAEditar()">
+              <i class="fa-solid fa-pen-to-square"></i>
+              <span>Editar alojamiento</span>
+            </button>
+            <button class="host-accion-btn host-accion-btn--danger" (click)="abrirModalEliminar()">
+              <i class="fa-solid fa-trash"></i>
+              <span>Eliminar alojamiento</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Badge de estado -->
+        <div class="host-estado" [ngClass]="alojamiento.active ? 'host-estado--activo' : 'host-estado--inactivo'">
+          <i [class]="alojamiento.active ? 'fa-solid fa-circle' : 'fa-regular fa-circle'"></i>
+          <div class="host-estado__texto">
+            <span class="host-estado__titulo">{{ alojamiento.active ? 'Alojamiento activo' : 'Alojamiento inactivo' }}</span>
+            <span class="host-estado__sub">{{ alojamiento.active ? 'Visible en el catálogo' : 'No visible en el catálogo' }}</span>
+          </div>
+        </div>
+
       </aside>
 
     </div><!-- /detalle-layout -->

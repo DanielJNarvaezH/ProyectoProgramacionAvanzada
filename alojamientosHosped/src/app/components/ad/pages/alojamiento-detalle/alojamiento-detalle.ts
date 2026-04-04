@@ -58,7 +58,7 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
 
   constructor(
     private route:                    ActivatedRoute,
-    private router:                   Router,
+    public  router:                   Router,
     private alojamientoService:       AlojamientoService,
     private imagenService:            ImagenService,
     private comentarioService:        ComentarioService,
@@ -244,6 +244,11 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
 
   /** Solo los usuarios con rol USUARIO pueden marcar favoritos */
   get puedeMarcarFavorito(): boolean {
+    return this.authService.getUsuario()?.role === 'USUARIO';
+  }
+
+  /** Solo los usuarios con rol USUARIO ven el calendario y el botón de reservar */
+  get puedeReservar(): boolean {
     return this.authService.getUsuario()?.role === 'USUARIO';
   }
 
