@@ -29,13 +29,20 @@ export class FiltroListaService {
   // ALOJ-23: Ordenamiento de resultados
   ordenamiento: 'ninguno' | 'precio-asc' | 'precio-desc' | 'capacidad-asc' | 'capacidad-desc' = 'ninguno';
 
+  // ALOJ-18: Estado de búsqueda por ubicación — persiste entre navegaciones
+  modoUbicacion:       boolean      = false;
+  radioKm:             number       = 10;
+  alojamientosCercanos: any[]       = [];   // resultados crudos del endpoint cercanos
+
   get hayFiltroActivo(): boolean {
     return (
       this.terminoBusqueda.trim().length > 0 ||
       this.precioMin              !== null   ||
       this.precioMax              !== null   ||
       this.capacidadMin           !== null   ||
-      this.serviciosSeleccionados.length > 0
+      this.serviciosSeleccionados.length > 0 ||
+      this.ordenamiento           !== 'ninguno' ||
+      this.modoUbicacion
     );
   }
 
@@ -48,5 +55,8 @@ export class FiltroListaService {
     this.paginaActual           = 1;
     this.mostrarFiltros         = false;
     this.ordenamiento           = 'ninguno';
+    this.modoUbicacion          = false;
+    this.radioKm                = 10;
+    this.alojamientosCercanos   = [];
   }
 }

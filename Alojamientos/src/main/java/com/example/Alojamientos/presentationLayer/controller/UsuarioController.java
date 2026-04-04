@@ -85,6 +85,38 @@ public class UsuarioController {
     }
 
     // ============================================================
+    // Eliminar cuenta del usuario autenticado
+    // ============================================================
+    @DeleteMapping("/me")
+    @Operation(
+            summary = "Eliminar cuenta del usuario autenticado",
+            security = @SecurityRequirement(name = "bearerAuth"),
+            responses = {
+                    @ApiResponse(responseCode = "204", description = "Cuenta eliminada correctamente"),
+                    @ApiResponse(responseCode = "400", description = "No se puede eliminar la cuenta por restricciones"),
+                    @ApiResponse(responseCode = "401", description = "No autenticado"),
+                    @ApiResponse(responseCode = "404", description = "Usuario no encontrado")
+            }
+    )
+    public ResponseEntity<?> deleteMe() {
+        try {
+            Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+            String email = auth.getName();
+            UsuarioDTO usuario = usuarioService.buscarPorEmail(email);
+            usuarioService.eliminarUsuario(usuario.getId());
+            return ResponseEntity.noContent().build();
+        } catch (IllegalArgumentException e) {
+            String msg = e.getMessage();
+            if (msg.contains("no encontrado")) {
+                return ResponseEntity.status(HttpStatus.NOT_FOUND).body(msg);
+            }
+            return ResponseEntity.badRequest().body(msg);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body("No autenticado");
+        }
+    }
+
+    // ============================================================
     // Listar todos los usuarios activos
     // ============================================================
     @GetMapping

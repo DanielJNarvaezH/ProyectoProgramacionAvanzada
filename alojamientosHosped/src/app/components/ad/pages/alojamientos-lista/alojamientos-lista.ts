@@ -43,9 +43,14 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
   // ── ALOJ-18: Búsqueda por ubicación ──────────────────────────
   buscandoUbicacion = false;
   errorUbicacion    = '';
-  modoUbicacion     = false;
-  radioKm           = 10;
   readonly RADIOS_DISPONIBLES = [5, 10, 25, 50];
+
+  // Estado persistente delegado a FiltroListaService
+  get modoUbicacion(): boolean  { return this.filtroSvc.modoUbicacion; }
+  set modoUbicacion(v: boolean) { this.filtroSvc.modoUbicacion = v; }
+
+  get radioKm(): number  { return this.filtroSvc.radioKm; }
+  set radioKm(v: number) { this.filtroSvc.radioKm = v; }
 
   // ── ALOJ-19: Estado de filtros — delegado a FiltroListaService ──
 
@@ -112,7 +117,13 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
           this.serviciosDisponibles = servicios.filter(s => s.active);
           this.cargando             = false;
           this.construirMapaServicios(this.serviciosDisponibles.map(s => s.id));
-          if (this.filtroSvc.hayFiltroActivo) {
+
+          if (this.filtroSvc.modoUbicacion && this.filtroSvc.alojamientosCercanos.length > 0) {
+            // Restaurar modo ubicación: filtrar sobre los cercanos guardados
+            this.alojamientos          = this.filtroSvc.alojamientosCercanos;
+            this.alojamientosFiltrados = this.filtroSvc.alojamientosCercanos;
+            if (this.filtroSvc.hayFiltroActivo) this.filtrar();
+          } else if (this.filtroSvc.hayFiltroActivo) {
             this.filtrar();
           } else {
             this.alojamientosFiltrados = alojamientos;
@@ -189,10 +200,20 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
   }
 
   limpiarFiltro(): void {
-    this.filtroSvc.limpiar();
-    this.modoUbicacion  = false;
+    const estabaModoUbicacion = this.modoUbicacion;
+    this.filtroSvc.limpiar();   // resetea todo incluyendo modoUbicacion y alojamientosCercanos
     this.errorUbicacion = '';
-    this.alojamientosFiltrados = this.alojamientos;
+    if (estabaModoUbicacion) {
+      // Si estaba en modo ubicación, recargar todos los alojamientos
+      this.cargarDatos();
+    } else {
+      this.alojamientosFiltrados = this.alojamientos;
+    }
+  }
+
+  limpiarTerminoBusqueda(): void {
+    this.terminoBusqueda = '';
+    this.filtrar();
   }
 
   // ── ALOJ-18: Búsqueda por ubicación ──────────────────────────
@@ -214,11 +235,20 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (resultados) => {
-              this.buscandoUbicacion     = false;
-              this.modoUbicacion         = true;
+              this.buscandoUbicacion = false;
+              this.modoUbicacion     = true;
+
+              // Guardar resultados crudos en el servicio para persistir al volver del detalle
+              this.filtroSvc.alojamientosCercanos = resultados;
+
+              // Aplicar sobre los cercanos los filtros activos (precio, capacidad, servicios, orden)
+              this.alojamientos          = resultados;
               this.alojamientosFiltrados = resultados;
               this.paginaActual          = 1;
-              this.filtroSvc.limpiar();
+
+              if (this.filtroSvc.hayFiltroActivo) {
+                this.filtrar();
+              }
             },
             error: (err: Error) => {
               this.buscandoUbicacion = false;
@@ -252,10 +282,14 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
   }
 
   salirModoUbicacion(): void {
-    this.modoUbicacion         = false;
-    this.errorUbicacion        = '';
-    this.alojamientosFiltrados = this.alojamientos;
-    this.paginaActual          = 1;
+    this.modoUbicacion                    = false;
+    this.errorUbicacion                   = '';
+    this.filtroSvc.alojamientosCercanos   = [];
+    this.alojamientos                     = [];
+    this.alojamientosFiltrados            = [];
+    this.paginaActual                     = 1;
+    // Recargar todos los alojamientos desde el backend
+    this.cargarDatos();
   }
 
   toggleFiltros(): void {

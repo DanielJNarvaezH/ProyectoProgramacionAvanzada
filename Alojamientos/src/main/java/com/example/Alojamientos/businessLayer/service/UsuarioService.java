@@ -202,5 +202,16 @@ public class UsuarioService {
                 throw new IllegalArgumentException("No se puede eliminar un anfitrión con reservas futuras");
             }
         }
+
+        if (usuario.getRol() == UsuarioEntity.Rol.USUARIO) {
+            boolean tieneReservasActivas = usuario.getReservas().stream()
+                    .anyMatch(r -> (r.getEstado() == ReservaEntity.EstadoReserva.PENDIENTE ||
+                            r.getEstado() == ReservaEntity.EstadoReserva.CONFIRMADA) &&
+                            r.getFechaFin().isAfter(LocalDate.now()));
+
+            if (tieneReservasActivas) {
+                throw new IllegalArgumentException("No se puede eliminar tu cuenta mientras tengas reservas activas o pendientes");
+            }
+        }
     }
 }

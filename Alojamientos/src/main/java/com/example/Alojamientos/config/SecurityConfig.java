@@ -127,8 +127,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/codigos-recuperacion/**").permitAll()
 
                         // Perfil propio — ANTES de la regla general de usuarios
-                        .requestMatchers(HttpMethod.GET, "/api/usuarios/me").authenticated()
-                        .requestMatchers(HttpMethod.PUT, "/api/usuarios/me").authenticated()
+                        .requestMatchers(HttpMethod.GET,    "/api/usuarios/me").authenticated()
+                        .requestMatchers(HttpMethod.PUT,    "/api/usuarios/me").authenticated()
+                        .requestMatchers(HttpMethod.DELETE, "/api/usuarios/me").authenticated()
 
                         // Usuarios — ADMIN para gestión general
                         .requestMatchers(HttpMethod.GET,    "/api/usuarios/**").hasRole("ADMIN")

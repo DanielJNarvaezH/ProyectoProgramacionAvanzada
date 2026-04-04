@@ -185,11 +185,71 @@
         <span>Cerrar sesión</span>
       </button>
 
+      <!-- Eliminar cuenta -->
+      <button
+        (click)="abrirModalEliminar()"
+        class="w-full mt-2 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition flex items-center justify-center gap-2">
+        <app-icon icon="fa-solid fa-trash"></app-icon>
+        <span>Eliminar mi cuenta</span>
+      </button>
+
     </ng-container>
 
     <footer class="text-center text-sm text-neutral-500 mt-6">
       © 2025 Hosped | Sistema de Alojamiento Inteligente
     </footer>
+
+  </div>
+</div>
+
+<!-- ── Modal confirmar eliminación de cuenta ── -->
+<div
+  *ngIf="mostrarModalEliminar"
+  class="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50"
+  (click)="cerrarModalEliminar()">
+
+  <div
+    class="bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4"
+    (click)="$event.stopPropagation()">
+
+    <!-- Icono advertencia -->
+    <div class="flex justify-center mb-4">
+      <div class="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center">
+        <i class="fa-solid fa-triangle-exclamation text-red-600 text-2xl"></i>
+      </div>
+    </div>
+
+    <h3 class="text-xl font-bold text-center text-neutral-800 mb-2">
+      ¿Eliminar tu cuenta?
+    </h3>
+    <p class="text-sm text-neutral-500 text-center mb-2">
+      Esta acción es <strong>permanente e irreversible</strong>. Tu cuenta, historial y datos serán desactivados del sistema.
+    </p>
+    <p class="text-sm text-neutral-500 text-center mb-6">
+      Si eres anfitrión, no puedes eliminar tu cuenta mientras tengas alojamientos activos o reservas futuras pendientes.
+    </p>
+
+    <!-- Error -->
+    <div *ngIf="errorEliminacion" class="mb-4 p-3 bg-red-50 border border-red-200 rounded-md text-sm text-red-600 text-center">
+      {{ errorEliminacion }}
+    </div>
+
+    <!-- Botones -->
+    <div class="flex gap-3">
+      <button
+        (click)="cerrarModalEliminar()"
+        [disabled]="eliminandoCuenta"
+        class="flex-1 py-2 border-2 border-neutral-300 text-neutral-600 font-semibold rounded-md hover:bg-neutral-50 transition">
+        Cancelar
+      </button>
+      <button
+        (click)="confirmarEliminarCuenta()"
+        [disabled]="eliminandoCuenta"
+        class="flex-1 py-2 bg-red-600 text-white font-semibold rounded-md hover:bg-red-700 transition flex items-center justify-center gap-2">
+        <i *ngIf="eliminandoCuenta" class="fa-solid fa-spinner fa-spin"></i>
+        <span>{{ eliminandoCuenta ? 'Eliminando...' : 'Sí, eliminar' }}</span>
+      </button>
+    </div>
 
   </div>
 </div>

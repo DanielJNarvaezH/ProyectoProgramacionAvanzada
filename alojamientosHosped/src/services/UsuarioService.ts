@@ -45,6 +45,18 @@ export class UsuarioService {
   }
 
   // ─────────────────────────────────────────────────────────────
+  // DELETE /api/usuarios/me — Eliminar cuenta del usuario autenticado
+  // ─────────────────────────────────────────────────────────────
+  eliminarCuenta(): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/me`).pipe(
+      catchError(error => {
+        const mensaje = this.resolverError(error);
+        return throwError(() => new Error(mensaje));
+      })
+    );
+  }
+
+  // ─────────────────────────────────────────────────────────────
   // Manejo de errores
   // ─────────────────────────────────────────────────────────────
   private resolverError(error: any): string {

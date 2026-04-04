@@ -23,6 +23,11 @@ export class PerfilPageComponent implements OnInit {
   errorMessage   = '';
   successMessage = '';
 
+  // ─── Eliminar cuenta ──────────────────────────────────────────
+  mostrarModalEliminar = false;
+  eliminandoCuenta     = false;
+  errorEliminacion     = '';
+
   constructor(
     private fb: FormBuilder,
     private usuarioService: UsuarioService,
@@ -122,6 +127,34 @@ export class PerfilPageComponent implements OnInit {
   cerrarSesion(): void {
     this.authService.logout();
     this.router.navigate(['/login']);
+  }
+
+  // ─── Eliminar cuenta ──────────────────────────────────────────
+  abrirModalEliminar(): void {
+    this.mostrarModalEliminar = true;
+    this.errorEliminacion     = '';
+  }
+
+  cerrarModalEliminar(): void {
+    this.mostrarModalEliminar = false;
+    this.errorEliminacion     = '';
+  }
+
+  confirmarEliminarCuenta(): void {
+    this.eliminandoCuenta = true;
+    this.errorEliminacion = '';
+
+    this.usuarioService.eliminarCuenta().subscribe({
+      next: () => {
+        this.eliminandoCuenta = false;
+        this.authService.logout();
+        this.router.navigate(['/login']);
+      },
+      error: (err: Error) => {
+        this.eliminandoCuenta = false;
+        this.errorEliminacion = err.message;
+      }
+    });
   }
 
   // ─── Helpers de UI ───────────────────────────────────────────

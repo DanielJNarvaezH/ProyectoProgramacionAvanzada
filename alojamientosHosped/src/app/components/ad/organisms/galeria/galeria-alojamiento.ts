@@ -51,12 +51,35 @@ export class GaleriaAlojamientoComponent implements OnChanges {
 
   private construirGaleria(): void {
     const imgs = this.imagenes ?? [];
+
     if (imgs.length > 0) {
-      this.imagenPrincipal = imgs[0].url;
-      this.miniaturas       = imgs.slice(1, 5);
+      // Respetar el campo mainImage del alojamiento:
+      // buscar la imagen que coincide con mainImage y ponerla como principal
+      const idxPrincipal = this.mainImage
+        ? imgs.findIndex(img => img.url === this.mainImage)
+        : -1;
+
+      if (idxPrincipal > 0) {
+        // mainImage existe en la lista pero no es la primera — reordenar
+        const principal = imgs[idxPrincipal];
+        const resto     = imgs.filter((_, i) => i !== idxPrincipal);
+        this.imagenPrincipal = principal.url;
+        this.miniaturas      = resto.slice(0, 4);
+      } else if (idxPrincipal === 0) {
+        // mainImage ya es la primera — comportamiento normal
+        this.imagenPrincipal = imgs[0].url;
+        this.miniaturas      = imgs.slice(1, 5);
+      } else {
+        // mainImage no coincide con ninguna imagen de la tabla
+        // (caso: se cambió mainImage pero la tabla imagen no se actualizó)
+        // usar mainImage directamente como principal y todas las de tabla como miniaturas
+        this.imagenPrincipal = this.mainImage || imgs[0].url;
+        this.miniaturas      = imgs.slice(0, 4);
+      }
     } else {
+      // Sin imágenes en tabla imagen — usar mainImage del alojamiento
       this.imagenPrincipal = this.mainImage || this.placeholder;
-      this.miniaturas       = [];
+      this.miniaturas      = [];
     }
   }
 
