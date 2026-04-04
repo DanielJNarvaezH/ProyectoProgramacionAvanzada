@@ -92,6 +92,12 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     this.destroy$.complete();
   }
 
+  rangoReserva: { startDate: string; endDate: string } | null = null;
+
+  onRangoSeleccionado(rango: { startDate: string; endDate: string }): void {
+    this.rangoReserva = rango;
+  }
+
   // ── Navegación prev/next ─────────────────────────────────────────
 
   get idActual(): number { return this.alojamiento?.id ?? 0; }

@@ -33,6 +33,8 @@ import { RegisterFormComponent }     from './components/ad/molecules/register-fo
 import { AlojamientoCardComponent }  from './components/ad/molecules/alojamiento-card/alojamiento-card';
 import { ComentarioCardComponent }   from './components/ad/molecules/comentario-card/comentario-card';
 import { ConfirmModalComponent }      from './components/ad/molecules/confirm-modal/confirm-modal';
+import { CalendarioDisponibilidadComponent } from './components/ad/molecules/calendario-disponibilidad/calendario-disponibilidad';
+
 
 // -- Organismos
 import { LoginCardComponent }             from './components/ad/organisms/login-card/login-card';
@@ -80,6 +82,8 @@ import { LazyImgDirective } from './directives/lazy-img.directive';
     ImageUploaderComponent,
     AlojamientoPreviewComponent,
     ConfirmModalComponent,
+    CalendarioDisponibilidadComponent,
+
 
     // Organismos
     LoginCardComponent,

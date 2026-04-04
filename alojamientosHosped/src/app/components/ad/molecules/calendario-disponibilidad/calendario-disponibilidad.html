@@ -1,0 +1,102 @@
+<div class="calendario-wrap">
+
+  <!-- ── Header del calendario ──────────────────────────────── -->
+  <div class="cal-header">
+    <button
+      type="button"
+      class="cal-nav"
+      (click)="mesAnterior()"
+      [disabled]="!puedeIrAtras"
+      aria-label="Mes anterior"
+    >
+      <svg viewBox="0 0 16 16" fill="none"><path d="M10 3L5 8l5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+
+    <span class="cal-titulo">{{ tituloMes }}</span>
+
+    <button
+      type="button"
+      class="cal-nav"
+      (click)="mesSiguiente()"
+      aria-label="Mes siguiente"
+    >
+      <svg viewBox="0 0 16 16" fill="none"><path d="M6 3l5 5-5 5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </button>
+  </div>
+
+  <!-- ── Loading ─────────────────────────────────────────────── -->
+  <div class="cal-loading" *ngIf="cargando">
+    <div class="cal-spinner"></div>
+    <span>Cargando disponibilidad…</span>
+  </div>
+
+  <!-- ── Calendario ──────────────────────────────────────────── -->
+  <div class="cal-grid-wrap" *ngIf="!cargando">
+
+    <!-- Nombres de días -->
+    <div class="cal-dias-semana">
+      <span *ngFor="let d of DIAS_SEMANA" class="cal-dia-nombre">{{ d }}</span>
+    </div>
+
+    <!-- Grid de días -->
+    <div class="cal-grid">
+      <div
+        *ngFor="let dia of diasDelMes"
+        class="cal-celda"
+        [class.cal-celda--vacia]="!dia"
+        [class.cal-celda--pasado]="dia && esPasado(dia)"
+        [class.cal-celda--bloqueado]="dia && esBloqueado(dia)"
+        [class.cal-celda--disponible]="dia && !esBloqueado(dia) && !esPasado(dia)"
+        [class.cal-celda--inicio]="dia && esInicio(dia)"
+        [class.cal-celda--fin]="dia && esFin(dia)"
+        [class.cal-celda--rango]="dia && enRango(dia)"
+        [class.cal-celda--hoy]="dia && esHoy(dia)"
+        (click)="seleccionarDia(dia)"
+        [attr.title]="dia && esBloqueado(dia) ? 'No disponible' : dia && esPasado(dia) ? 'Fecha pasada' : ''"
+      >
+        <span *ngIf="dia" class="cal-numero">{{ dia.getDate() }}</span>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ── Leyenda ──────────────────────────────────────────────── -->
+  <div class="cal-leyenda" *ngIf="!cargando">
+    <div class="leyenda-item">
+      <span class="leyenda-dot leyenda-dot--disponible"></span>
+      <span>Disponible</span>
+    </div>
+    <div class="leyenda-item">
+      <span class="leyenda-dot leyenda-dot--bloqueado"></span>
+      <span>No disponible</span>
+    </div>
+    <div class="leyenda-item">
+      <span class="leyenda-dot leyenda-dot--seleccionado"></span>
+      <span>Seleccionado</span>
+    </div>
+  </div>
+
+  <!-- ── Selección activa ─────────────────────────────────────── -->
+  <div class="cal-seleccion" *ngIf="fechaInicio && !cargando">
+    <div class="cal-seleccion__rango">
+      <svg viewBox="0 0 16 16" fill="none" class="cal-seleccion__icon">
+        <rect x="2" y="2" width="12" height="12" rx="2" stroke="currentColor" stroke-width="1.4"/>
+        <path d="M5 1v2M11 1v2M2 6h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+      </svg>
+      <span>{{ rangoLabel }}</span>
+      <span class="cal-seleccion__noches" *ngIf="noches > 0">
+        · {{ noches }} noche{{ noches !== 1 ? 's' : '' }}
+      </span>
+    </div>
+    <button type="button" class="cal-seleccion__limpiar" (click)="limpiarSeleccion()">
+      <svg viewBox="0 0 16 16" fill="none"><path d="M3 3l10 10M13 3L3 13" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"/></svg>
+    </button>
+  </div>
+
+  <!-- ── Error ────────────────────────────────────────────────── -->
+  <div class="cal-error" *ngIf="error">
+    <svg viewBox="0 0 16 16" fill="none"><circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4"/><path d="M8 5v3M8 10h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/></svg>
+    {{ error }}
+  </div>
+
+</div>

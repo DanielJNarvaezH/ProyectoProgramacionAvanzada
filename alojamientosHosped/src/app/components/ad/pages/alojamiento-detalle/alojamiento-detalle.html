@@ -246,6 +246,11 @@
 
       <!-- ── Columna derecha: caja de precio ────────────────────────────── -->
       <aside class="detalle-aside">
+        <!-- RESERV-3: Calendario de disponibilidad -->
+        <app-calendario-disponibilidad
+          [lodgingId]="alojamiento.id!"
+          (rangoSeleccionado)="onRangoSeleccionado($event)">
+        </app-calendario-disponibilidad>
         <div class="precio-box">
           <div class="precio-box__precio">
             <span class="precio-box__valor">${{ alojamiento.pricePerNight | peso }}</span>
