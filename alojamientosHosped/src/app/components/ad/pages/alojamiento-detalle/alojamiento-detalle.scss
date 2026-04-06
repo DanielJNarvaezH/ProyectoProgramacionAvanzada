@@ -764,3 +764,140 @@ $shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
   &--activo i  { color: #16a34a; }
   &--inactivo i { color: #94a3b8; }
 }
+// ── RESERV-4: Formulario de solicitud de reserva ─────────────────────────────
+
+// Campo número de huéspedes
+.reserva-campo {
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  margin-bottom: 1rem;
+
+  &__label {
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: #374151;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+  }
+
+  &__stepper {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+  }
+
+  &__hint {
+    font-size: 0.75rem;
+    color: #9ca3af;
+  }
+}
+
+// Stepper +/-
+.stepper__btn {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  border: 1.5px solid #d1d5db;
+  background: #fff;
+  color: #374151;
+  font-size: 0.8rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: border-color 0.15s, background 0.15s;
+
+  &:hover:not(:disabled) {
+    border-color: #6366f1;
+    color: #6366f1;
+  }
+
+  &:disabled {
+    opacity: 0.4;
+    cursor: not-allowed;
+  }
+}
+
+.stepper__valor {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #1e293b;
+  min-width: 24px;
+  text-align: center;
+}
+
+// Resumen de precio
+.reserva-resumen {
+  background: #f8f9fb;
+  border-radius: 8px;
+  padding: 0.75rem 1rem;
+  margin-bottom: 1rem;
+
+  &__fila {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: #374151;
+    padding: 0.2rem 0;
+
+    &--total {
+      font-size: 1rem;
+      color: #1e293b;
+      padding-top: 0.4rem;
+    }
+  }
+}
+
+// Hint "selecciona fechas"
+.reserva-hint {
+  font-size: 0.8rem;
+  color: #9ca3af;
+  text-align: center;
+  margin-bottom: 1rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+}
+
+// Error al reservar
+.reserva-error {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  background: #fef2f2;
+  border: 1px solid #fca5a5;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  color: #dc2626;
+  font-size: 0.8rem;
+  margin-bottom: 0.75rem;
+}
+
+// Confirmación exitosa
+.reserva-ok {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.4rem;
+  background: #f0fdf4;
+  border: 1px solid #86efac;
+  border-radius: 8px;
+  padding: 0.6rem 0.75rem;
+  color: #16a34a;
+  font-size: 0.8rem;
+  margin-bottom: 0.75rem;
+}
+
+// Advertencia capacidad
+.reserva-warn {
+  font-size: 0.78rem;
+  color: #d97706;
+  text-align: center;
+  margin-top: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.3rem;
+}

@@ -267,20 +267,88 @@
             <span>{{ promedioLabel }} · {{ totalResenasLabel }}</span>
           </div>
           <hr class="divider" />
-          <ul class="precio-box__detalles" role="list">
-            <li>
-              <span><i class="fa-solid fa-users"></i> Capacidad</span>
-              <strong>{{ alojamiento.maxCapacity }} huéspedes</strong>
-            </li>
-            <li>
-              <span><i class="fa-solid fa-location-dot"></i> Ciudad</span>
-              <strong>{{ alojamiento.city }}</strong>
-            </li>
-          </ul>
-          <button class="btn-reservar" disabled title="Disponible próximamente">
-            <i class="fa-solid fa-calendar-check"></i>
-            Reservar (próximamente)
+
+          <!-- RESERV-4: Número de huéspedes -->
+          <div class="reserva-campo">
+            <label class="reserva-campo__label">
+              <i class="fa-solid fa-users"></i>
+              Huéspedes
+            </label>
+            <div class="reserva-campo__stepper">
+              <button
+                type="button"
+                class="stepper__btn"
+                [disabled]="numGuests <= 1"
+                (click)="numGuests = numGuests - 1"
+                aria-label="Reducir huéspedes"
+              >
+                <i class="fa-solid fa-minus"></i>
+              </button>
+              <span class="stepper__valor">{{ numGuests }}</span>
+              <button
+                type="button"
+                class="stepper__btn"
+                [disabled]="numGuests >= alojamiento.maxCapacity"
+                (click)="numGuests = numGuests + 1"
+                aria-label="Aumentar huéspedes"
+              >
+                <i class="fa-solid fa-plus"></i>
+              </button>
+            </div>
+            <span class="reserva-campo__hint">
+              Máx. {{ alojamiento.maxCapacity }} huéspedes
+            </span>
+          </div>
+
+          <!-- RESERV-4: Resumen de precio en tiempo real -->
+          <div class="reserva-resumen" *ngIf="noches > 0">
+            <div class="reserva-resumen__fila">
+              <span>
+                ${{ alojamiento.pricePerNight | peso }} × {{ noches }} noche{{ noches !== 1 ? 's' : '' }}
+              </span>
+              <span>${{ precioTotal | peso }}</span>
+            </div>
+            <hr class="divider" />
+            <div class="reserva-resumen__fila reserva-resumen__fila--total">
+              <strong>Total</strong>
+              <strong>${{ precioTotal | peso }}</strong>
+            </div>
+          </div>
+
+          <!-- RESERV-4: Hint si no hay fechas seleccionadas -->
+          <p class="reserva-hint" *ngIf="noches === 0">
+            <i class="fa-regular fa-calendar"></i>
+            Selecciona las fechas en el calendario para ver el precio total
+          </p>
+
+          <!-- RESERV-4: Error al reservar -->
+          <div class="reserva-error" *ngIf="errorReserva">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span>{{ errorReserva }}</span>
+          </div>
+
+          <!-- RESERV-4: Confirmación exitosa -->
+          <div class="reserva-ok" *ngIf="reservaExitosa">
+            <i class="fa-solid fa-circle-check"></i>
+            <span>¡Reserva confirmada! Revisa tus reservas en tu perfil.</span>
+          </div>
+
+          <!-- RESERV-4: Botón Reservar -->
+          <button
+            class="btn-reservar"
+            [disabled]="!formularioValido || enviandoReserva"
+            (click)="solicitarReserva()"
+          >
+            <i *ngIf="enviandoReserva" class="fa-solid fa-spinner fa-spin"></i>
+            <i *ngIf="!enviandoReserva" class="fa-solid fa-calendar-check"></i>
+            {{ enviandoReserva ? 'Procesando...' : 'Reservar' }}
           </button>
+
+          <!-- Validación: capacidad excedida -->
+          <p class="reserva-warn" *ngIf="numGuests > alojamiento.maxCapacity">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+            El número de huéspedes excede la capacidad máxima
+          </p>
         </div>
       </aside>
 

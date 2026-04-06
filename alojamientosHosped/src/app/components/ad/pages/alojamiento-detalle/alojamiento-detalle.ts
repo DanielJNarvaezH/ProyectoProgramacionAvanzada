@@ -10,6 +10,7 @@ import { AlojamientoServicioService } from '../../../../../services/AlojamientoS
 import { AuthService }                from '../../../../../services/AuthService';
 import { MapService }                 from '../../../../../services/MapService';
 import { FavoritoService }            from '../../../../../services/FavoritoService'; // ALOJ-21
+import { ReservaService }             from '../../../../../services/ReservaService';  // RESERV-4
 
 import { Alojamiento, Imagen, Comentario, AlojamientoServicio } from '../../../../models';
 
@@ -65,7 +66,8 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     private alojamientoServicioSvc:   AlojamientoServicioService,
     private authService:              AuthService,
     private mapService:               MapService,
-    private favoritoService:          FavoritoService  // ALOJ-21
+    private favoritoService:          FavoritoService,  // ALOJ-21
+    private reservaService:           ReservaService    // RESERV-4
   ) {}
 
   ngOnInit(): void {
@@ -94,8 +96,76 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
 
   rangoReserva: { startDate: string; endDate: string } | null = null;
 
+  // ── RESERV-4: Formulario de solicitud de reserva ──────────────
+  numGuests:       number = 1;      // número de huéspedes seleccionado
+  enviandoReserva: boolean = false; // spinner del botón Reservar
+  errorReserva:    string  = '';    // mensaje de error al reservar
+  reservaExitosa:  boolean = false; // confirmación tras reservar
+
   onRangoSeleccionado(rango: { startDate: string; endDate: string }): void {
-    this.rangoReserva = rango;
+    this.rangoReserva   = rango;
+    this.errorReserva   = '';
+    this.reservaExitosa = false;
+  }
+
+  // ── RESERV-4: Cálculo de precio en tiempo real ────────────────
+
+  /** Número de noches entre las fechas seleccionadas */
+  get noches(): number {
+    if (!this.rangoReserva) return 0;
+    const inicio = new Date(this.rangoReserva.startDate + 'T00:00:00');
+    const fin    = new Date(this.rangoReserva.endDate   + 'T00:00:00');
+    const diff   = fin.getTime() - inicio.getTime();
+    return Math.max(0, Math.round(diff / (1000 * 60 * 60 * 24)));
+  }
+
+  /** Precio total calculado en tiempo real */
+  get precioTotal(): number {
+    if (!this.alojamiento || this.noches === 0) return 0;
+    return this.noches * this.alojamiento.pricePerNight;
+  }
+
+  /** Validaciones del formulario antes de enviar */
+  get formularioValido(): boolean {
+    return !!this.rangoReserva
+      && this.noches >= 1
+      && !!this.alojamiento
+      && this.numGuests >= 1
+      && this.numGuests <= this.alojamiento.maxCapacity;
+  }
+
+  /** Enviar la solicitud de reserva — RESERV-4 */
+  solicitarReserva(): void {
+    if (!this.formularioValido || !this.alojamiento || !this.rangoReserva) return;
+
+    const usuario = this.authService.getUsuario();
+    if (!usuario?.id) return;
+
+    this.enviandoReserva = true;
+    this.errorReserva    = '';
+    this.reservaExitosa  = false;
+
+    this.reservaService.create({
+      guestId:    usuario.id,
+      lodgingId:  this.alojamiento.id!,
+      startDate:  this.rangoReserva.startDate,
+      endDate:    this.rangoReserva.endDate,
+      numGuests:  this.numGuests,
+      totalPrice: this.precioTotal,
+      status:     'CONFIRMADA'
+    }).pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          this.enviandoReserva = false;
+          this.reservaExitosa  = true;
+          this.rangoReserva    = null;
+          this.numGuests       = 1;
+        },
+        error: (err: Error) => {
+          this.enviandoReserva = false;
+          this.errorReserva    = err.message || 'No se pudo completar la reserva.';
+        }
+      });
   }
 
   // ── Navegación prev/next ─────────────────────────────────────────
