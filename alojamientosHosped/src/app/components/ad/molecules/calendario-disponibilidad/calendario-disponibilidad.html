@@ -63,10 +63,6 @@
   <!-- ── Leyenda ──────────────────────────────────────────────── -->
   <div class="cal-leyenda" *ngIf="!cargando">
     <div class="leyenda-item">
-      <span class="leyenda-dot leyenda-dot--disponible"></span>
-      <span>Disponible</span>
-    </div>
-    <div class="leyenda-item">
       <span class="leyenda-dot leyenda-dot--bloqueado"></span>
       <span>No disponible</span>
     </div>
@@ -75,6 +71,15 @@
       <span>Seleccionado</span>
     </div>
   </div>
+
+  <!-- ── Hint mínimo 1 noche ──────────────────────────────────── -->
+  <p class="cal-hint" *ngIf="!cargando">
+    <svg viewBox="0 0 16 16" fill="none" class="cal-hint__icon">
+      <circle cx="8" cy="8" r="6" stroke="currentColor" stroke-width="1.4"/>
+      <path d="M8 7v4M8 5.5h.01" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"/>
+    </svg>
+    Mínimo 1 noche — selecciona check-in y luego check-out
+  </p>
 
   <!-- ── Selección activa ─────────────────────────────────────── -->
   <div class="cal-seleccion" *ngIf="fechaInicio && !cargando">

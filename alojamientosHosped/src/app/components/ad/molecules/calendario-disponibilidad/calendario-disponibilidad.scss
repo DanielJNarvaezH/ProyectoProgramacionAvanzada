@@ -221,9 +221,25 @@ $radius-sm:  8px;
   height: 12px;
   border-radius: 3px;
 
-  &--disponible  { background: $green-lt; border: 1.5px solid $green; }
-  &--bloqueado   { background: $red-lt;   border: 1.5px solid $red; }
+  &--bloqueado    { background: $red-lt;  border: 1.5px solid $red; }
   &--seleccionado { background: $primary; }
+}
+
+// ── Hint mínimo 1 noche ───────────────────────────────────────────
+.cal-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  color: $gray-400;
+  margin: 4px 0 0;
+
+  &__icon {
+    width: 13px;
+    height: 13px;
+    flex-shrink: 0;
+    color: $gray-400;
+  }
 }
 
 // ── Selección activa ──────────────────────────────────────────────

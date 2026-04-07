@@ -8,12 +8,18 @@ import { ReservaService } from '../../../../../services/ReservaService';
 import { Reserva } from '../../../../models/reserva.model';
 
 /**
- * CalendarioDisponibilidadComponent — RESERV-3
+ * CalendarioDisponibilidadComponent — RESERV-3 / RESERV-5
  *
  * Muestra un calendario interactivo donde el usuario puede:
  * - Ver fechas bloqueadas (ya reservadas) en rojo
  * - Ver fechas disponibles en verde
  * - Seleccionar rango de fechas para una nueva reserva
+ *
+ * RESERV-5: Validaciones de fechas en frontend:
+ * - No se pueden seleccionar fechas pasadas (check-in ni check-out)
+ * - check-out debe ser estrictamente posterior al check-in (mín. 1 noche)
+ * - Si el usuario selecciona el mismo día dos veces se muestra error claro
+ * - Si el rango reordenado deja el check-in en el pasado se corrige con error
  *
  * Uso:
  *   <app-calendario-disponibilidad
@@ -33,6 +39,9 @@ export class CalendarioDisponibilidadComponent implements OnInit, OnChanges, OnD
 
   /** Emite { startDate, endDate } en formato yyyy-MM-dd cuando el usuario selecciona un rango */
   @Output() rangoSeleccionado = new EventEmitter<{ startDate: string; endDate: string }>();
+
+  /** Emite cuando el usuario cancela/limpia la selección del calendario */
+  @Output() rangoCancelado = new EventEmitter<void>();
 
   // Estado
   cargando     = false;
@@ -166,27 +175,50 @@ export class CalendarioDisponibilidadComponent implements OnInit, OnChanges, OnD
     if (!dia || this.esBloqueado(dia) || this.esPasado(dia)) return;
 
     if (!this.fechaInicio || (this.fechaInicio && this.fechaFin)) {
-      // Primera selección o reinicio
+      // Primera selección o reinicio — solo check-in
       this.fechaInicio = dia;
       this.fechaFin    = null;
+      this.error       = '';
     } else {
-      // Segunda selección
-      if (dia < this.fechaInicio) {
-        this.fechaFin    = this.fechaInicio;
-        this.fechaInicio = dia;
-      } else {
-        this.fechaFin = dia;
+      // Segunda selección — check-out
+
+      // RESERV-5: check-out debe ser estrictamente posterior al check-in (mín. 1 noche)
+      if (this.toYYYYMMDD(dia) === this.toYYYYMMDD(this.fechaInicio)) {
+        this.error = 'El check-out debe ser un día diferente al check-in (mínimo 1 noche).';
+        return;
       }
 
-      // Verificar que no haya fechas bloqueadas en el rango
-      if (this.hayBloqueadosEnRango(this.fechaInicio, this.fechaFin)) {
+      // Ordenar el rango si el usuario seleccionó en orden inverso
+      let inicio: Date;
+      let fin:    Date;
+      if (dia < this.fechaInicio) {
+        inicio = dia;
+        fin    = this.fechaInicio;
+      } else {
+        inicio = this.fechaInicio;
+        fin    = dia;
+      }
+
+      // RESERV-5: verificar que check-in no sea pasado (edge case al reordenar)
+      if (this.esPasado(inicio)) {
+        this.error       = 'La fecha de check-in no puede ser anterior a hoy.';
+        this.fechaInicio = dia;
+        this.fechaFin    = null;
+        return;
+      }
+
+      // Verificar que no haya fechas bloqueadas dentro del rango
+      if (this.hayBloqueadosEnRango(inicio, fin)) {
         this.error       = 'El rango seleccionado incluye fechas no disponibles.';
         this.fechaInicio = dia;
         this.fechaFin    = null;
         return;
       }
 
-      this.error = '';
+      // Rango válido
+      this.fechaInicio = inicio;
+      this.fechaFin    = fin;
+      this.error       = '';
       this.rangoSeleccionado.emit({
         startDate: this.toYYYYMMDD(this.fechaInicio),
         endDate:   this.toYYYYMMDD(this.fechaFin)
@@ -198,6 +230,7 @@ export class CalendarioDisponibilidadComponent implements OnInit, OnChanges, OnD
     this.fechaInicio = null;
     this.fechaFin    = null;
     this.error       = '';
+    this.rangoCancelado.emit();
   }
 
   // ── Helpers de estado de día ──────────────────────────────────

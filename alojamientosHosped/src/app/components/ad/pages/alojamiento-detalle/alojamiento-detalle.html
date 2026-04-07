@@ -249,7 +249,8 @@
         <!-- RESERV-3: Calendario de disponibilidad -->
         <app-calendario-disponibilidad
           [lodgingId]="alojamiento.id!"
-          (rangoSeleccionado)="onRangoSeleccionado($event)">
+          (rangoSeleccionado)="onRangoSeleccionado($event)"
+          (rangoCancelado)="onRangoCancelado()">
         </app-calendario-disponibilidad>
         <div class="precio-box">
           <div class="precio-box__precio">

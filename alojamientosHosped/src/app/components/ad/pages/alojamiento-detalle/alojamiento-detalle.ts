@@ -108,6 +108,12 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     this.reservaExitosa = false;
   }
 
+  onRangoCancelado(): void {
+    this.rangoReserva   = null;
+    this.errorReserva   = '';
+    this.reservaExitosa = false;
+  }
+
   // ── RESERV-4: Cálculo de precio en tiempo real ────────────────
 
   /** Número de noches entre las fechas seleccionadas */
