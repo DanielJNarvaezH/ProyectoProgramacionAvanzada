@@ -51,6 +51,17 @@
       <span>Favoritos</span>
     </button>
 
+    <!-- RESERV-8: mis reservas solo para usuarios USUARIO -->
+    <button
+      *ngIf="esUsuario"
+      (click)="irAMisReservas()"
+      class="navbar__reservas-btn"
+      title="Mis reservas"
+    >
+      <i class="fa-regular fa-calendar-check"></i>
+      <span>Mis reservas</span>
+    </button>
+
     <button
       (click)="irAlPerfil()"
       class="navbar__profile-btn"

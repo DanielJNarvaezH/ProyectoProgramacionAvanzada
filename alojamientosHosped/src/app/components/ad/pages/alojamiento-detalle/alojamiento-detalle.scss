@@ -888,6 +888,16 @@ $shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
   color: #16a34a;
   font-size: 0.8rem;
   margin-bottom: 0.75rem;
+
+  &__link {
+    color: #15803d;
+    font-weight: 600;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-left: 4px;
+
+    &:hover { color: #166534; }
+  }
 }
 
 // Advertencia capacidad

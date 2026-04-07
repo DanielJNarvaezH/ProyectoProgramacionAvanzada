@@ -331,7 +331,9 @@
           <!-- RESERV-4: Confirmación exitosa -->
           <div class="reserva-ok" *ngIf="reservaExitosa">
             <i class="fa-solid fa-circle-check"></i>
-            <span>¡Reserva confirmada! Revisa tus reservas en tu perfil.</span>
+            <span>¡Reserva confirmada!
+              <a (click)="router.navigate(['/mis-reservas'])" class="reserva-ok__link">Ver mis reservas</a>
+            </span>
           </div>
 
           <!-- RESERV-4: Botón Reservar -->

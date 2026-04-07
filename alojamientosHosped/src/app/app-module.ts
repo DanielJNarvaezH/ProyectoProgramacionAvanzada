@@ -56,6 +56,7 @@ import { AlojamientoDetallePageComponent } from './components/ad/pages/alojamien
 import { AlojamientoCrearPageComponent }   from './components/ad/pages/alojamiento-crear/alojamiento-crear';
 import { PanelGestionPageComponent }       from './components/ad/pages/panel-gestion/panel-gestion'; // ALOJ-9
 import { MisFavoritosPageComponent }       from './components/ad/pages/mis-favoritos/mis-favoritos';  // ALOJ-21
+import { MisReservasPageComponent }        from './components/ad/pages/mis-reservas/mis-reservas';    // RESERV-8
 
 // -- Pipes
 import { SafeUrlPipe }    from './pipes/safe-url.pipe';
@@ -104,6 +105,7 @@ import { LazyImgDirective } from './directives/lazy-img.directive';
     AlojamientoEditarPageComponent,  // ALOJ-8
     PanelGestionPageComponent,       // ALOJ-9
     MisFavoritosPageComponent,       // ALOJ-21
+    MisReservasPageComponent,        // RESERV-8
     PerfilPageComponent,
     // Pipes
     SafeUrlPipe,

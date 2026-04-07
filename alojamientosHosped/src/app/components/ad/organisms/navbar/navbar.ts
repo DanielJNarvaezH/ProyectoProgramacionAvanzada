@@ -9,6 +9,8 @@ import { AuthService } from '../../../../../services/AuthService';
  * - Logo con enlace a /alojamientos
  * - Botón "Mi panel" visible SOLO para anfitriones (ALOJ-9)
  * - Botón "Publicar" visible SOLO para anfitriones (ALOJ-7)
+ * - Botón "Favoritos" visible SOLO para huéspedes (ALOJ-21)
+ * - Botón "Mis reservas" visible SOLO para huéspedes (RESERV-8)
  * - Botón de perfil para todos los usuarios autenticados
  */
 @Component({
@@ -56,5 +58,10 @@ export class NavbarComponent {
   /** ALOJ-21: navega a la vista de favoritos */
   irAFavoritos(): void {
     this.router.navigate(['/mis-favoritos']);
+  }
+
+  /** RESERV-8: navega al historial de reservas del huésped */
+  irAMisReservas(): void {
+    this.router.navigate(['/mis-reservas']);
   }
 }

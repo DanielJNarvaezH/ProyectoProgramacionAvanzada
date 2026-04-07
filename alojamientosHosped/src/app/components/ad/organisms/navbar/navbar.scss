@@ -149,4 +149,26 @@
 
     i { font-size: 1rem; }
   }
+
+  // ── Botón mis reservas — RESERV-8 ───────────────────────────────
+  &__reservas-btn {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0.4rem 0.75rem;
+    border-radius: 9999px;
+    transition: background-color 0.2s;
+    color: var(--color-primary);
+    font-size: 0.875rem;
+    font-weight: 500;
+
+    &:hover {
+      background-color: #f5f3ff;
+    }
+
+    i { font-size: 1rem; }
+  }
 }
