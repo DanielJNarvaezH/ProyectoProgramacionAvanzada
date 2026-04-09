@@ -1,4 +1,4 @@
-// mis-reservas.scss — RESERV-8
+// mis-reservas.scss — RESERV-8 / RESERV-11
 
 // ── Variables ─────────────────────────────────────────────────────
 $primary:     #7C3AED;
@@ -10,17 +10,20 @@ $gray-400:    #94A3B8;
 $gray-600:    #475569;
 $gray-800:    #1E293B;
 
-// Estados
-$success:     #16A34A;
+// Estados — RESERV-11
+$success:     #16A34A;   // CONFIRMADA — verde
 $success-lt:  #F0FDF4;
 $success-bd:  #BBF7D0;
-$warning:     #D97706;
+
+$warning:     #D97706;   // PENDIENTE  — amarillo
 $warning-lt:  #FFFBEB;
 $warning-bd:  #FDE68A;
-$danger:      #DC2626;
+
+$danger:      #DC2626;   // CANCELADA  — rojo
 $danger-lt:   #FEF2F2;
 $danger-bd:   #FECACA;
-$info:        #2563EB;
+
+$info:        #2563EB;   // COMPLETADA — azul
 $info-lt:     #EFF6FF;
 $info-bd:     #BFDBFE;
 
@@ -261,13 +264,13 @@ $info-bd:     #BFDBFE;
 
   &:hover { box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
 
-  // Borde lateral de color según estado
+  // Borde lateral de color según estado — RESERV-11
   border-left: 4px solid $gray-200;
 
-  &--success { border-left-color: $success; }
-  &--warning { border-left-color: $warning; }
-  &--danger  { border-left-color: $danger; }
-  &--info    { border-left-color: $info; }
+  &--success { border-left-color: $success; }   // CONFIRMADA — verde
+  &--warning { border-left-color: $warning; }   // PENDIENTE  — amarillo
+  &--danger  { border-left-color: $danger; }    // CANCELADA  — rojo
+  &--info    { border-left-color: $info; }      // COMPLETADA — azul
 
   &__badge {
     align-self: flex-start;
@@ -363,12 +366,33 @@ $info-bd:     #BFDBFE;
   }
 }
 
-// ── Badges de estado ──────────────────────────────────────────────
+// ── Badges de estado — RESERV-11 ──────────────────────────────────
+// CONFIRMADA → verde  |  CANCELADA → rojo  |  COMPLETADA → azul
+// PENDIENTE  → amarillo (estado extra, fuera del alcance de RESERV-11)
 .reserva-badge {
-  &--success { background: $success-lt; color: $success; border: 1px solid $success-bd; }
-  &--warning { background: $warning-lt; color: $warning; border: 1px solid $warning-bd; }
-  &--danger  { background: $danger-lt;  color: $danger;  border: 1px solid $danger-bd;  }
-  &--info    { background: $info-lt;    color: $info;    border: 1px solid $info-bd;    }
+  &--success {
+    background: $success-lt;
+    color: $success;
+    border: 1px solid $success-bd;
+  }
+
+  &--warning {
+    background: $warning-lt;
+    color: $warning;
+    border: 1px solid $warning-bd;
+  }
+
+  &--danger {
+    background: $danger-lt;
+    color: $danger;
+    border: 1px solid $danger-bd;
+  }
+
+  &--info {
+    background: $info-lt;
+    color: $info;
+    border: 1px solid $info-bd;
+  }
 }
 
 // ── Responsive ────────────────────────────────────────────────────
