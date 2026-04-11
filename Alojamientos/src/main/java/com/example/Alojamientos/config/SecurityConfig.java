@@ -29,6 +29,7 @@ public class SecurityConfig {
 
     private final JwtAuthenticationFilter jwtAuthenticationFilter;
     private final UserDetailsService userDetailsService;
+    private final SecurityHeadersFilter securityHeadersFilter;
 
     private static final String[] SWAGGER_WHITELIST = {
             "/api-docs/**",
@@ -79,9 +80,9 @@ public class SecurityConfig {
                         )
                         // Evita que el navegador detecte el tipo MIME automáticamente
                         .contentTypeOptions(contentType -> {})
-                        // Referrer policy: no enviar información de referencia
+                        // Referrer policy — consistente con SecurityHeadersFilter
                         .referrerPolicy(referrer -> referrer
-                                .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.NO_REFERRER)
+                                .policy(ReferrerPolicyHeaderWriter.ReferrerPolicy.STRICT_ORIGIN_WHEN_CROSS_ORIGIN)
                         )
                 )
 
@@ -140,6 +141,7 @@ public class SecurityConfig {
                         .anyRequest().authenticated()
                 )
                 .authenticationProvider(authenticationProvider())
+                .addFilterBefore(securityHeadersFilter, UsernamePasswordAuthenticationFilter.class)
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
