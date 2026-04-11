@@ -55,7 +55,9 @@ export interface CancelarReservaRequest {
 }
 
 /**
- * Helpers de estado — utilidades para trabajar con EstadoReserva en la UI
+ * Helpers de estado — RESERV-11
+ *
+ * Labels y clases CSS para los badges visuales de estado en la UI.
  */
 export const ESTADO_RESERVA_LABEL: Record<EstadoReserva, string> = {
   PENDIENTE:  'Pendiente',
@@ -64,9 +66,19 @@ export const ESTADO_RESERVA_LABEL: Record<EstadoReserva, string> = {
   COMPLETADA: 'Completada'
 };
 
+/**
+ * RESERV-11 — Estados visuales (badges de colores):
+ *   CONFIRMADA → 'success' (verde)
+ *   CANCELADA  → 'danger'  (rojo)
+ *   COMPLETADA → 'info'    (azul)
+ *   PENDIENTE  → 'warning' (amarillo)
+ *
+ * Los valores corresponden a los modificadores CSS:
+ *   .reserva-badge--{valor}  y  .reserva-card--{valor}
+ */
 export const ESTADO_RESERVA_COLOR: Record<EstadoReserva, string> = {
   PENDIENTE:  'warning',   // amarillo
-  CONFIRMADA: 'success',   // verde
-  CANCELADA:  'danger',    // rojo
-  COMPLETADA: 'info'       // azul
+  CONFIRMADA: 'success',   // verde  ✅ RESERV-11
+  CANCELADA:  'danger',    // rojo   ✅ RESERV-11
+  COMPLETADA: 'info'       // azul   ✅ RESERV-11
 };
