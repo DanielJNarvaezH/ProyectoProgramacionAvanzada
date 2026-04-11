@@ -1,29 +1,25 @@
-<!-- ─────────────────────────────────────────────────────────────────────────
-     PanelGestionPageComponent — ALOJ-9 + Fix-4
-     Fix-4: muestra activos e inactivos, botón reactivar en inactivos
-     ───────────────────────────────────────────────────────────────────────── -->
+﻿<!-- PanelGestionPageComponent â€” ALOJ-9 + Fix-4 + RESERV-9 -->
 
 <app-navbar></app-navbar>
 
 <main class="panel-page">
 
-  <!-- ── Header ──────────────────────────────────────────────────────────── -->
+  <!-- â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <section class="panel-header">
     <div class="panel-header__text">
       <h1 class="panel-header__title">
-        Hola, {{ nombreAnfitrion }}
+        Hola, {{ nombreAnfitrionLabel }}
         <span class="panel-header__wave">👋</span>
       </h1>
-      <p class="panel-header__subtitle">Administra tus alojamientos desde aquí</p>
+      <p class="panel-header__subtitle">Administra tus alojamientos y reservas</p>
     </div>
-
     <button class="btn-crear" (click)="irACrear()" title="Publicar nuevo alojamiento">
       <i class="fa-solid fa-plus"></i>
       <span>Nuevo alojamiento</span>
     </button>
   </section>
 
-  <!-- ── Métricas ─────────────────────────────────────────────────────────── -->
+  <!-- â”€â”€ MÃ©tricas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <section class="metricas" *ngIf="!cargando && !error">
     <div class="metrica-card">
       <div class="metrica-card__icon">
@@ -31,22 +27,17 @@
       </div>
       <div class="metrica-card__info">
         <span class="metrica-card__valor">{{ totalActivos }}</span>
-        <span class="metrica-card__label">
-          Activo{{ totalActivos !== 1 ? 's' : '' }}
-        </span>
+        <span class="metrica-card__label">Activo{{ totalActivos !== 1 ? 's' : '' }}</span>
       </div>
     </div>
 
-    <!-- Fix-4: métrica de inactivos solo si hay alguno -->
     <div class="metrica-card" *ngIf="totalInactivos > 0">
       <div class="metrica-card__icon metrica-card__icon--gray">
         <i class="fa-solid fa-house-circle-xmark"></i>
       </div>
       <div class="metrica-card__info">
         <span class="metrica-card__valor">{{ totalInactivos }}</span>
-        <span class="metrica-card__label">
-          Inactivo{{ totalInactivos !== 1 ? 's' : '' }}
-        </span>
+        <span class="metrica-card__label">Inactivo{{ totalInactivos !== 1 ? 's' : '' }}</span>
       </div>
     </div>
 
@@ -59,157 +50,292 @@
         <span class="metrica-card__label">Precio promedio / noche</span>
       </div>
     </div>
+
+    <!-- RESERV-9: mÃ©tricas de reservas -->
+    <div class="metrica-card" *ngIf="reservas.length > 0">
+      <div class="metrica-card__icon metrica-card__icon--purple">
+        <i class="fa-solid fa-calendar-check"></i>
+      </div>
+      <div class="metrica-card__info">
+        <span class="metrica-card__valor">{{ totalConfirmadas }}</span>
+        <span class="metrica-card__label">Reserva{{ totalConfirmadas !== 1 ? 's' : '' }} confirmada{{ totalConfirmadas !== 1 ? 's' : '' }}</span>
+      </div>
+    </div>
   </section>
 
-  <!-- ── Toast de éxito ───────────────────────────────────────────────────── -->
+  <!-- â”€â”€ Toast Ã©xito â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
   <div class="toast-success" *ngIf="successMessage" role="alert">
     <i class="fa-solid fa-circle-check"></i>
     <span>{{ successMessage }}</span>
   </div>
 
-  <!-- ── Loading skeleton ──────────────────────────────────────────────────── -->
-  <section *ngIf="cargando" class="panel-grid" aria-label="Cargando alojamientos">
-    <div *ngFor="let item of [1,2,3,4]; let idx = index" class="skeleton-card">
-      <div class="skeleton-card__img skeleton-pulse"></div>
-      <div class="skeleton-card__body">
-        <div class="skeleton-line skeleton-pulse" style="width: 65%"></div>
-        <div class="skeleton-line skeleton-pulse" style="width: 45%"></div>
-        <div class="skeleton-line skeleton-pulse" style="width: 80%"></div>
-      </div>
-      <div class="skeleton-card__footer skeleton-pulse"></div>
-    </div>
-  </section>
-
-  <!-- ── Error state ──────────────────────────────────────────────────────── -->
-  <section *ngIf="!cargando && error" class="panel-empty">
-    <div class="panel-empty__icon panel-empty__icon--error">
-      <i class="fa-solid fa-triangle-exclamation"></i>
-    </div>
-    <h2 class="panel-empty__title">No pudimos cargar tus alojamientos</h2>
-    <p class="panel-empty__msg">{{ error }}</p>
-    <button (click)="cargarAlojamientos()" class="btn-retry">
-      <i class="fa-solid fa-rotate-right"></i>
-      Intentar de nuevo
-    </button>
-  </section>
-
-  <!-- ── Empty state ──────────────────────────────────────────────────────── -->
-  <section *ngIf="!cargando && !error && totalAlojamientos === 0" class="panel-empty">
-    <div class="panel-empty__icon">
-      <i class="fa-solid fa-house-circle-plus"></i>
-    </div>
-    <h2 class="panel-empty__title">Aún no tienes alojamientos</h2>
-    <p class="panel-empty__msg">
-      Publica tu primer alojamiento y comienza a recibir huéspedes.
-    </p>
-    <button class="btn-crear" (click)="irACrear()">
-      <i class="fa-solid fa-plus"></i>
-      Publicar mi primer alojamiento
-    </button>
-  </section>
-
-  <!-- ── Grid de alojamientos ─────────────────────────────────────────────── -->
-  <section
-    *ngIf="!cargando && !error && totalAlojamientos > 0"
-    class="panel-grid"
-    aria-label="Mis alojamientos"
-  >
-    <article
-      *ngFor="let aloj of alojamientos; trackBy: trackById"
-      class="aloj-card"
-      [class.aloj-card--inactivo]="!aloj.active"
-      (click)="irADetalle(aloj.id!)"
-      (keydown.enter)="irADetalle(aloj.id!)"
-      [attr.tabindex]="'0'"
-      role="button"
-      [attr.aria-label]="(aloj.active ? 'Ver detalle de ' : 'Alojamiento inactivo: ') + aloj.name"
+  <!-- â”€â”€ Tabs RESERV-9 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <div class="panel-tabs">
+    <button
+      type="button"
+      class="panel-tab"
+      [class.panel-tab--activo]="tabActivo === 'alojamientos'"
+      (click)="cambiarTab('alojamientos')"
     >
-      <!-- Imagen -->
-      <div class="aloj-card__img-wrap">
-        <img
-          appLazyImg
-          [appLazyImg]="aloj.mainImage || placeholderImg"
-          [alt]="'Foto de ' + aloj.name"
-          (error)="$any($event.target).src = placeholderImg"
-          class="aloj-card__img"
-          loading="lazy"
-        />
-        <!-- Fix-4: badge dinámico según estado -->
-        <span
-          class="aloj-card__badge"
-          [class.aloj-card__badge--activo]="aloj.active"
-          [class.aloj-card__badge--inactivo]="!aloj.active"
+      <i class="fa-solid fa-house"></i>
+      Mis alojamientos
+      <span class="tab-badge" *ngIf="totalAlojamientos > 0">{{ totalAlojamientos }}</span>
+    </button>
+    <button
+      type="button"
+      class="panel-tab"
+      [class.panel-tab--activo]="tabActivo === 'reservas'"
+      (click)="cambiarTab('reservas')"
+    >
+      <i class="fa-solid fa-calendar-alt"></i>
+      Reservas recibidas
+      <span class="tab-badge tab-badge--warning" *ngIf="totalPendientes > 0">{{ totalPendientes }}</span>
+    </button>
+  </div>
+
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       TAB: MIS ALOJAMIENTOS
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  <ng-container *ngIf="tabActivo === 'alojamientos'">
+
+    <!-- Loading skeleton -->
+    <section *ngIf="cargando" class="panel-grid" aria-label="Cargando alojamientos">
+      <div *ngFor="let item of [1,2,3,4]" class="skeleton-card">
+        <div class="skeleton-card__img skeleton-pulse"></div>
+        <div class="skeleton-card__body">
+          <div class="skeleton-line skeleton-pulse" style="width: 65%"></div>
+          <div class="skeleton-line skeleton-pulse" style="width: 45%"></div>
+          <div class="skeleton-line skeleton-pulse" style="width: 80%"></div>
+        </div>
+        <div class="skeleton-card__footer skeleton-pulse"></div>
+      </div>
+    </section>
+
+    <!-- Error -->
+    <section *ngIf="!cargando && error" class="panel-empty">
+      <div class="panel-empty__icon panel-empty__icon--error">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h2 class="panel-empty__title">No pudimos cargar tus alojamientos</h2>
+      <p class="panel-empty__msg">{{ error }}</p>
+      <button (click)="cargarAlojamientos()" class="btn-retry">
+        <i class="fa-solid fa-rotate-right"></i>
+        Intentar de nuevo
+      </button>
+    </section>
+
+    <!-- Empty -->
+    <section *ngIf="!cargando && !error && totalAlojamientos === 0" class="panel-empty">
+      <div class="panel-empty__icon">
+        <i class="fa-solid fa-house-circle-plus"></i>
+      </div>
+      <h2 class="panel-empty__title">Aún no tienes alojamientos</h2>
+      <p class="panel-empty__msg">Publica tu primer alojamiento y comienza a recibir huespedes.</p>
+      <button class="btn-crear" (click)="irACrear()">
+        <i class="fa-solid fa-plus"></i>
+        Publicar mi primer alojamiento
+      </button>
+    </section>
+
+    <!-- Grid de alojamientos -->
+    <section
+      *ngIf="!cargando && !error && totalAlojamientos > 0"
+      class="panel-grid"
+      aria-label="Mis alojamientos"
+    >
+      <article
+        *ngFor="let aloj of alojamientos; trackBy: trackById"
+        class="aloj-card"
+        [class.aloj-card--inactivo]="!aloj.active"
+        (click)="irADetalle(aloj.id!)"
+        (keydown.enter)="irADetalle(aloj.id!)"
+        [attr.tabindex]="'0'"
+        role="button"
+        [attr.aria-label]="(aloj.active ? 'Ver detalle de ' : 'Alojamiento inactivo: ') + aloj.name"
+      >
+        <div class="aloj-card__img-wrap">
+          <img
+            appLazyImg
+            [appLazyImg]="aloj.mainImage || placeholderImg"
+            [alt]="'Foto de ' + aloj.name"
+            (error)="$any($event.target).src = placeholderImg"
+            class="aloj-card__img"
+            loading="lazy"
+          />
+          <span
+            class="aloj-card__badge"
+            [class.aloj-card__badge--activo]="aloj.active"
+            [class.aloj-card__badge--inactivo]="!aloj.active"
+          >
+            <i class="fa-solid fa-circle"></i>
+            {{ aloj.active ? 'Activo' : 'Inactivo' }}
+          </span>
+        </div>
+
+        <div class="aloj-card__body">
+          <h3 class="aloj-card__nombre">{{ aloj.name }}</h3>
+          <p class="aloj-card__meta">
+            <i class="fa-solid fa-location-dot"></i> {{ aloj.city }}
+          </p>
+          <p class="aloj-card__meta">
+            <i class="fa-solid fa-users"></i> Hasta {{ aloj.maxCapacity }} huéspedes
+          </p>
+          <p class="aloj-card__precio">
+            <span class="aloj-card__precio-valor">${{ aloj.pricePerNight | peso }}</span>
+            <span class="aloj-card__precio-label"> / noche</span>
+          </p>
+        </div>
+
+        <div class="aloj-card__actions" (click)="$event.stopPropagation()">
+          <button
+            class="aloj-card__btn aloj-card__btn--edit"
+            (click)="irAEditar(aloj.id!)"
+            title="Editar alojamiento"
+          >
+            <i class="fa-solid fa-pen-to-square"></i>
+            <span>Editar</span>
+          </button>
+
+          <button
+            *ngIf="!aloj.active"
+            class="aloj-card__btn aloj-card__btn--reactivar"
+            (click)="reactivarAlojamiento($event, aloj)"
+            [disabled]="reactivando === aloj.id"
+          >
+            <i class="fa-solid fa-rotate-right" [class.fa-spin]="reactivando === aloj.id"></i>
+            <span>{{ reactivando === aloj.id ? 'Reactivando...' : 'Reactivar' }}</span>
+          </button>
+
+          <button
+            class="aloj-card__btn aloj-card__btn--delete"
+            (click)="abrirModalEliminar($event, aloj)"
+            title="Eliminar alojamiento"
+          >
+            <i class="fa-solid fa-trash"></i>
+            <span>Eliminar</span>
+          </button>
+        </div>
+      </article>
+    </section>
+
+  </ng-container>
+
+  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
+       TAB: RESERVAS RECIBIDAS â€” RESERV-9
+  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  <ng-container *ngIf="tabActivo === 'reservas'">
+
+    <!-- Loading -->
+    <div class="reservas-loading" *ngIf="cargandoReservas">
+      <div class="reservas-spinner"></div>
+      <span>Cargando reservasâ€¦</span>
+    </div>
+
+    <!-- Error -->
+    <section *ngIf="!cargandoReservas && errorReservas" class="panel-empty">
+      <div class="panel-empty__icon panel-empty__icon--error">
+        <i class="fa-solid fa-triangle-exclamation"></i>
+      </div>
+      <h2 class="panel-empty__title">{{ errorReservas }}</h2>
+      <button (click)="cargarReservas()" class="btn-retry">
+        <i class="fa-solid fa-rotate-right"></i> Intentar de nuevo
+      </button>
+    </section>
+
+    <ng-container *ngIf="!cargandoReservas && !errorReservas">
+
+      <!-- Filtros por estado -->
+      <div class="reservas-filtros">
+        <button
+          *ngFor="let estado of ESTADOS"
+          type="button"
+          class="estado-chip"
+          [class.estado-chip--activo]="filtroEstado === estado"
+          (click)="setFiltroEstado(estado)"
         >
-          <i class="fa-solid fa-circle"></i>
-          {{ aloj.active ? 'Activo' : 'Inactivo' }}
-        </span>
+          {{ getLabelEstado(estado) }}
+          <span class="estado-chip__count" *ngIf="estado === 'TODAS'">{{ totalReservas }}</span>
+        </button>
       </div>
 
-      <!-- Info -->
-      <div class="aloj-card__body">
-        <h3 class="aloj-card__nombre">{{ aloj.name }}</h3>
-
-        <p class="aloj-card__meta">
-          <i class="fa-solid fa-location-dot"></i>
-          {{ aloj.city }}
+      <!-- Empty -->
+      <section *ngIf="reservasFiltradas.length === 0" class="panel-empty">
+        <div class="panel-empty__icon">
+          <i class="fa-regular fa-calendar-xmark"></i>
+        </div>
+        <h2 class="panel-empty__title">
+          {{ filtroEstado === 'TODAS' ? 'Aún no tienes reservas' : 'Sin reservas ' + getLabelEstado(filtroEstado) }}
+        </h2>
+        <p class="panel-empty__msg" *ngIf="filtroEstado === 'TODAS'">
+          Las reservas de tus alojamientos aparecerán aquí
         </p>
+      </section>
 
-        <p class="aloj-card__meta">
-          <i class="fa-solid fa-users"></i>
-          Hasta {{ aloj.maxCapacity }} huéspedes
-        </p>
+      <!-- Lista de reservas -->
+      <div class="reservas-lista" *ngIf="reservasFiltradas.length > 0">
+        <article
+          *ngFor="let r of reservasFiltradas; trackBy: trackByReservaId"
+          class="reserva-card"
+          [class.reserva-card--pendiente]="r.status === 'PENDIENTE'"
+          [class.reserva-card--confirmada]="r.status === 'CONFIRMADA'"
+          [class.reserva-card--cancelada]="r.status === 'CANCELADA'"
+          [class.reserva-card--completada]="r.status === 'COMPLETADA'"
+        >
+          <!-- Badge estado -->
+          <div class="reserva-card__estado">
+            <span class="estado-badge estado-badge--{{ getColorEstado(r.status) }}">
+              <i class="fa-solid fa-circle"></i>
+              {{ ESTADO_LABEL[r.status] }}
+            </span>
+          </div>
 
-        <p class="aloj-card__precio">
-          <span class="aloj-card__precio-valor">${{ aloj.pricePerNight | peso }}</span>
-          <span class="aloj-card__precio-label"> / noche</span>
-        </p>
+          <!-- Info principal -->
+          <div class="reserva-card__info">
+            <h3 class="reserva-card__alojamiento">
+              <i class="fa-solid fa-house"></i>
+              {{ getNombreAlojamiento(r.lodgingId) }}
+            </h3>
+            <div class="reserva-card__fechas">
+              <span>
+                <i class="fa-regular fa-calendar"></i>
+                {{ formatearFecha(r.startDate) }} → {{ formatearFecha(r.endDate) }}
+              </span>
+              <span class="reserva-card__noches">
+                Â· {{ calcularNoches(r.startDate, r.endDate) }} noche{{ calcularNoches(r.startDate, r.endDate) !== 1 ? 's' : '' }}
+              </span>
+            </div>
+            <div class="reserva-card__meta">
+              <span>
+                <i class="fa-solid fa-users"></i>
+                {{ r.numGuests }} huésped{{ r.numGuests !== 1 ? 'es' : '' }}
+              </span>
+              <span class="reserva-card__precio">
+                <i class="fa-solid fa-coins"></i>
+                ${{ r.totalPrice.toLocaleString('es-CO') }}
+              </span>
+            </div>
+            <div class="reserva-card__cancelacion" *ngIf="r.status === 'CANCELADA' && r.cancelReason">
+              <i class="fa-solid fa-comment-slash"></i>
+              Motivo: {{ r.cancelReason }}
+            </div>
+          </div>
+
+        </article>
       </div>
 
-      <!-- Acciones CRUD -->
-      <div class="aloj-card__actions" (click)="$event.stopPropagation()">
-
-        <!-- Editar — siempre disponible -->
-        <button
-          class="aloj-card__btn aloj-card__btn--edit"
-          (click)="irAEditar(aloj.id!)"
-          title="Editar alojamiento"
-          [attr.aria-label]="'Editar ' + aloj.name"
-        >
-          <i class="fa-solid fa-pen-to-square"></i>
-          <span>Editar</span>
-        </button>
-
-        <!-- Fix-4: Reactivar — solo si inactivo -->
-        <button
-          *ngIf="!aloj.active"
-          class="aloj-card__btn aloj-card__btn--reactivar"
-          (click)="reactivarAlojamiento($event, aloj)"
-          [disabled]="reactivando === aloj.id"
-          title="Reactivar alojamiento"
-          [attr.aria-label]="'Reactivar ' + aloj.name"
-        >
-          <i class="fa-solid fa-rotate-right" [class.fa-spin]="reactivando === aloj.id"></i>
-          <span>{{ reactivando === aloj.id ? 'Reactivando...' : 'Reactivar' }}</span>
-        </button>
-
-        <!-- Eliminar — disponible para activos e inactivos -->
-        <button
-          class="aloj-card__btn aloj-card__btn--delete"
-          (click)="abrirModalEliminar($event, aloj)"
-          title="Eliminar alojamiento"
-          [attr.aria-label]="'Eliminar ' + aloj.name"
-        >
-          <i class="fa-solid fa-trash"></i>
-          <span>Eliminar</span>
-        </button>
-
+      <!-- Resumen ingresos -->
+      <div class="reservas-resumen" *ngIf="reservas.length > 0">
+        <i class="fa-solid fa-chart-line"></i>
+        Ingresos confirmados + completados:
+        <strong>${{ ingresosTotales }}</strong>
       </div>
-    </article>
-  </section>
+
+    </ng-container>
+
+  </ng-container>
 
 </main>
 
-<!-- fix6: modal extraído a molécula confirm-modal -->
 <app-confirm-modal
   [visible]="mostrarModal"
   [nombreElemento]="alojamientoAEliminar?.name || ''"

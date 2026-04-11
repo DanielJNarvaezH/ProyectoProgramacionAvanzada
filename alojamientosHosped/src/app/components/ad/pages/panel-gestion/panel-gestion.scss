@@ -519,4 +519,232 @@ $shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
 
   &:hover:not(:disabled) { background: #059669; }
   &:disabled { opacity: 0.6; cursor: not-allowed; }
+
+    // ── RESERV-9: Tabs ────────────────────────────────────────────────────────────
+  .panel-tabs {
+  display: flex;
+  gap: 4px;
+  margin-bottom: 24px;
+  border-bottom: 2px solid #e2d9f3;
+}
+
+  .panel-tab {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 10px 20px;
+    background: none;
+    border: none;
+    border-bottom: 3px solid transparent;
+    margin-bottom: -2px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #64748b;
+    cursor: pointer;
+    transition: color 0.2s, border-color 0.2s;
+
+    &:hover { color: #9B5CFF; }
+
+    &--activo {
+      color: #9B5CFF;
+      border-bottom-color: #9B5CFF;
+      font-weight: 700;
+    }
+  }
+
+  .tab-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    min-width: 20px;
+    height: 20px;
+    padding: 0 6px;
+    background: #9B5CFF;
+    color: white;
+    font-size: 11px;
+    font-weight: 700;
+    border-radius: 10px;
+
+    &--warning { background: #F59E0B; }
+  }
+
+  .metrica-card__icon--purple {
+    background: rgba(155, 92, 255, 0.1);
+    color: #9B5CFF;
+  }
+
+  .reservas-loading {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 48px;
+    font-size: 14px;
+    color: #9CA3AF;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  .reservas-spinner {
+    width: 24px;
+    height: 24px;
+    border: 2.5px solid #E5E7EB;
+    border-top-color: #9B5CFF;
+    border-radius: 50%;
+    animation: spin 0.7s linear infinite;
+  }
+
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  .reservas-filtros {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 20px;
+  }
+
+  .estado-chip {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 14px;
+    border: 1.5px solid #e2d9f3;
+    border-radius: 20px;
+    background: white;
+    color: #64748b;
+    font-family: 'Poppins', sans-serif;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.15s;
+
+    &:hover { border-color: #9B5CFF; color: #9B5CFF; }
+
+    &--activo {
+      background: #9B5CFF;
+      border-color: #9B5CFF;
+      color: white;
+    }
+
+    &__count {
+      background: #F3EEFF;
+      color: #9B5CFF;
+      font-size: 11px;
+      font-weight: 700;
+      padding: 1px 6px;
+      border-radius: 10px;
+
+      .estado-chip--activo & {
+        background: rgba(255,255,255,0.3);
+        color: white;
+      }
+    }
+  }
+
+  .reservas-lista {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .reserva-card {
+    background: white;
+    border: 1.5px solid #E5E7EB;
+    border-radius: 12px;
+    padding: 16px 20px;
+    display: flex;
+    align-items: flex-start;
+    gap: 16px;
+    transition: box-shadow 0.2s;
+
+    &:hover { box-shadow: 0 4px 16px rgba(155,92,255,0.1); }
+
+    &--pendiente  { border-left: 4px solid #F59E0B; }
+    &--confirmada { border-left: 4px solid #10B981; }
+    &--cancelada  { border-left: 4px solid #EF4444; opacity: 0.8; }
+    &--completada { border-left: 4px solid #6366F1; }
+
+    &__estado { flex-shrink: 0; }
+    &__info { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+
+    &__alojamiento {
+      font-size: 15px;
+      font-weight: 700;
+      color: #1F2937;
+      margin: 0;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+
+      i { color: #9B5CFF; font-size: 13px; }
+    }
+
+    &__fechas {
+      font-size: 13px;
+      color: #4B5563;
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      flex-wrap: wrap;
+
+      i { color: #9CA3AF; }
+    }
+
+    &__noches { color: #9CA3AF; font-size: 12px; }
+
+    &__meta {
+      display: flex;
+      gap: 16px;
+      font-size: 13px;
+      color: #4B5563;
+      flex-wrap: wrap;
+
+      i { color: #9CA3AF; margin-right: 4px; }
+    }
+
+    &__precio { font-weight: 700; color: #9B5CFF; }
+
+    &__cancelacion {
+      font-size: 12px;
+      color: #EF4444;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+  }
+
+  .estado-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-size: 11px;
+    font-weight: 700;
+    font-family: 'Poppins', sans-serif;
+
+    i { font-size: 8px; }
+
+    &--warning  { background: #FEF3C7; color: #92400E; }
+    &--success  { background: #D1FAE5; color: #065F46; }
+    &--danger   { background: #FEE2E2; color: #991B1B; }
+    &--info     { background: #E0E7FF; color: #3730A3; }
+  }
+
+  .reservas-resumen {
+    margin-top: 20px;
+    padding: 14px 18px;
+    background: #F3EEFF;
+    border: 1.5px solid rgba(155,92,255,0.2);
+    border-radius: 10px;
+    font-size: 14px;
+    color: #4B5563;
+    font-family: 'Poppins', sans-serif;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+
+    i { color: #9B5CFF; }
+    strong { color: #9B5CFF; font-size: 16px; margin-left: 4px; }
+  }
 }
