@@ -1,0 +1,160 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     ReservaResumenModalComponent — RESERV-7
+     Modal de resumen antes de confirmar la reserva.
+     ───────────────────────────────────────────────────────────────────────── -->
+<div
+  class="reserva-modal-overlay"
+  *ngIf="visible"
+  (click)="onOverlayClick()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="reserva-modal-titulo"
+>
+  <div class="reserva-modal" (click)="$event.stopPropagation()">
+
+    <!-- ── Encabezado ───────────────────────────────────────────── -->
+    <div class="reserva-modal__header">
+      <div class="reserva-modal__icono">
+        <i class="fa-solid fa-calendar-check"></i>
+      </div>
+      <h2 class="reserva-modal__titulo" id="reserva-modal-titulo">
+        Confirmar reserva
+      </h2>
+      <button
+        type="button"
+        class="reserva-modal__cerrar"
+        (click)="cancelar.emit()"
+        [disabled]="cargando"
+        aria-label="Cerrar modal"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- ── Nombre del alojamiento ───────────────────────────────── -->
+    <div class="reserva-modal__alojamiento" *ngIf="alojamiento">
+      <i class="fa-solid fa-house reserva-modal__aloj-icono"></i>
+      <div class="reserva-modal__aloj-info">
+        <span class="reserva-modal__aloj-label">Alojamiento</span>
+        <strong class="reserva-modal__aloj-nombre">{{ alojamiento.name }}</strong>
+        <span class="reserva-modal__aloj-ciudad">
+          <i class="fa-solid fa-location-dot"></i> {{ alojamiento.city }}
+        </span>
+      </div>
+    </div>
+
+    <hr class="reserva-modal__divider" />
+
+    <!-- ── Detalles de la estadía ────────────────────────────────── -->
+    <div class="reserva-modal__detalles">
+
+      <!-- Fechas -->
+      <div class="reserva-modal__fila">
+        <div class="reserva-modal__campo">
+          <span class="reserva-modal__campo-label">
+            <i class="fa-regular fa-calendar"></i> Check-in
+          </span>
+          <strong class="reserva-modal__campo-valor">
+            {{ formatearFecha(startDate) }}
+          </strong>
+        </div>
+        <div class="reserva-modal__campo">
+          <span class="reserva-modal__campo-label">
+            <i class="fa-regular fa-calendar-check"></i> Check-out
+          </span>
+          <strong class="reserva-modal__campo-valor">
+            {{ formatearFecha(endDate) }}
+          </strong>
+        </div>
+      </div>
+
+      <!-- Noches y huéspedes -->
+      <div class="reserva-modal__fila reserva-modal__fila--secundaria">
+        <span class="reserva-modal__dato">
+          <i class="fa-solid fa-moon"></i>
+          {{ noches }} noche{{ noches !== 1 ? 's' : '' }}
+        </span>
+        <span class="reserva-modal__dato">
+          <i class="fa-solid fa-users"></i>
+          {{ numGuests }} huésped{{ numGuests !== 1 ? 'es' : '' }}
+        </span>
+      </div>
+
+    </div>
+
+    <hr class="reserva-modal__divider" />
+
+    <!-- ── Desglose de precio ────────────────────────────────────── -->
+    <div class="reserva-modal__precio">
+
+      <div class="reserva-modal__precio-fila">
+        <span>
+          ${{ precioPorNoche | number:'1.0-0' }} × {{ noches }}
+          noche{{ noches !== 1 ? 's' : '' }}
+        </span>
+        <span>${{ precioTotal | number:'1.0-0' }}</span>
+      </div>
+
+      <div class="reserva-modal__precio-fila reserva-modal__precio-fila--servicio">
+        <span>Tarifa de servicio</span>
+        <span class="reserva-modal__gratis">Incluida</span>
+      </div>
+
+      <hr class="reserva-modal__divider" />
+
+      <div class="reserva-modal__precio-fila reserva-modal__precio-fila--total">
+        <strong>Total</strong>
+        <strong class="reserva-modal__total-valor">
+          ${{ precioTotal | number:'1.0-0' }}
+        </strong>
+      </div>
+
+    </div>
+
+    <!-- ── Aviso de política de cancelación ─────────────────────── -->
+    <div class="reserva-modal__aviso">
+      <i class="fa-solid fa-circle-info"></i>
+      <span>
+        Cancelación gratuita hasta 48 horas antes del check-in.
+        Revisa las condiciones antes de confirmar.
+      </span>
+    </div>
+
+    <!-- ── Error del API ─────────────────────────────────────────── -->
+    <div class="reserva-modal__error" *ngIf="error" role="alert">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span>{{ error }}</span>
+    </div>
+
+    <!-- ── Acciones ──────────────────────────────────────────────── -->
+    <div class="reserva-modal__acciones">
+
+      <button
+        type="button"
+        class="reserva-modal__btn reserva-modal__btn--cancelar"
+        (click)="cancelar.emit()"
+        [disabled]="cargando"
+      >
+        Volver
+      </button>
+
+      <button
+        type="button"
+        class="reserva-modal__btn reserva-modal__btn--confirmar"
+        (click)="confirmar.emit()"
+        [disabled]="cargando"
+      >
+        <span *ngIf="!cargando">
+          <i class="fa-solid fa-calendar-check"></i>
+          Confirmar reserva
+        </span>
+        <span *ngIf="cargando">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          Procesando...
+        </span>
+      </button>
+
+    </div>
+
+  </div>
+</div>

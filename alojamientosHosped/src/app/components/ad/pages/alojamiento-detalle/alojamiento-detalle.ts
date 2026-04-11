@@ -97,10 +97,13 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
   rangoReserva: { startDate: string; endDate: string } | null = null;
 
   // ── RESERV-4: Formulario de solicitud de reserva ──────────────
-  numGuests:       number = 1;      // número de huéspedes seleccionado
-  enviandoReserva: boolean = false; // spinner del botón Reservar
+  numGuests:       number  = 1;     // número de huéspedes seleccionado
+  enviandoReserva: boolean = false; // spinner del botón Confirmar en modal
   errorReserva:    string  = '';    // mensaje de error al reservar
   reservaExitosa:  boolean = false; // confirmación tras reservar
+
+  // ── RESERV-7: Modal de resumen de reserva ─────────────────────
+  mostrarModalReserva: boolean = false; // controla visibilidad del modal
 
   onRangoSeleccionado(rango: { startDate: string; endDate: string }): void {
     this.rangoReserva   = rango;
@@ -131,7 +134,7 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     return this.noches * this.alojamiento.pricePerNight;
   }
 
-  /** Validaciones del formulario antes de enviar */
+  /** Validaciones del formulario antes de abrir el modal */
   get formularioValido(): boolean {
     return !!this.rangoReserva
       && this.noches >= 1
@@ -140,8 +143,32 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
       && this.numGuests <= this.alojamiento.maxCapacity;
   }
 
-  /** Enviar la solicitud de reserva — RESERV-4 */
+  /**
+   * RESERV-7: Abre el modal de resumen.
+   * El botón "Reservar" ahora muestra el resumen antes de confirmar.
+   */
   solicitarReserva(): void {
+    if (!this.formularioValido) return;
+    this.errorReserva        = '';
+    this.reservaExitosa      = false;
+    this.mostrarModalReserva = true;
+  }
+
+  /**
+   * RESERV-7: Cierra el modal sin realizar la reserva.
+   * No permitido mientras se procesa la petición.
+   */
+  cerrarModalReserva(): void {
+    if (this.enviandoReserva) return;
+    this.mostrarModalReserva = false;
+    this.errorReserva        = '';
+  }
+
+  /**
+   * RESERV-7: Ejecuta la llamada real al API.
+   * Se dispara desde el botón "Confirmar reserva" dentro del modal.
+   */
+  confirmarReserva(): void {
     if (!this.formularioValido || !this.alojamiento || !this.rangoReserva) return;
 
     const usuario = this.authService.getUsuario();
@@ -149,7 +176,6 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
 
     this.enviandoReserva = true;
     this.errorReserva    = '';
-    this.reservaExitosa  = false;
 
     this.reservaService.create({
       guestId:    usuario.id,
@@ -162,12 +188,15 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     }).pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          this.enviandoReserva = false;
-          this.reservaExitosa  = true;
-          this.rangoReserva    = null;
-          this.numGuests       = 1;
+          this.enviandoReserva     = false;
+          this.mostrarModalReserva = false;
+          this.reservaExitosa      = true;
+          this.rangoReserva        = null;
+          this.numGuests           = 1;
         },
         error: (err: Error) => {
+          // El error se muestra dentro del modal; no se cierra para
+          // que el usuario pueda leer el mensaje en contexto.
           this.enviandoReserva = false;
           this.errorReserva    = err.message || 'No se pudo completar la reserva.';
         }

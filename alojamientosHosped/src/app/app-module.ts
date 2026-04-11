@@ -34,6 +34,7 @@ import { AlojamientoCardComponent }  from './components/ad/molecules/alojamiento
 import { ComentarioCardComponent }   from './components/ad/molecules/comentario-card/comentario-card';
 import { ConfirmModalComponent }      from './components/ad/molecules/confirm-modal/confirm-modal';
 import { CalendarioDisponibilidadComponent } from './components/ad/molecules/calendario-disponibilidad/calendario-disponibilidad';
+import { ReservaResumenModalComponent } from './components/ad/molecules/reserva-resumen-modal/reserva-resumen-modal'; // RESERV-7
 
 
 // -- Organismos
@@ -84,6 +85,7 @@ import { LazyImgDirective } from './directives/lazy-img.directive';
     AlojamientoPreviewComponent,
     ConfirmModalComponent,
     CalendarioDisponibilidadComponent,
+    ReservaResumenModalComponent,      // RESERV-7
 
 
     // Organismos

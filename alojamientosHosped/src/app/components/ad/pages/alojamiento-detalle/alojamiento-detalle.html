@@ -427,3 +427,18 @@
   (confirmar)="confirmarEliminar()"
   (cancelar)="cerrarModalEliminar()"
 ></app-confirm-modal>
+
+<!-- RESERV-7: Modal de resumen y confirmación de reserva -->
+<app-reserva-resumen-modal
+  [visible]="mostrarModalReserva"
+  [alojamiento]="alojamiento"
+  [startDate]="rangoReserva?.startDate || ''"
+  [endDate]="rangoReserva?.endDate || ''"
+  [noches]="noches"
+  [numGuests]="numGuests"
+  [precioTotal]="precioTotal"
+  [cargando]="enviandoReserva"
+  [error]="errorReserva"
+  (confirmar)="confirmarReserva()"
+  (cancelar)="cerrarModalReserva()"
+></app-reserva-resumen-modal>

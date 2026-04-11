@@ -1,0 +1,361 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// ReservaResumenModalComponent — RESERV-7
+// Modal de confirmación de reserva con resumen de detalles y desglose de precio
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Variables de color ────────────────────────────────────────────
+$primary:      #7C3AED;
+$primary-lt:   #F5F3FF;
+$primary-dark: #6D28D9;
+$success:      #16A34A;
+$success-lt:   #F0FDF4;
+$danger:       #DC2626;
+$danger-lt:    #FEF2F2;
+$warning-lt:   #FFFBEB;
+$warning-tx:   #92400E;
+$white:        #FFFFFF;
+$gray-50:      #F8FAFC;
+$gray-100:     #F1F5F9;
+$gray-200:     #E2E8F0;
+$gray-400:     #94A3B8;
+$gray-600:     #475569;
+$gray-800:     #1E293B;
+$radius-lg:    1.25rem;
+
+// ── Overlay ───────────────────────────────────────────────────────
+.reserva-modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(26, 26, 46, 0.55);
+  backdrop-filter: blur(4px);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1100;   // por encima de otros modales (1000)
+  padding: 1rem;
+  animation: fadeInOverlay 0.2s ease;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+// ── Contenedor del modal ──────────────────────────────────────────
+.reserva-modal {
+  background: $white;
+  border-radius: $radius-lg;
+  width: 100%;
+  max-width: 480px;
+  box-shadow: 0 24px 64px rgba(0, 0, 0, 0.18);
+  animation: modalIn 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  gap: 0;           // controlamos spacing interno con padding/margin
+  overflow: hidden; // para que el header tenga borde limpio
+
+  // ── Encabezado ──────────────────────────────────────────────────
+  &__header {
+    display: flex;
+    align-items: center;
+    gap: 0.75rem;
+    padding: 1.25rem 1.5rem 1rem;
+    border-bottom: 1px solid $gray-100;
+  }
+
+  &__icono {
+    width: 42px;
+    height: 42px;
+    border-radius: 50%;
+    background: $primary-lt;
+    color: $primary;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  &__titulo {
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: $gray-800;
+    margin: 0;
+    flex: 1;
+  }
+
+  &__cerrar {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border: none;
+    background: transparent;
+    color: $gray-400;
+    border-radius: 50%;
+    cursor: pointer;
+    transition: background 0.15s, color 0.15s;
+    font-size: 1rem;
+
+    &:hover:not(:disabled) {
+      background: $gray-100;
+      color: $gray-800;
+    }
+
+    &:disabled {
+      opacity: 0.4;
+      cursor: not-allowed;
+    }
+  }
+
+  // ── Alojamiento ──────────────────────────────────────────────────
+  &__alojamiento {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem;
+    background: $gray-50;
+  }
+
+  &__aloj-icono {
+    color: $primary;
+    font-size: 1.1rem;
+    margin-top: 3px;
+    flex-shrink: 0;
+  }
+
+  &__aloj-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+  }
+
+  &__aloj-label {
+    font-size: 0.72rem;
+    color: $gray-400;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    font-weight: 600;
+  }
+
+  &__aloj-nombre {
+    font-size: 0.95rem;
+    color: $gray-800;
+    font-weight: 700;
+    line-height: 1.3;
+  }
+
+  &__aloj-ciudad {
+    font-size: 0.8rem;
+    color: $gray-600;
+
+    i { margin-right: 3px; color: $gray-400; }
+  }
+
+  // ── Divider ──────────────────────────────────────────────────────
+  &__divider {
+    border: none;
+    border-top: 1px solid $gray-100;
+    margin: 0;
+  }
+
+  // ── Detalles de estadía ──────────────────────────────────────────
+  &__detalles {
+    padding: 1rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+  }
+
+  &__fila {
+    display: flex;
+    gap: 1.5rem;
+
+    &--secundaria {
+      gap: 1.25rem;
+    }
+  }
+
+  &__campo {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+
+  &__campo-label {
+    font-size: 0.72rem;
+    color: $gray-400;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    font-weight: 600;
+
+    i { margin-right: 3px; }
+  }
+
+  &__campo-valor {
+    font-size: 0.88rem;
+    color: $gray-800;
+    font-weight: 600;
+    line-height: 1.4;
+  }
+
+  &__dato {
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    font-size: 0.85rem;
+    color: $gray-600;
+    background: $gray-100;
+    padding: 4px 10px;
+    border-radius: 20px;
+    font-weight: 500;
+
+    i { color: $gray-400; font-size: 0.8rem; }
+  }
+
+  // ── Desglose de precio ───────────────────────────────────────────
+  &__precio {
+    padding: 1rem 1.5rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.6rem;
+  }
+
+  &__precio-fila {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.875rem;
+    color: $gray-600;
+
+    &--servicio {
+      font-size: 0.85rem;
+    }
+
+    &--total {
+      font-size: 1rem;
+      color: $gray-800;
+      padding-top: 0.25rem;
+
+      strong { font-weight: 700; }
+    }
+  }
+
+  &__gratis {
+    color: $success;
+    font-weight: 600;
+    font-size: 0.82rem;
+  }
+
+  &__total-valor {
+    color: $primary;
+    font-size: 1.1rem;
+  }
+
+  // ── Aviso de política ────────────────────────────────────────────
+  &__aviso {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0 1.5rem;
+    padding: 0.75rem 1rem;
+    background: $warning-lt;
+    border-radius: 8px;
+    font-size: 0.8rem;
+    color: $warning-tx;
+    line-height: 1.5;
+
+    i {
+      flex-shrink: 0;
+      margin-top: 2px;
+    }
+  }
+
+  // ── Error ────────────────────────────────────────────────────────
+  &__error {
+    display: flex;
+    align-items: flex-start;
+    gap: 0.5rem;
+    margin: 0 1.5rem;
+    padding: 0.75rem 1rem;
+    background: $danger-lt;
+    border-radius: 8px;
+    font-size: 0.85rem;
+    color: $danger;
+    line-height: 1.5;
+
+    i { flex-shrink: 0; margin-top: 2px; }
+  }
+
+  // ── Acciones ─────────────────────────────────────────────────────
+  &__acciones {
+    display: flex;
+    gap: 0.75rem;
+    padding: 1rem 1.5rem 1.25rem;
+  }
+
+  &__btn {
+    flex: 1;
+    padding: 0.75rem 1rem;
+    border: none;
+    border-radius: 999px;
+    font-family: 'Poppins', sans-serif;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.18s, transform 0.12s, opacity 0.18s;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4rem;
+
+    &:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    &--cancelar {
+      background: $gray-100;
+      color: $gray-600;
+
+      &:hover:not(:disabled) { background: $gray-200; }
+    }
+
+    &--confirmar {
+      background: $primary;
+      color: $white;
+      flex: 1.5; // ligeramente más ancho que el de cancelar
+
+      &:hover:not(:disabled) {
+        background: $primary-dark;
+        transform: translateY(-1px);
+      }
+    }
+  }
+}
+
+// ── Animación de entrada ──────────────────────────────────────────
+@keyframes modalIn {
+  from { opacity: 0; transform: scale(0.94) translateY(10px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+
+// ── Responsive ────────────────────────────────────────────────────
+@media (max-width: 520px) {
+  .reserva-modal {
+    border-radius: 1rem 1rem 0 0;
+    max-height: 90vh;
+    overflow-y: auto;
+
+    &__fila {
+      flex-direction: column;
+      gap: 0.75rem;
+    }
+  }
+
+  .reserva-modal-overlay {
+    align-items: flex-end;
+    padding: 0;
+  }
+}
