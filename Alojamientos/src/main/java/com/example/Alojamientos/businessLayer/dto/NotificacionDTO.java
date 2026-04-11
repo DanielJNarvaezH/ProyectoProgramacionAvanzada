@@ -8,7 +8,7 @@ import jakarta.validation.constraints.*;
 @NoArgsConstructor
 @AllArgsConstructor
 public class NotificacionDTO {
-
+    private Integer id;
     @NotNull
     private Integer userId;
 

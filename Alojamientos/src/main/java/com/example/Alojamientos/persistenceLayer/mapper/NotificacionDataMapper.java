@@ -11,6 +11,7 @@ import java.time.format.DateTimeFormatter;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface NotificacionDataMapper {
 
+    @Mapping(target = "id", source = "id")
     @Mapping(target = "userId", source = "usuario.id")
     @Mapping(target = "type", source = "tipo", qualifiedByName = "tipoNotificacionToString")
     @Mapping(target = "title", source = "titulo")

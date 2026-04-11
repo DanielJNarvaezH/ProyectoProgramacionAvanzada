@@ -1,0 +1,83 @@
+<div class="notif-wrapper">
+
+  <!-- ── Botón campana ──────────────────────────────────────── -->
+  <button
+    type="button"
+    class="notif-btn"
+    (click)="togglePanel($event)"
+    [class.notif-btn--activo]="abierto"
+    aria-label="Notificaciones"
+    [attr.aria-expanded]="abierto"
+  >
+    <i class="fa-solid fa-bell"></i>
+    <span class="notif-badge" *ngIf="hayNoLeidas">{{ totalLabel }}</span>
+  </button>
+
+  <!-- ── Panel desplegable ──────────────────────────────────── -->
+  <div class="notif-panel" *ngIf="abierto" (click)="$event.stopPropagation()">
+
+    <!-- Header -->
+    <div class="notif-panel__header">
+      <h3 class="notif-panel__titulo">
+        Notificaciones
+        <span class="notif-count" *ngIf="hayNoLeidas">{{ noLeidas }} nueva{{ noLeidas !== 1 ? 's' : '' }}</span>
+      </h3>
+      <button
+        *ngIf="hayNoLeidas"
+        type="button"
+        class="notif-panel__leer-todas"
+        (click)="marcarTodasLeidas()"
+      >
+        <i class="fa-solid fa-check-double"></i>
+        Leer todas
+      </button>
+    </div>
+
+    <!-- Loading -->
+    <div class="notif-loading" *ngIf="cargando">
+      <div class="notif-spinner"></div>
+    </div>
+
+    <!-- Empty -->
+    <div class="notif-empty" *ngIf="!cargando && notificaciones.length === 0">
+      <i class="fa-regular fa-bell-slash"></i>
+      <p>No tienes notificaciones</p>
+    </div>
+
+    <!-- Lista -->
+    <ul class="notif-lista" *ngIf="!cargando && notificaciones.length > 0">
+      <li
+        *ngFor="let n of notificaciones; trackBy: trackById"
+        class="notif-item"
+        [class.notif-item--no-leida]="!n.read"
+        [class.notif-item--success]="getColor(n.type) === 'success'"
+        [class.notif-item--danger]="getColor(n.type) === 'danger'"
+        [class.notif-item--info]="getColor(n.type) === 'info'"
+        [class.notif-item--warning]="getColor(n.type) === 'warning'"
+        (click)="marcarLeida(n, $event)"
+      >
+        <div class="notif-item__icon">
+          <i [class]="getIcon(n.type)"></i>
+        </div>
+
+        <div class="notif-item__body">
+          <p class="notif-item__titulo">{{ n.title }}</p>
+          <p class="notif-item__mensaje">{{ n.message }}</p>
+          <span class="notif-item__fecha" *ngIf="n.readDate">{{ formatearFecha(n.readDate) }}</span>
+        </div>
+
+        <div class="notif-item__dot" *ngIf="!n.read"></div>
+
+        <button
+          type="button"
+          class="notif-item__eliminar"
+          (click)="eliminar(n, $event)"
+          title="Eliminar"
+        >
+          <i class="fa-solid fa-xmark"></i>
+        </button>
+      </li>
+    </ul>
+
+  </div>
+</div>

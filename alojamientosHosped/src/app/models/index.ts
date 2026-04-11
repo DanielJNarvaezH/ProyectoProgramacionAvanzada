@@ -9,3 +9,5 @@ export * from './comentario.model';
 export * from './alojamiento-servicio.model';
 export * from './reserva.model';
 export * from './favorito.model'; // ALOJ-21
+
+export * from './notificacion.model';
