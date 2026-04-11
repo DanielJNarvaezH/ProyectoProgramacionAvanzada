@@ -519,9 +519,10 @@ $shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
 
   &:hover:not(:disabled) { background: #059669; }
   &:disabled { opacity: 0.6; cursor: not-allowed; }
+}
 
-    // ── RESERV-9: Tabs ────────────────────────────────────────────────────────────
-  .panel-tabs {
+// ── RESERV-9: Tabs ────────────────────────────────────────────────────────────
+.panel-tabs {
   display: flex;
   gap: 4px;
   margin-bottom: 24px;
@@ -747,4 +748,3 @@ $shadow-md:     0 8px 24px rgba(155, 92, 255, 0.14);
     i { color: #9B5CFF; }
     strong { color: #9B5CFF; font-size: 16px; margin-left: 4px; }
   }
-}

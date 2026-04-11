@@ -1,10 +1,10 @@
-﻿<!-- PanelGestionPageComponent â€” ALOJ-9 + Fix-4 + RESERV-9 -->
+﻿<!-- PanelGestionPageComponent — ALOJ-9 + Fix-4 + RESERV-9 -->
 
 <app-navbar></app-navbar>
 
 <main class="panel-page">
 
-  <!-- â”€â”€ Header â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <!-- Header -->
   <section class="panel-header">
     <div class="panel-header__text">
       <h1 class="panel-header__title">
@@ -19,7 +19,7 @@
     </button>
   </section>
 
-  <!-- â”€â”€ MÃ©tricas â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <!-- Métricas -->
   <section class="metricas" *ngIf="!cargando && !error">
     <div class="metrica-card">
       <div class="metrica-card__icon">
@@ -51,7 +51,7 @@
       </div>
     </div>
 
-    <!-- RESERV-9: mÃ©tricas de reservas -->
+    <!-- RESERV-9: métricas de reservas -->
     <div class="metrica-card" *ngIf="reservas.length > 0">
       <div class="metrica-card__icon metrica-card__icon--purple">
         <i class="fa-solid fa-calendar-check"></i>
@@ -63,13 +63,13 @@
     </div>
   </section>
 
-  <!-- â”€â”€ Toast Ã©xito â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <!-- Toast éxito -->
   <div class="toast-success" *ngIf="successMessage" role="alert">
     <i class="fa-solid fa-circle-check"></i>
     <span>{{ successMessage }}</span>
   </div>
 
-  <!-- â”€â”€ Tabs RESERV-9 â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ -->
+  <!-- Tabs RESERV-9 -->
   <div class="panel-tabs">
     <button
       type="button"
@@ -93,9 +93,7 @@
     </button>
   </div>
 
-  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       TAB: MIS ALOJAMIENTOS
-  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  <!-- TAB: MIS ALOJAMIENTOS -->
   <ng-container *ngIf="tabActivo === 'alojamientos'">
 
     <!-- Loading skeleton -->
@@ -220,15 +218,13 @@
 
   </ng-container>
 
-  <!-- â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•
-       TAB: RESERVAS RECIBIDAS â€” RESERV-9
-  â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â•â• -->
+  <!-- TAB: RESERVAS RECIBIDAS — RESERV-9 -->
   <ng-container *ngIf="tabActivo === 'reservas'">
 
     <!-- Loading -->
     <div class="reservas-loading" *ngIf="cargandoReservas">
       <div class="reservas-spinner"></div>
-      <span>Cargando reservasâ€¦</span>
+      <span>Cargando reservas…</span>
     </div>
 
     <!-- Error -->
@@ -301,7 +297,7 @@
                 {{ formatearFecha(r.startDate) }} → {{ formatearFecha(r.endDate) }}
               </span>
               <span class="reserva-card__noches">
-                Â· {{ calcularNoches(r.startDate, r.endDate) }} noche{{ calcularNoches(r.startDate, r.endDate) !== 1 ? 's' : '' }}
+                · {{ calcularNoches(r.startDate, r.endDate) }} noche{{ calcularNoches(r.startDate, r.endDate) !== 1 ? 's' : '' }}
               </span>
             </div>
             <div class="reserva-card__meta">
