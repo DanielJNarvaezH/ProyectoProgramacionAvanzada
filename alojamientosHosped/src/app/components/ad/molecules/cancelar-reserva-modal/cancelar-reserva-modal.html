@@ -1,0 +1,132 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     CancelarReservaModalComponent — RESERV-10
+     Modal de cancelación de reserva con motivo obligatorio.
+     ───────────────────────────────────────────────────────────────────────── -->
+<div
+  class="cancelar-overlay"
+  *ngIf="visible"
+  (click)="onOverlayClick()"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="cancelar-modal-titulo"
+>
+  <div class="cancelar-modal" (click)="$event.stopPropagation()">
+
+    <!-- ── Encabezado ───────────────────────────────────────────── -->
+    <div class="cancelar-modal__header">
+      <div class="cancelar-modal__icono">
+        <i class="fa-solid fa-calendar-xmark"></i>
+      </div>
+      <div class="cancelar-modal__header-texto">
+        <h2 class="cancelar-modal__titulo" id="cancelar-modal-titulo">
+          Cancelar reserva
+        </h2>
+        <p class="cancelar-modal__subtitulo" *ngIf="nombreAlojamiento">
+          {{ nombreAlojamiento }}
+        </p>
+      </div>
+      <button
+        type="button"
+        class="cancelar-modal__cerrar"
+        (click)="cancelar.emit()"
+        [disabled]="cargando"
+        aria-label="Cerrar"
+      >
+        <i class="fa-solid fa-xmark"></i>
+      </button>
+    </div>
+
+    <!-- ── Aviso de política 48h ────────────────────────────────── -->
+    <div class="cancelar-modal__aviso">
+      <i class="fa-solid fa-circle-info"></i>
+      <div>
+        <strong>Política de cancelación</strong>
+        <p>
+          Solo se puede cancelar con al menos <strong>48 horas</strong>
+          de anticipación al check-in
+          <span *ngIf="fechaCheckIn"> ({{ fechaCheckIn }})</span>.
+          Esta acción no se puede deshacer.
+        </p>
+      </div>
+    </div>
+
+    <!-- ── Campo de motivo ──────────────────────────────────────── -->
+    <div class="cancelar-modal__campo">
+      <label class="cancelar-modal__label" for="motivo-cancelacion">
+        <i class="fa-solid fa-message-lines"></i>
+        Motivo de cancelación
+        <span class="cancelar-modal__requerido">*</span>
+      </label>
+
+      <textarea
+        id="motivo-cancelacion"
+        class="cancelar-modal__textarea"
+        [class.cancelar-modal__textarea--error]="motivo.length > 0 && !motivoValido"
+        [(ngModel)]="motivo"
+        [maxlength]="MAX_CHARS"
+        [disabled]="cargando"
+        placeholder="Describe el motivo de la cancelación (mínimo 10 caracteres)…"
+        rows="4"
+        aria-describedby="motivo-hint"
+      ></textarea>
+
+      <div class="cancelar-modal__campo-footer" id="motivo-hint">
+        <span
+          class="cancelar-modal__hint"
+          [class.cancelar-modal__hint--error]="motivo.length > 0 && !motivoValido"
+        >
+          <ng-container *ngIf="motivo.length === 0">
+            Mínimo 10 caracteres
+          </ng-container>
+          <ng-container *ngIf="motivo.length > 0 && !motivoValido">
+            Faltan {{ 10 - motivo.trim().length }} caracteres
+          </ng-container>
+          <ng-container *ngIf="motivoValido">
+            <i class="fa-solid fa-circle-check"></i> Motivo válido
+          </ng-container>
+        </span>
+        <span
+          class="cancelar-modal__chars"
+          [class.cancelar-modal__chars--limit]="charsRestantes <= 20"
+        >
+          {{ motivo.length }} / {{ MAX_CHARS }}
+        </span>
+      </div>
+    </div>
+
+    <!-- ── Error del API ─────────────────────────────────────────── -->
+    <div class="cancelar-modal__error" *ngIf="error" role="alert">
+      <i class="fa-solid fa-circle-exclamation"></i>
+      <span>{{ error }}</span>
+    </div>
+
+    <!-- ── Acciones ──────────────────────────────────────────────── -->
+    <div class="cancelar-modal__acciones">
+      <button
+        type="button"
+        class="cancelar-modal__btn cancelar-modal__btn--volver"
+        (click)="cancelar.emit()"
+        [disabled]="cargando"
+      >
+        Volver
+      </button>
+
+      <button
+        type="button"
+        class="cancelar-modal__btn cancelar-modal__btn--confirmar"
+        [disabled]="!motivoValido || cargando"
+        (click)="onConfirmar()"
+      >
+        <span *ngIf="!cargando">
+          <i class="fa-solid fa-calendar-xmark"></i>
+          Confirmar cancelación
+        </span>
+        <span *ngIf="cargando">
+          <i class="fa-solid fa-spinner fa-spin"></i>
+          Cancelando...
+        </span>
+      </button>
+    </div>
+
+  </div>
+</div>

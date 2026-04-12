@@ -1,20 +1,26 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Router } from '@angular/router';
 import { Subject, takeUntil } from 'rxjs';
-import { ReservaService }  from '../../../../../services/ReservaService';
-import { AuthService }     from '../../../../../services/AuthService';
+import { ReservaService }     from '../../../../../services/ReservaService';
+import { AuthService }        from '../../../../../services/AuthService';
 import { AlojamientoService } from '../../../../../services/AlojamientoService';
 import { Reserva, EstadoReserva, ESTADO_RESERVA_LABEL, ESTADO_RESERVA_COLOR } from '../../../../models';
 import { Alojamiento } from '../../../../models';
 
 /**
- * MisReservasPageComponent — RESERV-8
+ * MisReservasPageComponent — RESERV-8 + RESERV-10
  *
  * Historial de reservas del huésped autenticado:
  * - Lista todas las reservas via GET /api/reservas/huesped/:guestId
  * - Enriquece cada reserva con el nombre del alojamiento
  * - Filtro por estado: TODAS | CONFIRMADA | PENDIENTE | CANCELADA | COMPLETADA
  * - Ordenadas por fecha de check-in descendente (más recientes primero)
+ *
+ * RESERV-10: Función de cancelación de reserva
+ * - Botón "Cancelar" visible solo en reservas con estado CONFIRMADA o PENDIENTE
+ * - Abre modal con campo de motivo obligatorio (mínimo 10 caracteres)
+ * - Llama a DELETE /api/reservas/:id?motivo=... al confirmar
+ * - Actualiza la lista localmente al completarse correctamente
  */
 @Component({
   selector: 'app-mis-reservas',
@@ -41,13 +47,19 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
     { label: 'Cancelada',  valor: 'CANCELADA'  },
   ];
 
+  // ── RESERV-10: Estado del modal de cancelación ────────────────
+  mostrarModalCancelar: boolean       = false;
+  reservaSeleccionada:  Reserva | null = null;  // reserva a cancelar
+  cancelando:           boolean       = false;  // spinner mientras procesa
+  errorCancelacion:     string        = '';     // error devuelto por el API
+
   private destroy$ = new Subject<void>();
 
   constructor(
-    private reservaService:    ReservaService,
+    private reservaService:     ReservaService,
     private alojamientoService: AlojamientoService,
-    private authService:       AuthService,
-    public  router:            Router
+    private authService:        AuthService,
+    public  router:             Router
   ) {}
 
   ngOnInit(): void {
@@ -119,6 +131,75 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
     this.reservasFiltradas = this.filtroEstado === 'TODAS'
       ? this.reservas
       : this.reservas.filter(r => r.status === this.filtroEstado);
+  }
+
+  // ── RESERV-10: Lógica de cancelación ─────────────────────────
+
+  /**
+   * Determina si una reserva puede cancelarse.
+   * Solo CONFIRMADA y PENDIENTE son cancelables.
+   */
+  puedeCancelar(reserva: Reserva): boolean {
+    return reserva.status === 'CONFIRMADA' || reserva.status === 'PENDIENTE';
+  }
+
+  /**
+   * Abre el modal de cancelación para la reserva indicada.
+   * Resetea el estado de error previo.
+   */
+  abrirModalCancelar(reserva: Reserva): void {
+    this.reservaSeleccionada = reserva;
+    this.errorCancelacion    = '';
+    this.mostrarModalCancelar = true;
+  }
+
+  /** Cierra el modal sin cancelar la reserva. */
+  cerrarModalCancelar(): void {
+    if (this.cancelando) return;
+    this.mostrarModalCancelar = false;
+    this.reservaSeleccionada  = null;
+    this.errorCancelacion     = '';
+  }
+
+  /**
+   * Ejecuta la cancelación llamando al API.
+   * Recibe el motivo emitido por el modal.
+   * Al completarse actualiza el estado de la reserva localmente
+   * sin recargar toda la lista.
+   *
+   * @param motivo Texto del motivo ingresado por el usuario
+   */
+  confirmarCancelacion(motivo: string): void {
+    if (!this.reservaSeleccionada?.id || !motivo) return;
+
+    this.cancelando       = true;
+    this.errorCancelacion = '';
+
+    this.reservaService.cancel(this.reservaSeleccionada.id, motivo)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe({
+        next: () => {
+          // Actualizar estado localmente para evitar recargar toda la lista
+          const id = this.reservaSeleccionada!.id!;
+          this.reservas = this.reservas.map(r =>
+            r.id === id
+              ? { ...r, status: 'CANCELADA' as EstadoReserva, cancelReason: motivo }
+              : r
+          );
+          this.aplicarFiltro();
+
+          this.cancelando           = false;
+          this.mostrarModalCancelar = false;
+          this.reservaSeleccionada  = null;
+          this.errorCancelacion     = '';
+        },
+        error: (err: Error) => {
+          // El error se muestra dentro del modal para que el usuario
+          // pueda leer el mensaje sin perder el contexto.
+          this.cancelando       = false;
+          this.errorCancelacion = err.message || 'No se pudo cancelar la reserva.';
+        }
+      });
   }
 
   // ── Helpers de template ───────────────────────────────────────

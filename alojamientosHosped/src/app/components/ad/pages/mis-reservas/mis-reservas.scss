@@ -408,3 +408,40 @@ $info-bd:     #BFDBFE;
   .reservas-filtros { gap: 6px; }
   .filtro-btn { padding: 5px 10px; font-size: 0.8rem; }
 }
+// ── RESERV-10: Acciones de la card ────────────────────────────────
+.reserva-card {
+  &__acciones {
+    display: flex;
+    justify-content: flex-end;
+    padding-top: 0.25rem;
+    border-top: 1px solid $gray-100;
+    margin-top: 0.25rem;
+  }
+}
+
+.btn-cancelar-reserva {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1.5px solid $danger-bd;
+  background: $danger-lt;
+  color: $danger;
+  font-size: 0.82rem;
+  font-weight: 600;
+  cursor: pointer;
+  font-family: 'Poppins', sans-serif;
+  transition: background 0.15s, border-color 0.15s, transform 0.1s;
+
+  i { font-size: 0.8rem; }
+
+  &:hover {
+    background: $danger;
+    border-color: $danger;
+    color: white;
+    transform: translateY(-1px);
+  }
+
+  &:active { transform: translateY(0); }
+}
