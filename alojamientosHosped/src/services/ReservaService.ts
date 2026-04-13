@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpParams } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable, catchError, throwError, map } from 'rxjs';
 import { environment } from '../environments/environment';
 import { Reserva, CrearReservaRequest } from '../app/models';
 
@@ -123,6 +123,8 @@ export class ReservaService {
    * Cancela una reserva.
    * El backend valida que la cancelación se haga con al menos
    * 48 horas de anticipación al check-in.
+   * Nota: el backend retorna 200 con body string — se usa responseType: 'text'
+   * para evitar error de parsing JSON.
    *
    * @param id     ID de la reserva a cancelar
    * @param motivo Motivo de la cancelación (obligatorio)
@@ -130,13 +132,14 @@ export class ReservaService {
    */
   cancel(id: number, motivo: string): Observable<void> {
     const params = new HttpParams().set('motivo', motivo);
-    return this.http.delete<void>(`${this.apiUrl}/${id}`, { params }).pipe(
+    return this.http.delete(`${this.apiUrl}/${id}`, { params, responseType: 'text' }).pipe(
+      map(() => void 0),
       catchError(error => {
         const mensaje = typeof error.error === 'string'
           ? error.error
           : (error.error?.mensaje || 'Error al cancelar la reserva');
         return throwError(() => new Error(mensaje));
       })
-    );
+    ) as Observable<void>;
   }
 }

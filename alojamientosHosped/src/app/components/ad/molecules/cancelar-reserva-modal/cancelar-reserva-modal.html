@@ -28,8 +28,8 @@
       <button
         type="button"
         class="cancelar-modal__cerrar"
-        (click)="cancelar.emit()"
-        [disabled]="cargando"
+        (click)="cerrarCancelar.emit()"
+        [attr.disabled]="cargando ? true : null"
         aria-label="Cerrar"
       >
         <i class="fa-solid fa-xmark"></i>
@@ -59,12 +59,14 @@
       </label>
 
       <textarea
+        #motivoRef
         id="motivo-cancelacion"
+        name="motivoCancelacion"
         class="cancelar-modal__textarea"
         [class.cancelar-modal__textarea--error]="motivo.length > 0 && !motivoValido"
-        [(ngModel)]="motivo"
-        [maxlength]="MAX_CHARS"
-        [disabled]="cargando"
+        (input)="onInput($event)"
+        maxlength="300"
+        [attr.disabled]="cargando ? true : null"
         placeholder="Describe el motivo de la cancelación (mínimo 10 caracteres)…"
         rows="4"
         aria-describedby="motivo-hint"
@@ -105,8 +107,8 @@
       <button
         type="button"
         class="cancelar-modal__btn cancelar-modal__btn--volver"
-        (click)="cancelar.emit()"
-        [disabled]="cargando"
+        (click)="cerrarCancelar.emit()"
+        [attr.disabled]="cargando ? true : null"
       >
         Volver
       </button>
@@ -114,7 +116,7 @@
       <button
         type="button"
         class="cancelar-modal__btn cancelar-modal__btn--confirmar"
-        [disabled]="!motivoValido || cargando"
+        [attr.disabled]="(!motivoValido || cargando) ? true : null"
         (click)="onConfirmar()"
       >
         <span *ngIf="!cargando">

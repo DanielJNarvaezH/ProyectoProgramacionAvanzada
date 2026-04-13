@@ -179,7 +179,6 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: () => {
-          // Actualizar estado localmente para evitar recargar toda la lista
           const id = this.reservaSeleccionada!.id!;
           this.reservas = this.reservas.map(r =>
             r.id === id
@@ -187,15 +186,12 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
               : r
           );
           this.aplicarFiltro();
-
           this.cancelando           = false;
           this.mostrarModalCancelar = false;
           this.reservaSeleccionada  = null;
           this.errorCancelacion     = '';
         },
         error: (err: Error) => {
-          // El error se muestra dentro del modal para que el usuario
-          // pueda leer el mensaje sin perder el contexto.
           this.cancelando       = false;
           this.errorCancelacion = err.message || 'No se pudo cancelar la reserva.';
         }

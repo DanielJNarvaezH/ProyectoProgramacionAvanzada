@@ -161,6 +161,6 @@
   [fechaCheckIn]="reservaSeleccionada ? formatearFecha(reservaSeleccionada.startDate) : ''"
   [cargando]="cancelando"
   [error]="errorCancelacion"
-  (confirmar)="confirmarCancelacion($event)"
-  (cancelar)="cerrarModalCancelar()"
+  (confirmarCancelar)="confirmarCancelacion($event)"
+  (cerrarCancelar)="cerrarModalCancelar()"
 ></app-cancelar-reserva-modal>

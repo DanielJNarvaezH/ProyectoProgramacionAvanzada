@@ -13,6 +13,7 @@ import java.time.format.DateTimeFormatter;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ReservaDataMapper {
 
+    @Mapping(target = "id", source = "id")
     @Mapping(target = "guestId", source = "huesped.id")
     @Mapping(target = "lodgingId", source = "alojamiento.id")
     @Mapping(target = "startDate", source = "fechaInicio", qualifiedByName = "localDateToString")
