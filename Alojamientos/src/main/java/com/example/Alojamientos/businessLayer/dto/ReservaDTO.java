@@ -9,6 +9,8 @@ import jakarta.validation.constraints.*;
 @AllArgsConstructor
 public class ReservaDTO {
 
+    private Integer id; // id de la reserva — necesario para cancelación y operaciones por id
+
     @NotNull
     private Integer guestId;
 

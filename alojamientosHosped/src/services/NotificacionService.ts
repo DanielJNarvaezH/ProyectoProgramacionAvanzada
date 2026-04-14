@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, throwError, BehaviorSubject, of } from 'rxjs';
+import { Observable, catchError, throwError, BehaviorSubject, of, map } from 'rxjs';
 import { environment } from '../environments/environment';
 import { Notificacion } from '../app/models/notificacion.model';
 
@@ -23,12 +23,14 @@ export class NotificacionService {
 
   getPorUsuario(usuarioId: number): Observable<Notificacion[]> {
     return this.http.get<Notificacion[]>(`${this.apiUrl}/usuario/${usuarioId}`).pipe(
+      map(lista => lista ?? []),
       catchError(() => of([]))
     );
   }
 
   getNoLeidas(usuarioId: number): Observable<Notificacion[]> {
     return this.http.get<Notificacion[]>(`${this.apiUrl}/usuario/${usuarioId}/no-leidas`).pipe(
+      map(lista => lista ?? []),
       catchError(() => of([]))
     );
   }

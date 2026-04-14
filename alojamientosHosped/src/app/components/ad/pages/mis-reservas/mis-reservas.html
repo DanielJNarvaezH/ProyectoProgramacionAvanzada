@@ -136,7 +136,31 @@
         <span>Motivo: {{ r.cancelReason }}</span>
       </div>
 
+      <!-- RESERV-10: Botón cancelar — visible solo si la reserva es cancelable -->
+      <div class="reserva-card__acciones" *ngIf="puedeCancelar(r)">
+        <button
+          type="button"
+          class="btn-cancelar-reserva"
+          (click)="abrirModalCancelar(r)"
+          title="Cancelar esta reserva"
+        >
+          <i class="fa-solid fa-calendar-xmark"></i>
+          Cancelar reserva
+        </button>
+      </div>
+
     </article>
   </section>
 
 </main>
+
+<!-- RESERV-10: Modal de cancelación de reserva -->
+<app-cancelar-reserva-modal
+  [visible]="mostrarModalCancelar"
+  [nombreAlojamiento]="reservaSeleccionada ? getNombreAlojamiento(reservaSeleccionada.lodgingId) : ''"
+  [fechaCheckIn]="reservaSeleccionada ? formatearFecha(reservaSeleccionada.startDate) : ''"
+  [cargando]="cancelando"
+  [error]="errorCancelacion"
+  (confirmarCancelar)="confirmarCancelacion($event)"
+  (cerrarCancelar)="cerrarModalCancelar()"
+></app-cancelar-reserva-modal>

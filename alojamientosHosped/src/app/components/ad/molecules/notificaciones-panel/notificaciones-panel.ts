@@ -67,7 +67,7 @@ export class NotificacionesPanelComponent implements OnInit, OnDestroy {
   togglePanel(event: Event): void {
     event.stopPropagation();
     this.abierto = !this.abierto;
-    if (this.abierto && this.notificaciones.length === 0) {
+    if (this.abierto && (this.notificaciones ?? []).length === 0) {
       this.cargarNotificaciones();
     }
   }
@@ -79,8 +79,8 @@ export class NotificacionesPanelComponent implements OnInit, OnDestroy {
     this.notifService.getPorUsuario(this.usuarioId)
       .pipe(takeUntil(this.destroy$))
       .subscribe(lista => {
-        this.notificaciones = lista;
-        this.noLeidas = lista.filter(n => !n.read).length;
+        this.notificaciones = lista ?? [];
+        this.noLeidas = this.notificaciones.filter(n => !n.read).length;
         this.notifService.actualizarBadge(this.noLeidas);
         this.cargando = false;
       });
