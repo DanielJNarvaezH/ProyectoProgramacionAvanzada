@@ -2,37 +2,86 @@ import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable, catchError, throwError } from 'rxjs';
 import { environment } from '../environments/environment';
-import { Comentario } from '../app/models/comentario.model';
+import {
+  Comentario,
+  CrearComentarioRequest,
+  ActualizarComentarioRequest,
+  RespuestaComentario,
+  CrearRespuestaRequest,
+  ActualizarRespuestaRequest
+} from '../app/models/comentario.model';
 
 /**
- * ComentarioService — ALOJ-5
+ * ComentarioService — COMENT-1
  *
- * Gestiona las llamadas al backend para los comentarios de alojamientos.
+ * Gestiona las llamadas al backend para comentarios y respuestas
+ * de alojamientos.
  *
- * Endpoints consumidos:
- * - GET  /api/comentarios/alojamiento/:id          → lista de comentarios
- * - GET  /api/comentarios/alojamiento/:id/promedio → promedio de calificaciones
- * - POST /api/comentarios                          → crear comentario
+ * Endpoints de comentarios:
+ *   POST   /api/comentarios                          → create()
+ *   GET    /api/comentarios/:id                      → getById()
+ *   GET    /api/comentarios/alojamiento/:id          → getByAlojamiento()
+ *   GET    /api/comentarios/alojamiento/:id/promedio → getPromedio()
+ *   PUT    /api/comentarios/:id                      → update()
+ *   DELETE /api/comentarios/:id                      → delete()
+ *
+ * Endpoints de respuestas (anfitrión):
+ *   POST   /api/respuestas-comentarios               → respond()
+ *   GET    /api/respuestas-comentarios/:id           → getRespuestaById()
+ *   GET    /api/respuestas-comentarios/comentario/:id → getRespuestasByComentario()
+ *   PUT    /api/respuestas-comentarios/:id           → updateRespuesta()
+ *   DELETE /api/respuestas-comentarios/:id           → deleteRespuesta()
  */
 @Injectable({
   providedIn: 'root'
 })
 export class ComentarioService {
 
-  private readonly apiUrl = `${environment.apiUrl}/comentarios`;
+  private readonly apiUrl        = `${environment.apiUrl}/comentarios`;
+  private readonly respuestasUrl = `${environment.apiUrl}/respuestas-comentarios`;
 
   constructor(private http: HttpClient) {}
 
-  // ─────────────────────────────────────────────────────────────────
-  // LISTAR POR ALOJAMIENTO
-  // ─────────────────────────────────────────────────────────────────
+  // ── Comentarios ───────────────────────────────────────────────
 
+  /**
+   * Crea un nuevo comentario para un alojamiento.
+   * Solo huéspedes con reserva completada pueden comentar (validado en backend).
+   */
+  create(comentario: CrearComentarioRequest): Observable<Comentario> {
+    return this.http.post<Comentario>(this.apiUrl, comentario).pipe(
+      catchError(error => {
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || 'Error al publicar el comentario');
+        return throwError(() => new Error(mensaje));
+      })
+    );
+  }
+
+  /**
+   * Obtiene un comentario por su ID.
+   */
+  getById(id: number): Observable<Comentario> {
+    return this.http.get<Comentario>(`${this.apiUrl}/${id}`).pipe(
+      catchError(error => {
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || `Comentario con ID ${id} no encontrado`);
+        return throwError(() => new Error(mensaje));
+      })
+    );
+  }
+
+  /**
+   * Lista todos los comentarios de un alojamiento.
+   * Retorna error controlado 'SIN_COMENTARIOS' si no hay ninguno (404).
+   */
   getByAlojamiento(alojamientoId: number): Observable<Comentario[]> {
     return this.http
       .get<Comentario[]>(`${this.apiUrl}/alojamiento/${alojamientoId}`)
       .pipe(
         catchError(error => {
-          // 404 = sin comentarios → devolvemos array vacío como error controlado
           if (error.status === 404) {
             return throwError(() => new Error('SIN_COMENTARIOS'));
           }
@@ -44,10 +93,10 @@ export class ComentarioService {
       );
   }
 
-  // ─────────────────────────────────────────────────────────────────
-  // PROMEDIO DE CALIFICACIONES
-  // ─────────────────────────────────────────────────────────────────
-
+  /**
+   * Obtiene el promedio de calificaciones de un alojamiento.
+   * Retorna error controlado 'SIN_CALIFICACIONES' si no hay comentarios (404).
+   */
   getPromedio(alojamientoId: number): Observable<number> {
     return this.http
       .get<number>(`${this.apiUrl}/alojamiento/${alojamientoId}/promedio`)
@@ -64,20 +113,111 @@ export class ComentarioService {
       );
   }
 
-  // ─────────────────────────────────────────────────────────────────
-  // CREAR COMENTARIO
-  // ─────────────────────────────────────────────────────────────────
+  /**
+   * Actualiza el texto de un comentario existente.
+   * Solo el autor del comentario puede actualizarlo (validado en backend).
+   */
+  update(id: number, request: ActualizarComentarioRequest): Observable<Comentario> {
+    return this.http.put<Comentario>(`${this.apiUrl}/${id}`, request).pipe(
+      catchError(error => {
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || 'Error al actualizar el comentario');
+        return throwError(() => new Error(mensaje));
+      })
+    );
+  }
 
-  crear(comentario: Omit<Comentario, 'id' | 'fecha'>): Observable<Comentario> {
+  /**
+   * Elimina un comentario por su ID.
+   * Solo el autor o un admin pueden eliminarlo (validado en backend).
+   */
+  delete(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
+      catchError(error => {
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || 'Error al eliminar el comentario');
+        return throwError(() => new Error(mensaje));
+      })
+    );
+  }
+
+  // ── Respuestas del anfitrión ──────────────────────────────────
+
+  /**
+   * Crea una respuesta de anfitrión a un comentario.
+   * Solo el anfitrión dueño del alojamiento puede responder (validado en backend).
+   */
+  respond(respuesta: CrearRespuestaRequest): Observable<RespuestaComentario> {
+    return this.http.post<RespuestaComentario>(this.respuestasUrl, respuesta).pipe(
+      catchError(error => {
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || 'Error al publicar la respuesta');
+        return throwError(() => new Error(mensaje));
+      })
+    );
+  }
+
+  /**
+   * Obtiene una respuesta por su ID.
+   */
+  getRespuestaById(id: number): Observable<RespuestaComentario> {
+    return this.http.get<RespuestaComentario>(`${this.respuestasUrl}/${id}`).pipe(
+      catchError(error => {
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || `Respuesta con ID ${id} no encontrada`);
+        return throwError(() => new Error(mensaje));
+      })
+    );
+  }
+
+  /**
+   * Lista todas las respuestas de un comentario.
+   */
+  getRespuestasByComentario(comentarioId: number): Observable<RespuestaComentario[]> {
     return this.http
-      .post<Comentario>(this.apiUrl, comentario)
+      .get<RespuestaComentario[]>(`${this.respuestasUrl}/comentario/${comentarioId}`)
       .pipe(
         catchError(error => {
+          if (error.status === 404) {
+            return throwError(() => new Error('SIN_RESPUESTAS'));
+          }
           const mensaje = typeof error.error === 'string'
             ? error.error
-            : (error.error?.mensaje || 'Error al publicar el comentario');
+            : (error.error?.mensaje || 'Error al obtener las respuestas');
           return throwError(() => new Error(mensaje));
         })
       );
+  }
+
+  /**
+   * Actualiza el texto de una respuesta existente.
+   */
+  updateRespuesta(id: number, request: ActualizarRespuestaRequest): Observable<RespuestaComentario> {
+    return this.http.put<RespuestaComentario>(`${this.respuestasUrl}/${id}`, request).pipe(
+      catchError(error => {
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || 'Error al actualizar la respuesta');
+        return throwError(() => new Error(mensaje));
+      })
+    );
+  }
+
+  /**
+   * Elimina una respuesta por su ID.
+   */
+  deleteRespuesta(id: number): Observable<void> {
+    return this.http.delete<void>(`${this.respuestasUrl}/${id}`).pipe(
+      catchError(error => {
+        const mensaje = typeof error.error === 'string'
+          ? error.error
+          : (error.error?.mensaje || 'Error al eliminar la respuesta');
+        return throwError(() => new Error(mensaje));
+      })
+    );
   }
 }
