@@ -1,0 +1,98 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// StarRatingComponent — Átomo (COMENT-3)
+// Estilos del selector interactivo de estrellas
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Variables del sistema de diseño del proyecto ──────────────────────────────
+$star-color-active : #FBBF24; // amarillo — estrella seleccionada / hover
+$star-color-empty  : #D1D5DB; // gris claro — estrella sin seleccionar
+$star-color-hover  : #F59E0B; // amarillo oscuro — hover
+$transition        : color 0.15s ease, transform 0.12s ease;
+
+// ── Tamaños disponibles ───────────────────────────────────────────────────────
+$sizes: (
+  'sm': 1rem,
+  'md': 1.35rem,
+  'lg': 1.75rem,
+);
+
+// ── Contenedor ────────────────────────────────────────────────────────────────
+.star-rating {
+  display        : inline-flex;
+  align-items    : center;
+  gap            : 0.15rem;
+
+  // ── Modificadores de tamaño ─────────────────────────────────────────────
+  @each $name, $size in $sizes {
+    &--#{$name} .star-rating__star i {
+      font-size: $size;
+    }
+  }
+
+  // ── Modo solo lectura ───────────────────────────────────────────────────
+  &--readonly {
+    cursor: default;
+    pointer-events: none;
+
+    .star-rating__star {
+      cursor: default;
+    }
+  }
+
+  // ── Estrella (botón) ────────────────────────────────────────────────────
+  &__star {
+    background : none;
+    border     : none;
+    padding    : 0.1rem;
+    margin     : 0;
+    cursor     : pointer;
+    line-height: 1;
+    outline    : none;
+    transition : transform 0.12s ease;
+
+    // estado focus visible (accesibilidad teclado)
+    &:focus-visible {
+      outline       : 2px solid #9B5CFF;
+      outline-offset: 2px;
+      border-radius : 3px;
+    }
+
+    // Ícono base — vacía
+    i {
+      color      : $star-color-empty;
+      transition : $transition;
+      display    : block;
+    }
+
+    // Estrella activa (seleccionada o dentro del rango hover)
+    &--active i {
+      color: $star-color-active;
+    }
+
+    // Efecto hover sobre el grupo
+    &--hover i {
+      color    : $star-color-hover;
+      transform: scale(1.15);
+    }
+
+    // Micro-animación al seleccionar
+    &:active i {
+      transform: scale(0.9);
+    }
+
+    // Hover individual cuando no está readonly
+    &:not([disabled]):hover i {
+      transform: scale(1.15);
+    }
+  }
+
+  // ── Label descriptivo ───────────────────────────────────────────────────
+  &__label {
+    margin-left : 0.5rem;
+    font-size   : 0.8rem;
+    color       : #64748b;
+    white-space : nowrap;
+    transition  : color 0.15s;
+    user-select : none;
+  }
+}

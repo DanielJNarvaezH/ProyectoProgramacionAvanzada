@@ -1,0 +1,43 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     StarRatingComponent — Átomo (COMENT-3)
+     Rating interactivo de 1-5 estrellas con selección visual.
+     ───────────────────────────────────────────────────────────────────────── -->
+
+<div
+  class="star-rating"
+  [class]="'star-rating--' + size"
+  [class.star-rating--readonly]="readonly"
+  role="group"
+  [attr.aria-label]="'Calificación: ' + ratingLabel"
+  (mouseleave)="onMouseLeave()"
+>
+
+  <!-- ── Estrellas ──────────────────────────────────────────────────────── -->
+  <button
+    *ngFor="let star of stars"
+    type="button"
+    class="star-rating__star"
+    [class.star-rating__star--active]="isActive(star)"
+    [class.star-rating__star--hover]="hoverIndex >= star && !readonly"
+    [disabled]="readonly"
+    [attr.aria-label]="starLabels[star - 1] + ' (' + star + ' de 5)'"
+    [attr.aria-pressed]="rating === star"
+    (click)="select(star)"
+    (mouseenter)="onMouseEnter(star)"
+  >
+    <!-- Estrella llena (activa / hover) -->
+    <i *ngIf="isActive(star)"  class="fa-solid fa-star"></i>
+    <!-- Estrella vacía -->
+    <i *ngIf="!isActive(star)" class="fa-regular fa-star"></i>
+  </button>
+
+  <!-- ── Label opcional ──────────────────────────────────────────────────── -->
+  <span
+    *ngIf="showLabel"
+    class="star-rating__label"
+    aria-live="polite"
+  >
+    {{ ratingLabel }}
+  </span>
+
+</div>

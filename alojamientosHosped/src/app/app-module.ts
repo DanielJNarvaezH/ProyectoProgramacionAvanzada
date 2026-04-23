@@ -24,6 +24,7 @@ import { ButtonComponent }   from './components/ad/atoms/button/button';
 import { LabelComponent }    from './components/ad/atoms/label/label';
 import { InputComponent }    from './components/ad/atoms/input/input';
 import { IconComponent }     from './components/ad/atoms/icon/icon';
+import { StarRatingComponent } from './components/ad/atoms/star-rating/star-rating'; // COMENT-3
 
 // -- Moleculas
 import { InputFieldComponent }       from './components/ad/molecules/input-field/input-field';
@@ -76,6 +77,7 @@ import { LazyImgDirective } from './directives/lazy-img.directive';
     LabelComponent,
     InputComponent,
     IconComponent,
+    StarRatingComponent,        // COMENT-3
     // Moleculas
     InputFieldComponent,
     PasswordFieldComponent,

@@ -225,6 +225,9 @@
             Comentarios
             <span *ngIf="comentarios.length > 0" class="badge">{{ comentarios.length }}</span>
           </h2>
+          <!-- PRUEBA COMENT-3 -->
+          <app-star-rating [showLabel]="true" size="lg"></app-star-rating>
+          <app-star-rating [rating]="3" [readonly]="true" [showLabel]="true"></app-star-rating>
           <ng-container *ngIf="comentarios.length > 0; else sinComentarios">
             <div class="comentarios-lista">
               <app-comentario-card
