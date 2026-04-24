@@ -1,0 +1,142 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     ComentarioFormComponent — Molécula (COMENT-4)
+     Formulario de comentario post-reserva.
+     Solo se activa cuando reserva.status === 'COMPLETADA'.
+     ───────────────────────────────────────────────────────────────────────── -->
+
+<div class="comentario-form-wrapper">
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       CASO 1: La reserva NO está completada → banner informativo
+       ══════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="!puedecomentar" class="comentario-form__bloqueado">
+    <i class="fa-solid fa-lock comentario-form__bloqueado-icon"></i>
+    <div>
+      <p class="comentario-form__bloqueado-titulo">Comentario no disponible</p>
+      <p class="comentario-form__bloqueado-sub">
+        Solo puedes dejar una reseña cuando tu estancia haya sido
+        <strong>completada</strong>.
+      </p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       CASO 2: Publicado exitosamente → confirmación
+       ══════════════════════════════════════════════════════════════════ -->
+  <div *ngIf="puedecomentar && publicado" class="comentario-form__exito" role="alert">
+    <i class="fa-solid fa-circle-check comentario-form__exito-icon"></i>
+    <div>
+      <p class="comentario-form__exito-titulo">¡Gracias por tu reseña!</p>
+      <p class="comentario-form__exito-sub">Tu comentario ha sido publicado.</p>
+    </div>
+  </div>
+
+  <!-- ══════════════════════════════════════════════════════════════════
+       CASO 3: Reserva COMPLETADA y aún no publicado → formulario activo
+       ══════════════════════════════════════════════════════════════════ -->
+  <form
+    *ngIf="puedecomentar && !publicado"
+    class="comentario-form"
+    [formGroup]="form"
+    (ngSubmit)="publicar()"
+    novalidate
+  >
+
+    <h3 class="comentario-form__titulo">
+      <i class="fa-solid fa-pen-to-square"></i>
+      Deja tu reseña
+    </h3>
+    <p class="comentario-form__sub">
+      Comparte tu experiencia con otros viajeros.
+    </p>
+
+    <!-- ── Calificación con estrellas (COMENT-3) ─────────────────────── -->
+    <div class="comentario-form__campo">
+      <label class="comentario-form__label">
+        Calificación <span class="comentario-form__requerido">*</span>
+      </label>
+
+      <app-star-rating
+        formControlName="rating"
+        size="lg"
+        [showLabel]="true"
+        (ratingChange)="onRatingChange($event)"
+      ></app-star-rating>
+
+      <!-- Error: no seleccionó estrella -->
+      <p
+        *ngIf="ratingInvalido"
+        class="comentario-form__error"
+        role="alert"
+      >
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        Selecciona una calificación de 1 a 5 estrellas.
+      </p>
+    </div>
+
+    <!-- ── Textarea de comentario ─────────────────────────────────────── -->
+    <div class="comentario-form__campo">
+      <label for="comentario-text" class="comentario-form__label">
+        Comentario <span class="comentario-form__requerido">*</span>
+      </label>
+
+      <textarea
+        id="comentario-text"
+        formControlName="text"
+        class="comentario-form__textarea"
+        [class.comentario-form__textarea--error]="textoInvalido"
+        rows="4"
+        [maxlength]="MAX_TEXT"
+        placeholder="Cuéntanos cómo fue tu estancia: ubicación, limpieza, atención del anfitrión..."
+        aria-describedby="char-count text-error"
+      ></textarea>
+
+      <!-- Contador de caracteres -->
+      <div class="comentario-form__contador" id="char-count" aria-live="polite">
+        <span [class.comentario-form__contador--limite]="charCount >= MAX_TEXT">
+          {{ charCount }} / {{ MAX_TEXT }}
+        </span>
+      </div>
+
+      <!-- Error del textarea -->
+      <p
+        *ngIf="textoInvalido"
+        id="text-error"
+        class="comentario-form__error"
+        role="alert"
+      >
+        <i class="fa-solid fa-triangle-exclamation"></i>
+        {{ textoError }}
+      </p>
+    </div>
+
+    <!-- ── Error de backend ───────────────────────────────────────────── -->
+    <div
+      *ngIf="errorEnvio"
+      class="comentario-form__error-backend"
+      role="alert"
+    >
+      <i class="fa-solid fa-circle-xmark"></i>
+      {{ errorEnvio }}
+    </div>
+
+    <!-- ── Botón de envío ─────────────────────────────────────────────── -->
+    <button
+      type="submit"
+      class="comentario-form__btn"
+      [class.comentario-form__btn--cargando]="enviando"
+      [disabled]="enviando"
+    >
+      <span *ngIf="!enviando">
+        <i class="fa-solid fa-paper-plane"></i>
+        Publicar reseña
+      </span>
+      <span *ngIf="enviando">
+        <i class="fa-solid fa-spinner fa-spin"></i>
+        Publicando…
+      </span>
+    </button>
+
+  </form>
+
+</div>

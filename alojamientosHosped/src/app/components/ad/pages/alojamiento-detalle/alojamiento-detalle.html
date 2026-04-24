@@ -1,6 +1,7 @@
 <!-- ─────────────────────────────────────────────────────────────────────────
-     AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8 + nav prev/next + ALOJ-13
+     AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8 + nav prev/next + ALOJ-13 + ALOJ-21 + COMENT-4
      ALOJ-13: botón Eliminar con modal de confirmación visible solo para el dueño
+     COMENT-4: formulario de comentario visible solo si reserva COMPLETADA
      ───────────────────────────────────────────────────────────────────────── -->
 <app-navbar></app-navbar>
 
@@ -218,13 +219,25 @@
 
         <hr class="divider" />
 
-        <!-- Comentarios -->
+        <!-- ── Comentarios ──────────────────────────────────────────────── -->
         <section class="detalle-seccion" aria-labelledby="com-title">
           <h2 id="com-title" class="detalle-seccion__titulo">
             <i class="fa-solid fa-comments"></i>
             Comentarios
             <span *ngIf="comentarios.length > 0" class="badge">{{ comentarios.length }}</span>
           </h2>
+
+          <!-- COMENT-4: Formulario de reseña -->
+          <!-- Se muestra solo si el usuario tiene una reserva COMPLETADA en este alojamiento -->
+          <app-comentario-form
+            *ngIf="reservaCompletada"
+            [reserva]="reservaCompletada"
+            [alojamientoId]="alojamiento.id!"
+            (comentarioPublicado)="onNuevoComentario($event)"
+            class="detalle-comentario-form"
+          ></app-comentario-form>
+
+          <!-- Lista de comentarios existentes -->
           <ng-container *ngIf="comentarios.length > 0; else sinComentarios">
             <div class="comentarios-lista">
               <app-comentario-card

@@ -13,9 +13,10 @@ import { FavoritoService }            from '../../../../../services/FavoritoServ
 import { ReservaService }             from '../../../../../services/ReservaService';  // RESERV-4
 
 import { Alojamiento, Imagen, Comentario, AlojamientoServicio } from '../../../../models';
+import { Reserva } from '../../../../models/reserva.model'; // COMENT-4
 
 /**
- * AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8 + nav prev/next + ALOJ-13 + ALOJ-21
+ * AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8 + nav prev/next + ALOJ-13 + ALOJ-21 + COMENT-4
  *
  * ALOJ-13: Botón Eliminar con modal de confirmación visible solo
  * para el anfitrión dueño del alojamiento. Tras eliminar redirige
@@ -23,6 +24,10 @@ import { Alojamiento, Imagen, Comentario, AlojamientoServicio } from '../../../.
  *
  * ALOJ-21: Botón de favorito (corazón) visible para usuarios USUARIO.
  * Verifica el estado al cargar y permite agregar/quitar con un clic.
+ *
+ * COMENT-4: Formulario de comentario post-reserva. Se muestra solo
+ * si el usuario autenticado tiene una reserva COMPLETADA para este
+ * alojamiento. Al publicar, el nuevo comentario se antepone a la lista.
  */
 @Component({
   selector: 'app-alojamiento-detalle',
@@ -55,6 +60,11 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
   esFavorito       = false;
   toggleandoFav    = false;
 
+  // ── COMENT-4: Reserva completada del usuario ──────────────────────
+  /** Reserva con estado COMPLETADA del usuario para este alojamiento.
+   *  null si no tiene ninguna → el formulario de comentario no se muestra. */
+  reservaCompletada: Reserva | null = null;
+
   private destroy$ = new Subject<void>();
 
   constructor(
@@ -67,7 +77,7 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     private authService:              AuthService,
     private mapService:               MapService,
     private favoritoService:          FavoritoService,  // ALOJ-21
-    private reservaService:           ReservaService    // RESERV-4
+    private reservaService:           ReservaService    // RESERV-4 / COMENT-4
   ) {}
 
   ngOnInit(): void {
@@ -195,8 +205,6 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
           this.numGuests           = 1;
         },
         error: (err: Error) => {
-          // El error se muestra dentro del modal; no se cierra para
-          // que el usuario pueda leer el mensaje en contexto.
           this.enviandoReserva = false;
           this.errorReserva    = err.message || 'No se pudo completar la reserva.';
         }
@@ -242,12 +250,9 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
   }
 
   irAEditar(): void {
-    // Fix nav: pasar origen (URL del detalle) + origenDetalle (de dónde vino el usuario
-    // al detalle, p.ej. /mis-alojamientos) para que al volver del editar el detalle
-    // restaure tanto las flechas prev/next como el destino correcto del botón Volver.
     const queryParams: Record<string, string> = {
       origen:        `/alojamientos/${this.alojamiento!.id}`,
-      origenDetalle: this.origen   // preserva /mis-alojamientos o /alojamientos
+      origenDetalle: this.origen
     };
     if (this.idsContexto.length > 1) {
       queryParams['ids'] = this.idsContexto.join(',');
@@ -283,7 +288,6 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
         next: () => {
           this.eliminando           = false;
           this.mostrarModalEliminar = false;
-          // Redirigir al panel del anfitrión o al listado
           this.router.navigate(['/mis-alojamientos']);
         },
         error: (err: Error) => {
@@ -309,6 +313,8 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
           this.cargarDatosSoporte(id);
           // ALOJ-21: verificar si el usuario ya marcó este alojamiento como favorito
           this.verificarFavorito(id);
+          // COMENT-4: buscar si el usuario tiene reserva COMPLETADA para este alojamiento
+          this.cargarReservaCompletada(id);
         },
         error: (err) => {
           this.error    = err.message || 'No se pudo cargar el alojamiento';
@@ -391,6 +397,40 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
       error: () => { this.toggleandoFav = false; }
     });
   }
+
+  // ── COMENT-4: Reserva completada ─────────────────────────────────
+
+  /**
+   * Busca entre las reservas del usuario autenticado si existe alguna
+   * con estado COMPLETADA para el alojamiento actual.
+   * Solo aplica a usuarios con rol USUARIO (los anfitriones no comentan).
+   */
+  private cargarReservaCompletada(alojamientoId: number): void {
+    const usuario = this.authService.getUsuario();
+    if (!usuario?.id || !this.puedeReservar) return;
+
+    this.reservaService.getByUser(usuario.id)
+      .pipe(
+        takeUntil(this.destroy$),
+        catchError(() => of([] as Reserva[]))
+      )
+      .subscribe((reservas: Reserva[]) => {
+        this.reservaCompletada = reservas.find(
+          r => r.lodgingId === alojamientoId && r.status === 'COMPLETADA'
+        ) ?? null;
+      });
+  }
+
+  /**
+   * COMENT-4: Handler del Output (comentarioPublicado) del formulario.
+   * Antepone el nuevo comentario a la lista para que aparezca de primero
+   * sin necesidad de recargar la página.
+   */
+  onNuevoComentario(comentario: Comentario): void {
+    this.comentarios = [comentario, ...this.comentarios];
+  }
+
+  // ── Utilidades de vista ──────────────────────────────────────────
 
   volver(): void { this.router.navigate([this.origen]); }
 
