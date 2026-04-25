@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
-import { Observable, catchError, throwError } from 'rxjs';
+import { Observable, catchError, throwError, of } from 'rxjs';
 import { environment } from '../environments/environment';
 import {
   Comentario,
@@ -75,7 +75,7 @@ export class ComentarioService {
 
   /**
    * Lista todos los comentarios de un alojamiento.
-   * Retorna error controlado 'SIN_COMENTARIOS' si no hay ninguno (404).
+   * Retorna array vacío si no hay ninguno (404).
    */
   getByAlojamiento(alojamientoId: number): Observable<Comentario[]> {
     return this.http
@@ -83,7 +83,7 @@ export class ComentarioService {
       .pipe(
         catchError(error => {
           if (error.status === 404) {
-            return throwError(() => new Error('SIN_COMENTARIOS'));
+            return of([] as Comentario[]);
           }
           const mensaje = typeof error.error === 'string'
             ? error.error
@@ -95,27 +95,18 @@ export class ComentarioService {
 
   /**
    * Obtiene el promedio de calificaciones de un alojamiento.
-   * Retorna error controlado 'SIN_CALIFICACIONES' si no hay comentarios (404).
+   * Retorna 0 si no hay comentarios (404) o cualquier error.
    */
   getPromedio(alojamientoId: number): Observable<number> {
     return this.http
       .get<number>(`${this.apiUrl}/alojamiento/${alojamientoId}/promedio`)
       .pipe(
-        catchError(error => {
-          if (error.status === 404) {
-            return throwError(() => new Error('SIN_CALIFICACIONES'));
-          }
-          const mensaje = typeof error.error === 'string'
-            ? error.error
-            : (error.error?.mensaje || 'Error al obtener el promedio');
-          return throwError(() => new Error(mensaje));
-        })
+        catchError(() => of(0))
       );
   }
 
   /**
    * Actualiza el texto de un comentario existente.
-   * Solo el autor del comentario puede actualizarlo (validado en backend).
    */
   update(id: number, request: ActualizarComentarioRequest): Observable<Comentario> {
     return this.http.put<Comentario>(`${this.apiUrl}/${id}`, request).pipe(
@@ -130,7 +121,6 @@ export class ComentarioService {
 
   /**
    * Elimina un comentario por su ID.
-   * Solo el autor o un admin pueden eliminarlo (validado en backend).
    */
   delete(id: number): Observable<void> {
     return this.http.delete<void>(`${this.apiUrl}/${id}`).pipe(
@@ -147,7 +137,6 @@ export class ComentarioService {
 
   /**
    * Crea una respuesta de anfitrión a un comentario.
-   * Solo el anfitrión dueño del alojamiento puede responder (validado en backend).
    */
   respond(respuesta: CrearRespuestaRequest): Observable<RespuestaComentario> {
     return this.http.post<RespuestaComentario>(this.respuestasUrl, respuesta).pipe(
@@ -176,6 +165,7 @@ export class ComentarioService {
 
   /**
    * Lista todas las respuestas de un comentario.
+   * Retorna array vacío si no hay ninguna (404).
    */
   getRespuestasByComentario(comentarioId: number): Observable<RespuestaComentario[]> {
     return this.http
@@ -183,7 +173,7 @@ export class ComentarioService {
       .pipe(
         catchError(error => {
           if (error.status === 404) {
-            return throwError(() => new Error('SIN_RESPUESTAS'));
+            return of([] as RespuestaComentario[]);
           }
           const mensaje = typeof error.error === 'string'
             ? error.error

@@ -304,10 +304,13 @@
     <app-alojamiento-card
       *ngFor="let alojamiento of alojamientosPagina; trackBy: trackById"
       [alojamiento]="alojamiento"
+      [calificacion]="getPromedio(alojamiento.id!)"
+      [totalResenas]="getTotalResenas(alojamiento.id!)"
       [todos]="idsAlojamientosFiltrados"
       class="lista-grid__item"
     >
     </app-alojamiento-card>
+
   </section>
 
   <!-- ── Paginación ── -->

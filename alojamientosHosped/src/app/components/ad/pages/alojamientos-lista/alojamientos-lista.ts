@@ -1,27 +1,17 @@
 import { Component, OnInit, OnDestroy } from '@angular/core';
 import { Subject, forkJoin, of, takeUntil } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-import { AlojamientoService } from '../../../../../services/AlojamientoService';
+import { AlojamientoService }        from '../../../../../services/AlojamientoService';
 import { AlojamientoServicioService } from '../../../../../services/AlojamientoServicioService';
-import { FiltroListaService } from '../../../../../services/FiltroListaService';
+import { FiltroListaService }         from '../../../../../services/FiltroListaService';
+import { ComentarioService }          from '../../../../../services/ComentarioService';
 import { Alojamiento, ServicioDisponible, AlojamientoServicio } from '../../../../models';
 
 /**
- * AlojamientosListaPageComponent — ALOJ-4 / ALOJ-6 / ALOJ-18 / ALOJ-19 / ALOJ-23
+ * AlojamientosListaPageComponent — ALOJ-4 / ALOJ-6 / ALOJ-18 / ALOJ-19 / ALOJ-23 / COMENT-5
  *
- * ALOJ-23: Ordenamiento de resultados por precio y capacidad.
- *
- * ALOJ-18: Búsqueda por ubicación — botón "Cerca de mí" que usa la
- *   Geolocation API del navegador y llama al endpoint
- *   GET /api/alojamientos/cercanos?lat=&lng=&radio=
- *
- * ALOJ-19: Filtros avanzados frontend sobre el array ya cargado:
- *   - Rango de precio (precioMin / precioMax)
- *   - Capacidad mínima de huéspedes
- *   - Servicios disponibles (checkboxes múltiples)
- * El estado de los filtros se preserva entre navegaciones gracias
- * a FiltroListaService (lista → detalle → lista mantiene filtros).
- * Paginación frontend: ITEMS_POR_PAGINA alojamientos por página.
+ * COMENT-5: Carga promedios de calificación por alojamiento para mostrarlos
+ *   en las tarjetas del listado.
  */
 @Component({
   selector: 'app-alojamientos-lista',
@@ -40,12 +30,15 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
   cargando = false;
   error    = '';
 
+  // COMENT-5: Mapa alojamientoId → promedio de calificación
+  promedios = new Map<number, number>();
+  totalResenas = new Map<number, number>();
+
   // ── ALOJ-18: Búsqueda por ubicación ──────────────────────────
   buscandoUbicacion = false;
   errorUbicacion    = '';
   readonly RADIOS_DISPONIBLES = [5, 10, 25, 50];
 
-  // Estado persistente delegado a FiltroListaService
   get modoUbicacion(): boolean  { return this.filtroSvc.modoUbicacion; }
   set modoUbicacion(v: boolean) { this.filtroSvc.modoUbicacion = v; }
 
@@ -79,15 +72,14 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
   get ordenamiento(): string { return this.filtroSvc.ordenamiento; }
   set ordenamiento(v: any)   { this.filtroSvc.ordenamiento = v; }
 
-  // Mapa servicioId → Set de alojamientoIds que lo tienen (ALOJ-19)
   private mapaServicioAlojamientos = new Map<number, Set<number>>();
-
   private destroy$ = new Subject<void>();
 
   constructor(
     private alojamientoService:     AlojamientoService,
     private alojamientoServicioSvc: AlojamientoServicioService,
-    private filtroSvc:              FiltroListaService
+    private filtroSvc:              FiltroListaService,
+    private comentarioService:      ComentarioService
   ) {}
 
   ngOnInit(): void {
@@ -118,8 +110,10 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
           this.cargando             = false;
           this.construirMapaServicios(this.serviciosDisponibles.map(s => s.id));
 
+          // COMENT-5: cargar promedios en paralelo
+          this.cargarPromedios(alojamientos.map(a => a.id!).filter(id => !!id));
+
           if (this.filtroSvc.modoUbicacion && this.filtroSvc.alojamientosCercanos.length > 0) {
-            // Restaurar modo ubicación: filtrar sobre los cercanos guardados
             this.alojamientos          = this.filtroSvc.alojamientosCercanos;
             this.alojamientosFiltrados = this.filtroSvc.alojamientosCercanos;
             if (this.filtroSvc.hayFiltroActivo) this.filtrar();
@@ -137,6 +131,39 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
   }
 
   cargarAlojamientos(): void { this.cargarDatos(); }
+
+  // ── COMENT-5: Cargar promedios de calificación ────────────────
+
+  private cargarPromedios(ids: number[]): void {
+    if (ids.length === 0) return;
+
+    const peticionesPromedio = ids.map(id =>
+      this.comentarioService.getPromedio(id).pipe(catchError(() => of(0)))
+    );
+    const peticionesComentarios = ids.map(id =>
+      this.comentarioService.getByAlojamiento(id).pipe(catchError(() => of([])))
+    );
+
+    forkJoin(peticionesPromedio)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(promedios => {
+        promedios.forEach((p, idx) => this.promedios.set(ids[idx], p ?? 0));
+      });
+
+    forkJoin(peticionesComentarios)
+      .pipe(takeUntil(this.destroy$))
+      .subscribe(resultados => {
+        resultados.forEach((lista, idx) => this.totalResenas.set(ids[idx], lista.length));
+      });
+  }
+
+  /** Devuelve el promedio de calificación de un alojamiento */
+  getPromedio(id: number): number {
+    return this.promedios.get(id) ?? 0;
+  }
+  getTotalResenas(id: number): number {
+    return this.totalResenas.get(id) ?? 0;
+  }
 
   // ── ALOJ-19: Construir mapa servicioId → Set<alojamientoId> ──
 
@@ -187,7 +214,6 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
       return true;
     });
 
-    // ALOJ-23: Ordenamiento de resultados
     this.alojamientosFiltrados = [...this.alojamientosFiltrados].sort((a, b) => {
       switch (this.ordenamiento) {
         case 'precio-asc':     return a.pricePerNight - b.pricePerNight;
@@ -201,10 +227,9 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
 
   limpiarFiltro(): void {
     const estabaModoUbicacion = this.modoUbicacion;
-    this.filtroSvc.limpiar();   // resetea todo incluyendo modoUbicacion y alojamientosCercanos
+    this.filtroSvc.limpiar();
     this.errorUbicacion = '';
     if (estabaModoUbicacion) {
-      // Si estaba en modo ubicación, recargar todos los alojamientos
       this.cargarDatos();
     } else {
       this.alojamientosFiltrados = this.alojamientos;
@@ -230,25 +255,17 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
     navigator.geolocation.getCurrentPosition(
       (posicion) => {
         const { latitude, longitude } = posicion.coords;
-
         this.alojamientoService.getCercanos(latitude, longitude, this.radioKm)
           .pipe(takeUntil(this.destroy$))
           .subscribe({
             next: (resultados) => {
-              this.buscandoUbicacion = false;
-              this.modoUbicacion     = true;
-
-              // Guardar resultados crudos en el servicio para persistir al volver del detalle
+              this.buscandoUbicacion             = false;
+              this.modoUbicacion                 = true;
               this.filtroSvc.alojamientosCercanos = resultados;
-
-              // Aplicar sobre los cercanos los filtros activos (precio, capacidad, servicios, orden)
-              this.alojamientos          = resultados;
-              this.alojamientosFiltrados = resultados;
-              this.paginaActual          = 1;
-
-              if (this.filtroSvc.hayFiltroActivo) {
-                this.filtrar();
-              }
+              this.alojamientos                  = resultados;
+              this.alojamientosFiltrados         = resultados;
+              this.paginaActual                  = 1;
+              if (this.filtroSvc.hayFiltroActivo) this.filtrar();
             },
             error: (err: Error) => {
               this.buscandoUbicacion = false;
@@ -282,13 +299,12 @@ export class AlojamientosListaPageComponent implements OnInit, OnDestroy {
   }
 
   salirModoUbicacion(): void {
-    this.modoUbicacion                    = false;
-    this.errorUbicacion                   = '';
-    this.filtroSvc.alojamientosCercanos   = [];
-    this.alojamientos                     = [];
-    this.alojamientosFiltrados            = [];
-    this.paginaActual                     = 1;
-    // Recargar todos los alojamientos desde el backend
+    this.modoUbicacion                  = false;
+    this.errorUbicacion                 = '';
+    this.filtroSvc.alojamientosCercanos = [];
+    this.alojamientos                   = [];
+    this.alojamientosFiltrados          = [];
+    this.paginaActual                   = 1;
     this.cargarDatos();
   }
 
