@@ -1,7 +1,7 @@
 <!-- ─────────────────────────────────────────────────────────────────────────
-     AlojamientoDetallePageComponent — ALOJ-5 + ALOJ-8 + nav prev/next + ALOJ-13 + ALOJ-21 + COMENT-4
-     ALOJ-13: botón Eliminar con modal de confirmación visible solo para el dueño
-     COMENT-4: formulario de comentario visible solo si reserva COMPLETADA
+     AlojamientoDetallePageComponent
+     ALOJ-5 + ALOJ-8 + nav prev/next + ALOJ-13 + ALOJ-21 + COMENT-4 + COMENT-7
+     COMENT-7: badge de promedio destacado en header y aside
      ───────────────────────────────────────────────────────────────────────── -->
 <app-navbar></app-navbar>
 
@@ -38,13 +38,11 @@
     <!-- ── Barra de navegación superior ──────────────────────────────────── -->
     <div class="detalle-topbar">
 
-      <!-- Volver al listado -->
       <button (click)="volver()" class="btn-volver" aria-label="Volver al listado">
         <i class="fa-solid fa-arrow-left"></i>
         <span>Volver</span>
       </button>
 
-      <!-- Navegación prev/next -->
       <div *ngIf="hayNavegacion" class="detalle-nav-contexto">
         <button
           type="button"
@@ -71,31 +69,17 @@
         </button>
       </div>
 
-      <!-- Acciones del anfitrión dueño: Editar + Eliminar -->
       <div *ngIf="esAnfitrionDueno" class="detalle-topbar__acciones">
-        <button
-          type="button"
-          (click)="irAEditar()"
-          class="btn-editar"
-          title="Editar este alojamiento"
-        >
+        <button type="button" (click)="irAEditar()" class="btn-editar" title="Editar este alojamiento">
           <i class="fa-solid fa-pen-to-square"></i>
           <span>Editar</span>
         </button>
-
-        <!-- ALOJ-13: botón eliminar -->
-        <button
-          type="button"
-          (click)="abrirModalEliminar()"
-          class="btn-eliminar"
-          title="Eliminar este alojamiento"
-        >
+        <button type="button" (click)="abrirModalEliminar()" class="btn-eliminar" title="Eliminar este alojamiento">
           <i class="fa-solid fa-trash"></i>
           <span>Eliminar</span>
         </button>
       </div>
 
-      <!-- ALOJ-21: Botón favorito — visible solo para usuarios USUARIO -->
       <button
         *ngIf="puedeMarcarFavorito"
         type="button"
@@ -133,17 +117,24 @@
         <header class="detalle-header">
           <div class="detalle-header__top">
             <h1 class="detalle-header__nombre">{{ alojamiento.name }}</h1>
-            <div class="detalle-header__calificacion">
-              <div class="estrellas">
+
+            <!-- COMENT-7: Badge de promedio destacado en el header -->
+            <div
+              class="promedio-badge"
+              [class.promedio-badge--nuevo]="comentarios.length === 0"
+              [attr.aria-label]="'Calificación: ' + promedioLabel + ' — ' + totalResenasLabel"
+            >
+              <span class="promedio-badge__numero">{{ promedioLabel }}</span>
+              <div class="promedio-badge__estrellas">
                 <ng-container *ngFor="let e of estrellas">
-                  <i *ngIf="e === 'full'"  class="fa-solid fa-star estrella estrella--full"></i>
-                  <i *ngIf="e === 'half'"  class="fa-solid fa-star-half-stroke estrella estrella--half"></i>
-                  <i *ngIf="e === 'empty'" class="fa-regular fa-star estrella estrella--empty"></i>
+                  <i *ngIf="e === 'full'"  class="fa-solid fa-star"></i>
+                  <i *ngIf="e === 'half'"  class="fa-solid fa-star-half-stroke"></i>
+                  <i *ngIf="e === 'empty'" class="fa-regular fa-star"></i>
                 </ng-container>
               </div>
-              <span class="detalle-header__promedio">{{ promedioLabel }}</span>
-              <span class="detalle-header__resenas">· {{ totalResenasLabel }}</span>
+              <span class="promedio-badge__resenas">{{ totalResenasLabel }}</span>
             </div>
+
           </div>
 
           <div class="detalle-header__meta">
@@ -228,7 +219,6 @@
           </h2>
 
           <!-- COMENT-4: Formulario de reseña -->
-          <!-- Se muestra solo si el usuario tiene una reserva COMPLETADA en este alojamiento -->
           <app-comentario-form
             *ngIf="reservaCompletada"
             [reserva]="reservaCompletada"
@@ -257,9 +247,8 @@
 
       </div><!-- /detalle-main -->
 
-      <!-- ── Columna derecha: caja de precio — solo para huéspedes (RESERV-3) ── -->
+      <!-- ── Columna derecha: caja de precio — solo para huéspedes ── -->
       <aside class="detalle-aside" *ngIf="puedeReservar">
-        <!-- RESERV-3: Calendario de disponibilidad -->
         <app-calendario-disponibilidad
           [lodgingId]="alojamiento.id!"
           (rangoSeleccionado)="onRangoSeleccionado($event)"
@@ -270,16 +259,21 @@
             <span class="precio-box__valor">${{ alojamiento.pricePerNight | peso }}</span>
             <span class="precio-box__unidad">/ noche</span>
           </div>
-          <div class="precio-box__calificacion">
-            <div class="estrellas estrellas--sm">
+
+          <!-- COMENT-7: Badge compacto de promedio en el aside del huésped -->
+          <div class="promedio-aside">
+            <div class="promedio-aside__estrellas">
               <ng-container *ngFor="let e of estrellas">
-                <i *ngIf="e === 'full'"  class="fa-solid fa-star estrella--full"></i>
-                <i *ngIf="e === 'half'"  class="fa-solid fa-star-half-stroke estrella--half"></i>
-                <i *ngIf="e === 'empty'" class="fa-regular fa-star estrella--empty"></i>
+                <i *ngIf="e === 'full'"  class="fa-solid fa-star"></i>
+                <i *ngIf="e === 'half'"  class="fa-solid fa-star-half-stroke"></i>
+                <i *ngIf="e === 'empty'" class="fa-regular fa-star"></i>
               </ng-container>
             </div>
-            <span>{{ promedioLabel }} · {{ totalResenasLabel }}</span>
+            <span class="promedio-aside__valor">{{ promedioLabel }}</span>
+            <span class="promedio-aside__sep">·</span>
+            <span class="promedio-aside__resenas">{{ totalResenasLabel }}</span>
           </div>
+
           <hr class="divider" />
 
           <!-- RESERV-4: Número de huéspedes -->
@@ -329,19 +323,16 @@
             </div>
           </div>
 
-          <!-- RESERV-4: Hint si no hay fechas seleccionadas -->
           <p class="reserva-hint" *ngIf="noches === 0">
             <i class="fa-regular fa-calendar"></i>
             Selecciona las fechas en el calendario para ver el precio total
           </p>
 
-          <!-- RESERV-4: Error al reservar -->
           <div class="reserva-error" *ngIf="errorReserva">
             <i class="fa-solid fa-circle-exclamation"></i>
             <span>{{ errorReserva }}</span>
           </div>
 
-          <!-- RESERV-4: Confirmación exitosa -->
           <div class="reserva-ok" *ngIf="reservaExitosa">
             <i class="fa-solid fa-circle-check"></i>
             <span>¡Reserva confirmada!
@@ -349,7 +340,6 @@
             </span>
           </div>
 
-          <!-- RESERV-4: Botón Reservar -->
           <button
             class="btn-reservar"
             [disabled]="!formularioValido || enviandoReserva"
@@ -360,7 +350,6 @@
             {{ enviandoReserva ? 'Procesando...' : 'Reservar' }}
           </button>
 
-          <!-- Validación: capacidad excedida -->
           <p class="reserva-warn" *ngIf="numGuests > alojamiento.maxCapacity">
             <i class="fa-solid fa-triangle-exclamation"></i>
             El número de huéspedes excede la capacidad máxima
@@ -371,6 +360,22 @@
       <!-- ── Columna derecha: panel del anfitrión dueño ── -->
       <aside class="detalle-aside" *ngIf="esAnfitrionDueno">
 
+        <!-- COMENT-7: Badge de promedio destacado para el anfitrión -->
+        <div
+          class="promedio-badge promedio-badge--anfitrion"
+          [class.promedio-badge--nuevo]="comentarios.length === 0"
+        >
+          <span class="promedio-badge__numero">{{ promedioLabel }}</span>
+          <div class="promedio-badge__estrellas">
+            <ng-container *ngFor="let e of estrellas">
+              <i *ngIf="e === 'full'"  class="fa-solid fa-star"></i>
+              <i *ngIf="e === 'half'"  class="fa-solid fa-star-half-stroke"></i>
+              <i *ngIf="e === 'empty'" class="fa-regular fa-star"></i>
+            </ng-container>
+          </div>
+          <span class="promedio-badge__resenas">{{ totalResenasLabel }}</span>
+        </div>
+
         <!-- Stats rápidos -->
         <div class="host-stats">
           <div class="host-stat">
@@ -378,12 +383,12 @@
             <span class="host-stat__label">reseñas</span>
           </div>
           <div class="host-stat">
-            <span class="host-stat__valor">{{ promedioLabel }} ★</span>
-            <span class="host-stat__label">promedio</span>
-          </div>
-          <div class="host-stat">
             <span class="host-stat__valor">{{ imagenes.length }}</span>
             <span class="host-stat__label">fotos</span>
+          </div>
+          <div class="host-stat">
+            <span class="host-stat__valor">{{ alojamiento.maxCapacity }}</span>
+            <span class="host-stat__label">huéspedes</span>
           </div>
         </div>
 
@@ -400,7 +405,6 @@
 
           <hr class="divider" />
 
-          <!-- Acciones rápidas -->
           <p class="host-acciones__titulo">Gestión rápida</p>
           <div class="host-acciones">
             <button class="host-accion-btn" (click)="irAEditar()">
@@ -431,7 +435,6 @@
 
 </main>
 
-<!-- fix6: modal extraído a molécula confirm-modal -->
 <app-confirm-modal
   [visible]="mostrarModalEliminar"
   [nombreElemento]="alojamiento?.name || ''"
@@ -441,7 +444,6 @@
   (cancelar)="cerrarModalEliminar()"
 ></app-confirm-modal>
 
-<!-- RESERV-7: Modal de resumen y confirmación de reserva -->
 <app-reserva-resumen-modal
   [visible]="mostrarModalReserva"
   [alojamiento]="alojamiento"
