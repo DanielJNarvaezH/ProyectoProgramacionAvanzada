@@ -1,0 +1,51 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     CalificacionGraficoComponent — Molécula (COMENT-10)
+     Gráfico de barras con distribución porcentual de calificaciones 1-5
+     Solo se renderiza si hay al menos un comentario
+     ───────────────────────────────────────────────────────────────────────── -->
+
+<div *ngIf="comentarios.length > 0" class="cal-grafico" aria-label="Distribución de calificaciones">
+
+  <!-- ── Columna izquierda: promedio destacado ─────────────────────────── -->
+  <div class="cal-grafico__resumen">
+    <span class="cal-grafico__numero">{{ promedioLabel }}</span>
+    <div class="cal-grafico__estrellas" [attr.aria-label]="'Promedio: ' + promedioLabel + ' de 5'">
+      <i class="fa-solid fa-star"></i>
+      <i class="fa-solid fa-star"></i>
+      <i class="fa-solid fa-star"></i>
+      <i class="fa-solid fa-star"></i>
+      <i class="fa-solid fa-star"></i>
+    </div>
+    <span class="cal-grafico__total">{{ totalLabel }}</span>
+  </div>
+
+  <!-- ── Columna derecha: barras de distribución ───────────────────────── -->
+  <div class="cal-grafico__barras" role="list">
+    <div
+      *ngFor="let fila of filas"
+      class="cal-grafico__fila"
+      role="listitem"
+      [attr.aria-label]="fila.stars + ' estrellas: ' + fila.porcentaje + '% (' + fila.cantidad + ' reseñas)'"
+    >
+      <!-- Número de estrellas -->
+      <span class="cal-grafico__stars-label">{{ fila.stars }}</span>
+      <i class="fa-solid fa-star cal-grafico__star-icon"></i>
+
+      <!-- Barra de progreso -->
+      <div class="cal-grafico__barra-track" title="{{ fila.porcentaje }}%">
+        <div
+          class="cal-grafico__barra-fill"
+          [style.width.%]="fila.porcentaje"
+          [class.cal-grafico__barra-fill--vacia]="fila.porcentaje === 0"
+        ></div>
+      </div>
+
+      <!-- Porcentaje -->
+      <span class="cal-grafico__pct">{{ fila.porcentaje }}%</span>
+
+      <!-- Cantidad entre paréntesis -->
+      <span class="cal-grafico__cant">({{ fila.cantidad }})</span>
+    </div>
+  </div>
+
+</div>

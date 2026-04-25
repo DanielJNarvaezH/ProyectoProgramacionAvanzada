@@ -1,7 +1,7 @@
 <!-- ─────────────────────────────────────────────────────────────────────────
      AlojamientoDetallePageComponent
-     ALOJ-5 + ALOJ-8 + nav prev/next + ALOJ-13 + ALOJ-21 + COMENT-4 + COMENT-7
-     COMENT-7: badge de promedio destacado en header y aside
+     ALOJ-5 + ALOJ-8 + nav prev/next + ALOJ-13 + ALOJ-21 + COMENT-4 + COMENT-7 + COMENT-10
+     COMENT-10: gráfico de barras de distribución de calificaciones
      ───────────────────────────────────────────────────────────────────────── -->
 <app-navbar></app-navbar>
 
@@ -217,6 +217,12 @@
             Comentarios
             <span *ngIf="comentarios.length > 0" class="badge">{{ comentarios.length }}</span>
           </h2>
+
+          <!-- COMENT-10: Gráfico de distribución de calificaciones -->
+          <!-- Se muestra solo cuando hay al menos un comentario -->
+          <app-calificacion-grafico
+            [comentarios]="comentarios"
+          ></app-calificacion-grafico>
 
           <!-- COMENT-4: Formulario de reseña -->
           <app-comentario-form

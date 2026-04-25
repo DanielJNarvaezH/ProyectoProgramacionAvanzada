@@ -24,18 +24,19 @@ import { IconComponent }      from './components/ad/atoms/icon/icon';
 import { StarRatingComponent } from './components/ad/atoms/star-rating/star-rating'; // COMENT-3
 
 // -- Moleculas
-import { InputFieldComponent }       from './components/ad/molecules/input-field/input-field';
-import { PasswordFieldComponent }    from './components/ad/molecules/password-field/password-field';
-import { LoginFormComponent }        from './components/ad/molecules/login-form/login-form';
-import { RegisterFormComponent }     from './components/ad/molecules/register-form/register-form';
-import { AlojamientoCardComponent }  from './components/ad/molecules/alojamiento-card/alojamiento-card';
-import { ComentarioCardComponent }   from './components/ad/molecules/comentario-card/comentario-card';
-import { ComentarioFormComponent }   from './components/ad/molecules/comentario-form/comentario-form'; // COMENT-4
-import { ConfirmModalComponent }      from './components/ad/molecules/confirm-modal/confirm-modal';
+import { InputFieldComponent }            from './components/ad/molecules/input-field/input-field';
+import { PasswordFieldComponent }         from './components/ad/molecules/password-field/password-field';
+import { LoginFormComponent }             from './components/ad/molecules/login-form/login-form';
+import { RegisterFormComponent }          from './components/ad/molecules/register-form/register-form';
+import { AlojamientoCardComponent }       from './components/ad/molecules/alojamiento-card/alojamiento-card';
+import { ComentarioCardComponent }        from './components/ad/molecules/comentario-card/comentario-card';
+import { ComentarioFormComponent }        from './components/ad/molecules/comentario-form/comentario-form';         // COMENT-4
+import { CalificacionGraficoComponent }   from './components/ad/molecules/calificacion-grafico/calificacion-grafico'; // COMENT-10
+import { ConfirmModalComponent }           from './components/ad/molecules/confirm-modal/confirm-modal';
 import { CalendarioDisponibilidadComponent } from './components/ad/molecules/calendario-disponibilidad/calendario-disponibilidad';
-import { ReservaResumenModalComponent } from './components/ad/molecules/reserva-resumen-modal/reserva-resumen-modal'; // RESERV-7
-import { CancelarReservaModalComponent } from './components/ad/molecules/cancelar-reserva-modal/cancelar-reserva-modal'; // RESERV-10
-import { NotificacionesPanelComponent } from './components/ad/molecules/notificaciones-panel/notificaciones-panel';
+import { ReservaResumenModalComponent }   from './components/ad/molecules/reserva-resumen-modal/reserva-resumen-modal'; // RESERV-7
+import { CancelarReservaModalComponent }  from './components/ad/molecules/cancelar-reserva-modal/cancelar-reserva-modal'; // RESERV-10
+import { NotificacionesPanelComponent }   from './components/ad/molecules/notificaciones-panel/notificaciones-panel';
 
 // -- Organismos
 import { LoginCardComponent }             from './components/ad/organisms/login-card/login-card';
@@ -74,7 +75,7 @@ import { LazyImgDirective } from './directives/lazy-img.directive';
     LabelComponent,
     InputComponent,
     IconComponent,
-    StarRatingComponent,        // COMENT-3
+    StarRatingComponent,              // COMENT-3
     // Moleculas
     InputFieldComponent,
     PasswordFieldComponent,
@@ -82,13 +83,14 @@ import { LazyImgDirective } from './directives/lazy-img.directive';
     RegisterFormComponent,
     AlojamientoCardComponent,
     ComentarioCardComponent,
-    ComentarioFormComponent,           // COMENT-4
+    ComentarioFormComponent,          // COMENT-4
+    CalificacionGraficoComponent,     // COMENT-10
     ImageUploaderComponent,
     AlojamientoPreviewComponent,
     ConfirmModalComponent,
     CalendarioDisponibilidadComponent,
-    ReservaResumenModalComponent,      // RESERV-7
-    CancelarReservaModalComponent,     // RESERV-10
+    ReservaResumenModalComponent,     // RESERV-7
+    CancelarReservaModalComponent,    // RESERV-10
     NotificacionesPanelComponent,
 
     // Organismos

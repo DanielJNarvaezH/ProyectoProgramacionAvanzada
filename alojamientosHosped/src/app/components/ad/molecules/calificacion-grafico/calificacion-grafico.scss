@@ -1,0 +1,133 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// CalificacionGraficoComponent — Molécula (COMENT-10)
+// Gráfico de barras de distribución de calificaciones
+// ─────────────────────────────────────────────────────────────────────────────
+
+$primary:      #9B5CFF;
+$primary-dark: #7B3FE4;
+$star-color:   #FBBF24;
+$gray-100:     #F1F5F9;
+$gray-200:     #E2E8F0;
+$gray-400:     #94A3B8;
+$gray-600:     #475569;
+$gray-900:     #0F172A;
+$white:        #FFFFFF;
+$radius:       12px;
+
+// ── Contenedor principal ──────────────────────────────────────────────────────
+.cal-grafico {
+  display        : flex;
+  align-items    : center;
+  gap            : 2rem;
+  background     : $white;
+  border         : 1.5px solid #EDE8F9;
+  border-radius  : $radius;
+  padding        : 1.25rem 1.5rem;
+  margin-bottom  : 1.25rem;
+
+  @media (max-width: 520px) {
+    flex-direction: column;
+    align-items   : stretch;
+    gap           : 1rem;
+  }
+
+  // ── Columna izquierda: número grande + estrellas ───────────────────────
+  &__resumen {
+    display        : flex;
+    flex-direction : column;
+    align-items    : center;
+    gap            : 0.3rem;
+    min-width      : 90px;
+    flex-shrink    : 0;
+  }
+
+  &__numero {
+    font-size    : 3rem;
+    font-weight  : 700;
+    color        : $gray-900;
+    line-height  : 1;
+    letter-spacing: -0.03em;
+  }
+
+  &__estrellas {
+    display: flex;
+    gap    : 0.15rem;
+
+    i {
+      font-size: 0.8rem;
+      color    : $star-color;
+    }
+  }
+
+  &__total {
+    font-size : 0.75rem;
+    color     : $gray-400;
+    margin-top: 0.1rem;
+    white-space: nowrap;
+  }
+
+  // ── Columna derecha: lista de barras ──────────────────────────────────
+  &__barras {
+    display       : flex;
+    flex-direction: column;
+    gap           : 0.45rem;
+    flex          : 1;
+  }
+
+  &__fila {
+    display    : flex;
+    align-items: center;
+    gap        : 0.4rem;
+  }
+
+  &__stars-label {
+    font-size  : 0.8rem;
+    font-weight: 600;
+    color      : $gray-600;
+    min-width  : 0.75rem;
+    text-align : right;
+  }
+
+  &__star-icon {
+    font-size   : 0.7rem;
+    color       : $star-color;
+    flex-shrink : 0;
+  }
+
+  // Track de la barra
+  &__barra-track {
+    flex         : 1;
+    height       : 8px;
+    background   : $gray-100;
+    border-radius: 999px;
+    overflow     : hidden;
+  }
+
+  // Relleno de la barra con animación
+  &__barra-fill {
+    height       : 100%;
+    background   : linear-gradient(90deg, $primary-dark, $primary);
+    border-radius: 999px;
+    transition   : width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
+
+    // Sin calificaciones → barra mínima gris
+    &--vacia {
+      background: $gray-200;
+      width     : 2px !important;
+    }
+  }
+
+  &__pct {
+    font-size  : 0.78rem;
+    font-weight: 600;
+    color      : $gray-600;
+    min-width  : 2.5rem;
+    text-align : right;
+  }
+
+  &__cant {
+    font-size : 0.72rem;
+    color     : $gray-400;
+    min-width : 1.75rem;
+  }
+}
