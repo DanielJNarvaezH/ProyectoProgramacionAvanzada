@@ -2,16 +2,20 @@ import { Component, Input } from '@angular/core';
 import { Comentario } from '../../../../models/comentario.model';
 
 /**
- * ComentarioCardComponent — Molécula (ALOJ-5)
+ * ComentarioCardComponent — Molécula (ALOJ-5 / COMENT-6)
  *
  * Muestra un comentario individual con:
  * - Avatar generado con las iniciales del userId
  * - Calificación en estrellas
  * - Texto del comentario
  * - Fecha formateada
+ * - Sección de respuesta del anfitrión (COMENT-6)
  *
  * Uso:
- * <app-comentario-card [comentario]="item"></app-comentario-card>
+ * <app-comentario-card
+ *   [comentario]="item"
+ *   [hostId]="alojamiento.hostId"
+ * ></app-comentario-card>
  */
 @Component({
   selector: 'app-comentario-card',
@@ -22,6 +26,13 @@ import { Comentario } from '../../../../models/comentario.model';
 export class ComentarioCardComponent {
 
   @Input() comentario!: Comentario;
+
+  /**
+   * COMENT-6: ID del anfitrión dueño del alojamiento.
+   * Se pasa al componente hijo RespuestaComentarioComponent para determinar
+   * si mostrar el formulario de respuesta.
+   */
+  @Input() hostId: number | null = null;
 
   /** Genera array de 5 elementos para renderizar estrellas */
   get estrellas(): Array<'full' | 'empty'> {

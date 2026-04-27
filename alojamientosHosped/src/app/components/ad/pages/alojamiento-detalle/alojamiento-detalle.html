@@ -239,6 +239,7 @@
               <app-comentario-card
                 *ngFor="let c of comentarios"
                 [comentario]="c"
+                [hostId]="alojamiento.hostId"
               ></app-comentario-card>
             </div>
           </ng-container>

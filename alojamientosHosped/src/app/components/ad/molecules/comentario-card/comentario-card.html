@@ -33,4 +33,11 @@
   <!-- ── Texto del comentario ───────────────────────────────────────────── -->
   <p class="comentario-card__texto">{{ comentario.text }}</p>
 
+  <!-- ── COMENT-6: Respuesta del anfitrión ──────────────────────────────── -->
+  <app-respuesta-comentario
+    *ngIf="comentario.reservationId"
+    [comentarioId]="comentario.reservationId"
+    [hostId]="hostId!"
+  ></app-respuesta-comentario>
+
 </article>

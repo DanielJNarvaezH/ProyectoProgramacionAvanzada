@@ -1,0 +1,77 @@
+<!-- ─────────────────────────────────────────────────────────────────────────
+     RespuestaComentarioComponent — COMENT-6
+     Respuesta del anfitrión debajo del comentario original.
+     ───────────────────────────────────────────────────────────────────────── -->
+
+<!-- Línea divisoria que indica la respuesta viene del anfitrión -->
+<div class="respuesta" *ngIf="respuesta || mostrarFormulario || cargando">
+
+  <div class="respuesta__indicador">
+    <i class="fa-solid fa-reply"></i>
+    <span>Respuesta del anfitrión</span>
+  </div>
+
+  <!-- ── Estado: cargando ────────────────────────────────────────────────── -->
+  <div *ngIf="cargando" class="respuesta__skeleton">
+    <div class="skeleton-line"></div>
+    <div class="skeleton-line skeleton-line--short"></div>
+  </div>
+
+  <!-- ── Respuesta existente (readonly) ─────────────────────────────────── -->
+  <p *ngIf="respuesta && !cargando" class="respuesta__texto">
+    {{ respuesta.text }}
+  </p>
+
+  <!-- ── Formulario: solo visible para el anfitrión dueño sin respuesta aún ── -->
+  <ng-container *ngIf="mostrarFormulario">
+
+    <div class="respuesta__form" [formGroup]="form">
+
+      <!-- Textarea -->
+      <div class="respuesta__field">
+        <textarea
+          formControlName="text"
+          class="respuesta__textarea"
+          [class.respuesta__textarea--error]="textoInvalido"
+          placeholder="Escribe tu respuesta al huésped..."
+          rows="3"
+          [maxlength]="MAX_TEXT"
+          aria-label="Texto de la respuesta"
+        ></textarea>
+
+        <!-- Contador de caracteres -->
+        <div class="respuesta__counter">
+          <span *ngIf="textoInvalido" class="respuesta__error-msg">
+            {{ textoError }}
+          </span>
+          <span class="respuesta__chars" [class.respuesta__chars--limit]="charCount >= MAX_TEXT">
+            {{ charCount }} / {{ MAX_TEXT }}
+          </span>
+        </div>
+      </div>
+
+      <!-- Error del backend -->
+      <p *ngIf="errorEnvio" class="respuesta__backend-error">
+        <i class="fa-solid fa-circle-exclamation"></i>
+        {{ errorEnvio }}
+      </p>
+
+      <!-- Botón publicar -->
+      <div class="respuesta__actions">
+        <button
+          type="button"
+          class="respuesta__btn-publicar"
+          [disabled]="enviando"
+          (click)="publicar()"
+        >
+          <i *ngIf="!enviando" class="fa-solid fa-paper-plane"></i>
+          <i *ngIf="enviando"  class="fa-solid fa-spinner fa-spin"></i>
+          {{ enviando ? 'Publicando...' : 'Publicar respuesta' }}
+        </button>
+      </div>
+
+    </div>
+
+  </ng-container>
+
+</div>

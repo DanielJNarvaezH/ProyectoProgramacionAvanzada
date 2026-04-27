@@ -31,6 +31,7 @@ import { RegisterFormComponent }          from './components/ad/molecules/regist
 import { AlojamientoCardComponent }       from './components/ad/molecules/alojamiento-card/alojamiento-card';
 import { ComentarioCardComponent }        from './components/ad/molecules/comentario-card/comentario-card';
 import { ComentarioFormComponent }        from './components/ad/molecules/comentario-form/comentario-form';         // COMENT-4
+import { RespuestaComentarioComponent }   from './components/ad/molecules/respuesta-comentario/respuesta-comentario'; // COMENT-6
 import { CalificacionGraficoComponent }   from './components/ad/molecules/calificacion-grafico/calificacion-grafico'; // COMENT-10
 import { ConfirmModalComponent }           from './components/ad/molecules/confirm-modal/confirm-modal';
 import { CalendarioDisponibilidadComponent } from './components/ad/molecules/calendario-disponibilidad/calendario-disponibilidad';
@@ -84,6 +85,7 @@ import { LazyImgDirective } from './directives/lazy-img.directive';
     AlojamientoCardComponent,
     ComentarioCardComponent,
     ComentarioFormComponent,          // COMENT-4
+    RespuestaComentarioComponent,      // COMENT-6
     CalificacionGraficoComponent,     // COMENT-10
     ImageUploaderComponent,
     AlojamientoPreviewComponent,

@@ -1,0 +1,179 @@
+// ─────────────────────────────────────────────────────────────────────────────
+// RespuestaComentarioComponent — COMENT-6
+// Estilos de la sección de respuesta del anfitrión
+// ─────────────────────────────────────────────────────────────────────────────
+
+// ── Variables del sistema de diseño del proyecto ──────────────────────────────
+$primary:      #9B5CFF;
+$primary-light:#f0ebff;
+$text-dark:    #1a1a2e;
+$text-mid:     #64748b;
+$text-light:   #94a3b8;
+$error:        #ef4444;
+$white:        #ffffff;
+$radius:       0.75rem;
+
+// ── Contenedor principal ──────────────────────────────────────────────────────
+.respuesta {
+  margin-top: 0.75rem;
+  padding-top: 0.75rem;
+  border-top: 1px solid $primary-light;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+
+  // ── Indicador "Respuesta del anfitrión" ─────────────────────────────────
+  &__indicador {
+    display: flex;
+    align-items: center;
+    gap: 0.4rem;
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: $primary;
+    letter-spacing: 0.02em;
+
+    i { font-size: 0.7rem; }
+  }
+
+  // ── Texto de la respuesta (modo lectura) ─────────────────────────────────
+  &__texto {
+    font-size: 0.875rem;
+    color: $text-mid;
+    line-height: 1.6;
+    margin: 0;
+    padding: 0.6rem 0.75rem;
+    background: $primary-light;
+    border-radius: $radius;
+    border-left: 3px solid $primary;
+  }
+
+  // ── Skeleton de carga ────────────────────────────────────────────────────
+  &__skeleton {
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+
+    .skeleton-line {
+      height: 12px;
+      background: linear-gradient(90deg, #f0ebff 25%, #e8dfff 50%, #f0ebff 75%);
+      background-size: 200% 100%;
+      border-radius: 6px;
+      animation: shimmer 1.4s infinite;
+      width: 100%;
+
+      &--short { width: 60%; }
+    }
+  }
+
+  // ── Formulario ───────────────────────────────────────────────────────────
+  &__form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+  }
+
+  &__field {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+  }
+
+  // ── Textarea ─────────────────────────────────────────────────────────────
+  &__textarea {
+    width: 100%;
+    resize: vertical;
+    min-height: 72px;
+    padding: 0.6rem 0.75rem;
+    border: 1px solid #e2d9ff;
+    border-radius: $radius;
+    font-size: 0.875rem;
+    color: $text-dark;
+    background: $white;
+    outline: none;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    font-family: inherit;
+    box-sizing: border-box;
+
+    &::placeholder { color: $text-light; }
+
+    &:focus {
+      border-color: $primary;
+      box-shadow: 0 0 0 3px rgba(155, 92, 255, 0.12);
+    }
+
+    &--error {
+      border-color: $error;
+      &:focus { box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.12); }
+    }
+  }
+
+  // ── Contador de caracteres ────────────────────────────────────────────────
+  &__counter {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    min-height: 1.2rem;
+  }
+
+  &__error-msg {
+    font-size: 0.75rem;
+    color: $error;
+  }
+
+  &__chars {
+    font-size: 0.72rem;
+    color: $text-light;
+    margin-left: auto;
+
+    &--limit { color: $error; font-weight: 600; }
+  }
+
+  // ── Error del backend ─────────────────────────────────────────────────────
+  &__backend-error {
+    font-size: 0.8rem;
+    color: $error;
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    margin: 0;
+
+    i { font-size: 0.75rem; }
+  }
+
+  // ── Acciones ─────────────────────────────────────────────────────────────
+  &__actions {
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  // ── Botón publicar ────────────────────────────────────────────────────────
+  &__btn-publicar {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.4rem;
+    padding: 0.45rem 1rem;
+    background: $primary;
+    color: $white;
+    border: none;
+    border-radius: 0.5rem;
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: background 0.2s, opacity 0.2s;
+
+    &:hover:not(:disabled) { background: #7B3FE4; }
+
+    &:disabled {
+      opacity: 0.65;
+      cursor: not-allowed;
+    }
+
+    i { font-size: 0.75rem; }
+  }
+}
+
+// ── Animación skeleton ────────────────────────────────────────────────────────
+@keyframes shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
