@@ -6,12 +6,25 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.media.*;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.*;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+/**
+ * ComentarioController — Capa de presentación
+ *
+ * COMENT-9: Se agrega @Valid en los endpoints POST y PUT que reciben ComentarioDTO,
+ * activando las anotaciones de Bean Validation del DTO (@Min, @Max, @Size, etc.).
+ * Se agrega @ExceptionHandler local para MethodArgumentNotValidException,
+ * devolviendo un mapa campo→mensaje con HTTP 400.
+ */
 @RestController
 @RequestMapping("/api/comentarios")
 @Tag(name = "Comentarios", description = "Gestión de comentarios en alojamientos")
@@ -20,11 +33,32 @@ public class ComentarioController {
 
     private final ComentarioService comentarioService;
 
-    // -------------------- CREAR COMENTARIO --------------------
+    // ─────────────────────────────────────────────────────────────────────────
+    // COMENT-9: Manejo de errores de Bean Validation
+    // Intercepta fallos de @Valid y devuelve { "campo": "mensaje" } con HTTP 400
+    // ─────────────────────────────────────────────────────────────────────────
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<Map<String, String>> handleValidationErrors(
+            MethodArgumentNotValidException ex) {
+
+        Map<String, String> errores = new HashMap<>();
+        ex.getBindingResult().getAllErrors().forEach(error -> {
+            String campo   = ((FieldError) error).getField();
+            String mensaje = error.getDefaultMessage();
+            errores.put(campo, mensaje);
+        });
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errores);
+    }
+
+    // ─────────────────────────────────────────────────────────────────────────
+    // CREAR COMENTARIO
+    // COMENT-9: @Valid activa las restricciones del DTO antes de llegar al Service
+    // ─────────────────────────────────────────────────────────────────────────
     @PostMapping
     @Operation(
             summary = "Crear un nuevo comentario",
-            description = "Permite a un usuario crear un comentario sobre una reserva completada.",
+            description = "Permite a un usuario crear un comentario sobre una reserva completada. " +
+                    "COMENT-9 — Validaciones: rating 1-5, text máximo 500 chars, 1 comentario por reserva.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     required = true,
                     content = @Content(mediaType = "application/json",
@@ -34,11 +68,11 @@ public class ComentarioController {
             ),
             responses = {
                     @ApiResponse(responseCode = "201", description = "Comentario creado exitosamente"),
-                    @ApiResponse(responseCode = "400", description = "Datos inválidos o reserva no completada"),
+                    @ApiResponse(responseCode = "400", description = "Datos inválidos, validación fallida o reserva no completada"),
                     @ApiResponse(responseCode = "404", description = "Reserva o usuario no encontrado")
             }
     )
-    public ResponseEntity<?> crearComentario(@RequestBody ComentarioDTO dto) {
+    public ResponseEntity<?> crearComentario(@Valid @RequestBody ComentarioDTO dto) {
         try {
             ComentarioDTO creado = comentarioService.crearComentario(dto);
             return ResponseEntity.status(HttpStatus.CREATED).body(creado);
@@ -53,7 +87,9 @@ public class ComentarioController {
         }
     }
 
-    // -------------------- LISTAR POR ALOJAMIENTO --------------------
+    // ─────────────────────────────────────────────────────────────────────────
+    // LISTAR POR ALOJAMIENTO
+    // ─────────────────────────────────────────────────────────────────────────
     @GetMapping("/alojamiento/{alojamientoId}")
     @Operation(
             summary = "Listar comentarios de un alojamiento",
@@ -79,7 +115,9 @@ public class ComentarioController {
         }
     }
 
-    // -------------------- OBTENER POR ID --------------------
+    // ─────────────────────────────────────────────────────────────────────────
+    // OBTENER POR ID
+    // ─────────────────────────────────────────────────────────────────────────
     @GetMapping("/{id}")
     @Operation(
             summary = "Obtener un comentario por ID",
@@ -103,7 +141,9 @@ public class ComentarioController {
         }
     }
 
-    // -------------------- OBTENER PROMEDIO --------------------
+    // ─────────────────────────────────────────────────────────────────────────
+    // OBTENER PROMEDIO
+    // ─────────────────────────────────────────────────────────────────────────
     @GetMapping("/alojamiento/{alojamientoId}/promedio")
     @Operation(
             summary = "Obtener promedio de calificaciones",
@@ -129,11 +169,15 @@ public class ComentarioController {
         }
     }
 
-    // -------------------- ACTUALIZAR --------------------
+    // ─────────────────────────────────────────────────────────────────────────
+    // ACTUALIZAR
+    // COMENT-9: @Valid activa @NotBlank y @Size(max=500) del DTO
+    // ─────────────────────────────────────────────────────────────────────────
     @PutMapping("/{id}")
     @Operation(
             summary = "Actualizar un comentario existente",
-            description = "Permite modificar el texto de un comentario existente.",
+            description = "Permite modificar el texto de un comentario existente. " +
+                    "COMENT-9 — Validación: text máximo 500 caracteres.",
             requestBody = @io.swagger.v3.oas.annotations.parameters.RequestBody(
                     content = @Content(mediaType = "application/json",
                             examples = @ExampleObject(value = "{\"text\":\"Excelente experiencia, volvería sin dudarlo.\"}")
@@ -146,7 +190,8 @@ public class ComentarioController {
                     @ApiResponse(responseCode = "404", description = "Comentario no encontrado")
             }
     )
-    public ResponseEntity<?> actualizarComentario(@PathVariable Integer id, @RequestBody ComentarioDTO dto) {
+    public ResponseEntity<?> actualizarComentario(@PathVariable Integer id,
+                                                  @Valid @RequestBody ComentarioDTO dto) {
         try {
             ComentarioDTO actualizado = comentarioService.actualizarComentario(id, dto.getText());
             return ResponseEntity.ok(actualizado);
@@ -158,7 +203,9 @@ public class ComentarioController {
         }
     }
 
-    // -------------------- ELIMINAR --------------------
+    // ─────────────────────────────────────────────────────────────────────────
+    // ELIMINAR
+    // ─────────────────────────────────────────────────────────────────────────
     @DeleteMapping("/{id}")
     @Operation(
             summary = "Eliminar un comentario",
@@ -181,4 +228,3 @@ public class ComentarioController {
         }
     }
 }
-
