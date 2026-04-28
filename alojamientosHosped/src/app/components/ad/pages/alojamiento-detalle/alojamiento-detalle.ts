@@ -335,7 +335,7 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
         next: ({ imagenes, servicios, comentarios, promedio }) => {
           this.imagenes    = imagenes;
           this.servicios   = servicios;
-          this.comentarios = comentarios;
+          this.comentarios = this.ordenarComentarios(comentarios);
           this.promedio    = promedio ?? 0;
           this.cargando    = false;
         },
@@ -427,7 +427,7 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
    * sin necesidad de recargar la página.
    */
   onNuevoComentario(comentario: Comentario): void {
-    this.comentarios = [comentario, ...this.comentarios];
+    this.comentarios = this.ordenarComentarios([comentario, ...this.comentarios]);
   }
 
   // ── Utilidades de vista ──────────────────────────────────────────
@@ -440,6 +440,16 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
       if (this.promedio >= pos)       return 'full';
       if (this.promedio >= pos - 0.5) return 'half';
       return 'empty';
+    });
+  }
+
+  /** COMENT-8: Ordena comentarios por fecha descendente (más recientes primero) */
+  private ordenarComentarios(lista: Comentario[]): Comentario[] {
+    return [...lista].sort((a, b) => {
+      if (!a.fecha && !b.fecha) return 0;
+      if (!a.fecha) return 1;
+      if (!b.fecha) return -1;
+      return new Date(b.fecha).getTime() - new Date(a.fecha).getTime();
     });
   }
 
