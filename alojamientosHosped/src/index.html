@@ -1,16 +1,68 @@
 <!doctype html>
-<html lang="en">
+<html lang="es">
 <head>
   <meta charset="utf-8">
-  <title>AlojamientosHosped</title>
+  <title>Hosped — Plataforma de Alojamientos</title>
   <base href="/">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hosped: encuentra y reserva alojamientos únicos cerca de ti.">
   <link rel="icon" type="image/x-icon" href="favicon.ico">
-  <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css" />
 
-  <!-- Google Analytics 4 — MET-9 -->
+  <!-- ── INT-3: Preconnect a dominios externos críticos ─────────────────
+       Le dice al browser que abra la conexión TCP+TLS antes de que
+       los recursos sean descubiertos en el HTML, ahorrando 100-300ms.
+  ──────────────────────────────────────────────────────────────────────── -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin>
+  <link rel="preconnect" href="https://fonts.gstatic.com"   crossorigin>
+  <link rel="preconnect" href="https://cdnjs.cloudflare.com" crossorigin>
+  <link rel="preconnect" href="https://res.cloudinary.com"   crossorigin>
+
+  <!-- ── INT-3: DNS-prefetch para dominios secundarios ─────────────────
+       Más ligero que preconnect: solo resuelve el DNS sin abrir conexión.
+       Útil para dominios que se usarán pero no de inmediato.
+  ──────────────────────────────────────────────────────────────────────── -->
+  <link rel="dns-prefetch" href="https://www.googletagmanager.com">
+  <link rel="dns-prefetch" href="https://t.contentsquare.net">
+
+  <!-- ── Fuentes: carga no bloqueante ──────────────────────────────────
+       display=swap evita FOIT (flash invisible) mientras carga la fuente.
+       Solo se carga el subset latino para reducir tamaño.
+  ──────────────────────────────────────────────────────────────────────── -->
+  <link
+    href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap&subset=latin"
+    rel="stylesheet"
+    media="print"
+    onload="this.media='all'"
+  >
+  <noscript>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500&display=swap" rel="stylesheet">
+  </noscript>
+
+  <!-- Material Icons (no bloqueante) -->
+  <link
+    href="https://fonts.googleapis.com/icon?family=Material+Icons"
+    rel="stylesheet"
+    media="print"
+    onload="this.media='all'"
+  >
+
+  <!-- ── Font Awesome: defer con media trick ───────────────────────────
+       Carga no bloqueante: el browser descarga en background y aplica
+       cuando termina, sin bloquear el render del HTML.
+  ──────────────────────────────────────────────────────────────────────── -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css"
+    media="print"
+    onload="this.media='all'"
+  >
+  <noscript>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  </noscript>
+
+  <!-- ── Google Analytics 4 — MET-9 ───────────────────────────────────
+       async: no bloquea el parser HTML.
+  ──────────────────────────────────────────────────────────────────────── -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-N4Z5VFRX85"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -18,10 +70,14 @@
     gtag('js', new Date());
     gtag('config', 'G-N4Z5VFRX85');
   </script>
-  <!-- Hotjar — MET-12 -->
-  <script src="https://t.contentsquare.net/uxa/3131fb8499f2c.js"></script>
+
+  <!-- ── Hotjar / Contentsquare — MET-12 ──────────────────────────────
+       defer: se ejecuta después del parse del HTML, sin bloquear render.
+  ──────────────────────────────────────────────────────────────────────── -->
+  <script defer src="https://t.contentsquare.net/uxa/3131fb8499f2c.js"></script>
+
 </head>
 <body>
-<app-root></app-root>
+  <app-root></app-root>
 </body>
 </html>

@@ -1,6 +1,9 @@
 <!-- ─────────────────────────────────────────────────────────────────────────
      GaleriaAlojamientoComponent — ALOJ-5
      Galería de fotos: imagen principal + miniaturas + lightbox
+     INT-3: fetchpriority="high" en imagen principal (LCP),
+            dimensiones explícitas para evitar CLS,
+            loading="lazy" en miniaturas
      ───────────────────────────────────────────────────────────────────────── -->
 
 <section class="galeria" [attr.aria-label]="'Galería de fotos de ' + nombre">
@@ -9,6 +12,9 @@
   <div class="galeria__layout">
 
     <!-- Imagen principal -->
+    <!-- INT-3: fetchpriority="high" → el browser la descarga primero (LCP).
+         loading="eager" + fetchpriority="high" es la combinación óptima
+         para la imagen más importante de la página (Above the fold). -->
     <div class="galeria__principal" (click)="abrirLightbox(imagenPrincipal)">
       <img
         [src]="imagenPrincipal"
@@ -16,6 +22,9 @@
         (error)="onImageError($event)"
         class="galeria__img"
         loading="eager"
+        fetchpriority="high"
+        width="800"
+        height="500"
       />
       <div class="galeria__overlay">
         <i class="fa-solid fa-magnifying-glass-plus"></i>
@@ -23,6 +32,9 @@
     </div>
 
     <!-- Grid de miniaturas -->
+    <!-- INT-3: las miniaturas usan appLazyImg + loading="lazy".
+         La primera miniatura (i===0) usa fetchpriority="low" explícito
+         para no competir con la imagen principal. -->
     <div class="galeria__miniaturas" *ngIf="miniaturas.length > 0">
       <div
         *ngFor="let img of miniaturas; let i = index"
@@ -37,6 +49,9 @@
           (error)="onImageError($event)"
           class="galeria__img"
           loading="lazy"
+          fetchpriority="low"
+          width="200"
+          height="150"
         />
         <div class="galeria__overlay">
           <ng-container *ngIf="i === 3 && hayMasImagenes; else iconoZoom">
@@ -54,6 +69,8 @@
 </section>
 
 <!-- ── Lightbox — fuera del section para escapar del overflow:hidden ──────── -->
+<!-- INT-3: la imagen del lightbox no necesita fetchpriority especial
+     ya que se carga solo al interactuar el usuario. -->
 <div
   *ngIf="lightboxUrl"
   class="lightbox"
@@ -77,12 +94,13 @@
     <i class="fa-solid fa-chevron-left"></i>
   </button>
 
-  <!-- Imagen activa -->
+  <!-- Imagen activa en lightbox -->
   <div class="lightbox__img-wrap" (click)="$event.stopPropagation()">
     <img
       [src]="lightboxUrl"
       alt="Vista ampliada"
       class="lightbox__img"
+      loading="eager"
     />
   </div>
 
