@@ -2,7 +2,7 @@ import { Component, OnInit, OnDestroy } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, forkJoin, of, takeUntil, Observable } from 'rxjs';
 import { catchError } from 'rxjs/operators';
-
+import { ToastService } from '../../../../../services/ToastService';
 import { AlojamientoService }        from '../../../../../services/AlojamientoService';
 import { ImagenService }              from '../../../../../services/ImagenService';
 import { ComentarioService }          from '../../../../../services/ComentarioService';
@@ -11,7 +11,6 @@ import { AuthService }                from '../../../../../services/AuthService'
 import { MapService }                 from '../../../../../services/MapService';
 import { FavoritoService }            from '../../../../../services/FavoritoService'; // ALOJ-21
 import { ReservaService }             from '../../../../../services/ReservaService';  // RESERV-4
-
 import { Alojamiento, Imagen, Comentario, AlojamientoServicio } from '../../../../models';
 import { Reserva } from '../../../../models/reserva.model'; // COMENT-4
 
@@ -47,6 +46,7 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
   promedio     = 0;
   mapaUrl      = '';
 
+
   // ── Navegación prev/next ─────────────────────────────────────────
   private idsContexto: number[] = [];
   origen = '/alojamientos'; // Fix: destino del botón Volver
@@ -77,7 +77,8 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
     private authService:              AuthService,
     private mapService:               MapService,
     private favoritoService:          FavoritoService,  // ALOJ-21
-    private reservaService:           ReservaService    // RESERV-4 / COMENT-4
+    private reservaService:           ReservaService,    // RESERV-4 / COMENT-4
+    private toastService:             ToastService
   ) {}
 
   ngOnInit(): void {
@@ -201,12 +202,14 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
           this.enviandoReserva     = false;
           this.mostrarModalReserva = false;
           this.reservaExitosa      = true;
+          this.toastService.success('¡Reserva creada correctamente!');
           this.rangoReserva        = null;
           this.numGuests           = 1;
         },
         error: (err: Error) => {
           this.enviandoReserva = false;
           this.errorReserva    = err.message || 'No se pudo completar la reserva.';
+          this.toastService.error('No se pudo crear la reserva. Intenta de nuevo.');
         }
       });
   }

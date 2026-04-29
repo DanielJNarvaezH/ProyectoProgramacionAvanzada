@@ -1,0 +1,92 @@
+$primary:  #9B5CFF;
+$green:    #10B981;
+$red:      #EF4444;
+$yellow:   #F59E0B;
+$blue:     #3B82F6;
+$radius:   10px;
+
+// ── Contenedor ────────────────────────────────────────────────────
+.toast-container {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  max-width: 380px;
+  width: calc(100vw - 48px);
+  pointer-events: none;
+
+  @media (max-width: 480px) {
+    bottom: 16px;
+    right: 16px;
+    left: 16px;
+    width: auto;
+  }
+}
+
+// ── Toast ─────────────────────────────────────────────────────────
+.toast {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 16px;
+  border-radius: $radius;
+  background: white;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.12), 0 2px 8px rgba(0,0,0,0.06);
+  border-left: 4px solid transparent;
+  pointer-events: all;
+  animation: slideIn 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+  font-family: 'Poppins', sans-serif;
+
+  &--success { border-left-color: $green; .toast__icon { color: $green; } }
+  &--error   { border-left-color: $red;   .toast__icon { color: $red; } }
+  &--warning { border-left-color: $yellow; .toast__icon { color: $yellow; } }
+  &--info    { border-left-color: $blue;  .toast__icon { color: $blue; } }
+
+  &__icon {
+    font-size: 18px;
+    flex-shrink: 0;
+  }
+
+  &__message {
+    flex: 1;
+    font-size: 13px;
+    font-weight: 500;
+    color: #1F2937;
+    line-height: 1.4;
+  }
+
+  &__close {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    color: #9CA3AF;
+    border-radius: 4px;
+    font-size: 12px;
+    flex-shrink: 0;
+    transition: background 0.15s, color 0.15s;
+
+    &:hover {
+      background: #F3F4F6;
+      color: #4B5563;
+    }
+  }
+}
+
+@keyframes slideIn {
+  from {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}

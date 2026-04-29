@@ -4,7 +4,7 @@ import { RouterModule } from '@angular/router';
 import { provideHttpClient, withInterceptorsFromDi } from '@angular/common/http';
 import { HTTP_INTERCEPTORS } from '@angular/common/http';
 import { provideBrowserGlobalErrorListeners } from '@angular/core';
-
+import { ToastContainerComponent } from './components/ad/atoms/toast-container/toast-container';
 import { AppRoutingModule } from './app-routing-module';
 import { App }              from './app';
 
@@ -27,7 +27,9 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
  */
 @NgModule({
   declarations: [
-    App
+    App,
+    ToastContainerComponent
+
   ],
   imports: [
     BrowserModule,
