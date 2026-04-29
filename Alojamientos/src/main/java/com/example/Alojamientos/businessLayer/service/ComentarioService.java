@@ -1,12 +1,14 @@
 package com.example.Alojamientos.businessLayer.service;
 
 import com.example.Alojamientos.businessLayer.dto.ComentarioDTO;
+import com.example.Alojamientos.businessLayer.dto.NotificacionDTO;
 import com.example.Alojamientos.persistenceLayer.entity.ComentarioEntity;
 import com.example.Alojamientos.persistenceLayer.entity.ReservaEntity;
 import com.example.Alojamientos.persistenceLayer.mapper.ComentarioDataMapper;
 import com.example.Alojamientos.persistenceLayer.repository.ComentarioRepository;
 import com.example.Alojamientos.persistenceLayer.repository.ReservaRepository;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -14,14 +16,16 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 @Transactional
 public class ComentarioService {
 
     private final ComentarioRepository comentarioRepository;
-    private final ReservaRepository reservaRepository;
+    private final ReservaRepository    reservaRepository;
     private final ComentarioDataMapper comentarioMapper;
+    private final NotificacionService  notificacionService;
 
     /**
      * RF25, HU-025: Crear comentario y calificación
@@ -29,73 +33,68 @@ public class ComentarioService {
      * RN20: Máximo 1 comentario por reserva
      * RN21: Calificación entre 1-5
      * RN22: Máximo 500 caracteres
+     * RF28: Notificar al anfitrión sobre el nuevo comentario
      */
     public ComentarioDTO crearComentario(ComentarioDTO dto) {
-        // Validar que los IDs no sean nulos
-        if (dto.getReservationId() == null) {
+        if (dto.getReservationId() == null)
             throw new IllegalArgumentException("El ID de la reserva es obligatorio");
-        }
 
-        if (dto.getUserId() == null) {
+        if (dto.getUserId() == null)
             throw new IllegalArgumentException("El ID del usuario es obligatorio");
-        }
 
-        // Obtener reserva
         ReservaEntity reserva = reservaRepository.findById(dto.getReservationId())
                 .orElseThrow(() -> new IllegalArgumentException("Reserva no encontrada con id: " + dto.getReservationId()));
 
-        // RN19: Validar que la reserva esté completada
-        if (reserva.getEstado() != ReservaEntity.EstadoReserva.COMPLETADA) {
+        if (reserva.getEstado() != ReservaEntity.EstadoReserva.COMPLETADA)
             throw new IllegalArgumentException(
                     "Solo puedes comentar después de completar la estadía. Estado actual: " + reserva.getEstado()
             );
-        }
 
-        // Validar que la fecha de check-out haya pasado
-        if (reserva.getFechaFin().isAfter(LocalDate.now()) || reserva.getFechaFin().equals(LocalDate.now())) {
+        if (reserva.getFechaFin().isAfter(LocalDate.now()) || reserva.getFechaFin().equals(LocalDate.now()))
             throw new IllegalArgumentException(
                     "Solo puedes comentar después de la fecha de check-out (" + reserva.getFechaFin() + ")"
             );
-        }
 
-        // RN20: Validar que no exista comentario previo para esta reserva
-        if (comentarioRepository.existsByReserva_Id(dto.getReservationId())) {
+        if (comentarioRepository.existsByReserva_Id(dto.getReservationId()))
             throw new IllegalArgumentException("Ya existe un comentario para esta reserva. Solo se permite 1 comentario por reserva.");
-        }
 
-        // RN21: Validar calificación entre 1-5
-        if (dto.getRating() == null) {
+        if (dto.getRating() == null)
             throw new IllegalArgumentException("La calificación es obligatoria");
-        }
 
-        if (dto.getRating() < 1 || dto.getRating() > 5) {
+        if (dto.getRating() < 1 || dto.getRating() > 5)
             throw new IllegalArgumentException("La calificación debe estar entre 1 y 5 estrellas");
-        }
 
-        // RN22: Validar longitud del texto
-        if (dto.getText() == null || dto.getText().trim().isEmpty()) {
+        if (dto.getText() == null || dto.getText().trim().isEmpty())
             throw new IllegalArgumentException("El comentario no puede estar vacío");
-        }
 
-        if (dto.getText().length() > 500) {
+        if (dto.getText().length() > 500)
             throw new IllegalArgumentException(
                     "El comentario no puede exceder 500 caracteres. Actual: " + dto.getText().length()
             );
-        }
 
-        // Validar que el usuario de la reserva coincida con el usuario del comentario
-        if (!reserva.getHuesped().getId().equals(dto.getUserId())) {
+        if (!reserva.getHuesped().getId().equals(dto.getUserId()))
             throw new IllegalArgumentException("Solo el huésped que realizó la reserva puede comentar");
-        }
 
-        // Crear entidad
         ComentarioEntity entity = comentarioMapper.toEntity(dto);
         entity.setAlojamiento(reserva.getAlojamiento());
         ComentarioEntity saved = comentarioRepository.save(entity);
 
-
-
-        // TODO: RF28 - Enviar notificación al anfitrión de nuevo comentario
+        // RF28: Notificar al anfitrión sobre el nuevo comentario
+        try {
+            Integer anfitrionId = reserva.getAlojamiento().getAnfitrion().getId();
+            String  nombreAloj  = reserva.getAlojamiento().getNombre();
+            String  estrellas   = "★".repeat(dto.getRating()) + "☆".repeat(5 - dto.getRating());
+            notificacionService.crearNotificacion(NotificacionDTO.builder()
+                    .userId(anfitrionId)
+                    .type("NUEVO_COMENTARIO")
+                    .title("Nuevo comentario recibido")
+                    .message("Tu alojamiento \"" + nombreAloj + "\" recibió una reseña " +
+                            estrellas + ": \"" + truncar(dto.getText(), 80) + "\"")
+                    .read(false)
+                    .build());
+        } catch (Exception e) {
+            log.warn("[ComentarioService] No se pudo crear notificación al anfitrión: {}", e.getMessage());
+        }
 
         return comentarioMapper.toDTO(saved);
     }
@@ -126,11 +125,10 @@ public class ComentarioService {
      */
     @Transactional(readOnly = true)
     public Double obtenerPromedioCalificaciones(Integer alojamientoId) {
-        List<ComentarioEntity> comentarios = comentarioRepository.findByAlojamiento_IdOrderByFechaCreacionDesc(alojamientoId);
+        List<ComentarioEntity> comentarios =
+                comentarioRepository.findByAlojamiento_IdOrderByFechaCreacionDesc(alojamientoId);
 
-        if (comentarios.isEmpty()) {
-            return 0.0;
-        }
+        if (comentarios.isEmpty()) return 0.0;
 
         double suma = comentarios.stream()
                 .mapToInt(ComentarioEntity::getCalificacion)
@@ -146,22 +144,25 @@ public class ComentarioService {
         ComentarioEntity entity = comentarioRepository.findById(id)
                 .orElseThrow(() -> new IllegalArgumentException("Comentario no encontrado"));
 
-        if (nuevoTexto.length() > 500) {
+        if (nuevoTexto.length() > 500)
             throw new IllegalArgumentException("El comentario no puede exceder 500 caracteres");
-        }
 
         entity.setTexto(nuevoTexto);
-        ComentarioEntity updated = comentarioRepository.save(entity);
-        return comentarioMapper.toDTO(updated);
+        return comentarioMapper.toDTO(comentarioRepository.save(entity));
     }
 
     /**
      * RN23, RN24: Eliminar comentario (solo admin o moderación)
      */
     public void eliminarComentario(Integer id) {
-        if (!comentarioRepository.existsById(id)) {
+        if (!comentarioRepository.existsById(id))
             throw new IllegalArgumentException("Comentario no encontrado");
-        }
         comentarioRepository.deleteById(id);
+    }
+
+    // ── Utilidad interna ─────────────────────────────────────────────────
+    private String truncar(String texto, int maxLen) {
+        if (texto == null) return "";
+        return texto.length() <= maxLen ? texto : texto.substring(0, maxLen) + "…";
     }
 }
