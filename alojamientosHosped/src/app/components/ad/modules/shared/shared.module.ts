@@ -10,6 +10,7 @@ import { StarRatingComponent } from '../../atoms/star-rating/star-rating';
 import { AlojamientoCardComponent }      from '../../molecules/alojamiento-card/alojamiento-card';
 import { NotificacionesPanelComponent }  from '../../molecules/notificaciones-panel/notificaciones-panel';
 import { CancelarReservaModalComponent } from '../../molecules/cancelar-reserva-modal/cancelar-reserva-modal';
+import { ConfirmModalComponent }         from '../../molecules/confirm-modal/confirm-modal';
 
 // -- Organismos compartidos
 import { NavbarComponent } from '../../organisms/navbar/navbar';
@@ -26,7 +27,10 @@ import { LazyImgDirective } from '../../../../directives/lazy-img.directive';
  *
  * Declara y exporta todo lo que se usa en más de un feature module.
  * Regla Angular: standalone:false solo puede declararse en UN NgModule.
- * Importado por: AuthModule, AlojamientosModule, UsuarioModule.
+ * Importado por: AuthModule, AlojamientosModule, UsuarioModule, PanelModule.
+ *
+ * FIX: ConfirmModalComponent agregado aquí porque lo usan tanto
+ * AlojamientosModule (alojamiento-detalle) como PanelModule (panel-gestion).
  */
 @NgModule({
   declarations: [
@@ -35,6 +39,7 @@ import { LazyImgDirective } from '../../../../directives/lazy-img.directive';
     AlojamientoCardComponent,
     NotificacionesPanelComponent,
     CancelarReservaModalComponent,
+    ConfirmModalComponent,
     NavbarComponent,
     PesoPipe,
     SafeUrlPipe,
@@ -52,6 +57,7 @@ import { LazyImgDirective } from '../../../../directives/lazy-img.directive';
     AlojamientoCardComponent,
     NotificacionesPanelComponent,
     CancelarReservaModalComponent,
+    ConfirmModalComponent,
     NavbarComponent,
     PesoPipe,
     SafeUrlPipe,

@@ -6,17 +6,9 @@ import { anfitrionGuard } from './guards/anfitrion.guard';
 /**
  * AppRoutingModule — INT-3 (Lazy Loading)
  *
- * Rutas principales de la aplicación con lazy loading de feature modules.
- *
- * Antes: todas las páginas en un solo AppModule → bundle inicial grande.
- * Ahora: 3 feature modules cargados solo cuando el usuario navega a ellos:
- *
- *   AuthModule        → /auth/** (login, register, recuperar-contrasena)
- *   AlojamientosModule → /alojamientos/**, /mis-alojamientos
- *   UsuarioModule     → /perfil, /mis-favoritos, /mis-reservas
- *
- * Cada loadChildren usa import() dinámico → Webpack genera un chunk
- * separado por módulo que el browser descarga solo cuando lo necesita.
+ * FIX: /mis-alojamientos ahora carga PanelModule (módulo propio)
+ * en vez de reutilizar AlojamientosModule con path:'' que siempre
+ * mostraba el listado de alojamientos en lugar del panel de gestión.
  */
 const routes: Routes = [
   // Redirección raíz
@@ -35,7 +27,7 @@ const routes: Routes = [
   { path: 'register',             redirectTo: 'auth/register',             pathMatch: 'full' },
   { path: 'recuperar-contrasena', redirectTo: 'auth/recuperar-contrasena', pathMatch: 'full' },
 
-  // ── Alojamientos ──────────────────────────────────────────────────────
+  // ── Alojamientos (listado + detalle + crear + editar) ─────────────────
   {
     path: 'alojamientos',
     loadChildren: () =>
@@ -44,12 +36,13 @@ const routes: Routes = [
     canActivate: [authGuard]
   },
 
-  // Panel de gestión del anfitrión (dentro del módulo Alojamientos)
+  // ── Panel de gestión del anfitrión — módulo propio ────────────────────
+  // FIX: ruta separada que carga PanelModule con path:'' → PanelGestionPageComponent
   {
     path: 'mis-alojamientos',
     loadChildren: () =>
-      import('./components/ad/modules/alojamientos/alojamientos.module')
-        .then(m => m.AlojamientosModule),
+      import('./components/ad/modules/panel/panel.module')
+        .then(m => m.PanelModule),
     canActivate: [anfitrionGuard]
   },
 
@@ -71,8 +64,6 @@ const routes: Routes = [
 
 @NgModule({
   imports: [RouterModule.forRoot(routes, {
-    // Precargar todos los módulos lazy después del arranque inicial
-    // para que la segunda navegación sea instantánea
     preloadingStrategy: PreloadAllModules
   })],
   exports: [RouterModule]

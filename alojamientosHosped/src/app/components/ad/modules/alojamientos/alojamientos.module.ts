@@ -7,9 +7,7 @@ import { ReactiveFormsModule, FormsModule }  from '@angular/forms';
 import { authGuard }      from '../../../../guards/auth.guard';
 import { anfitrionGuard } from '../../../../guards/anfitrion.guard';
 
-// -- SharedModule (aporta: NavbarComponent, AlojamientoCardComponent,
-//    IconComponent, StarRatingComponent, PesoPipe, SafeUrlPipe,
-//    LazyImgDirective, CancelarReservaModalComponent, NotificacionesPanelComponent)
+// -- SharedModule (aporta: ConfirmModalComponent, NavbarComponent, PesoPipe, SafeUrlPipe, LazyImgDirective, etc.)
 import { SharedModule } from '../shared/shared.module';
 
 // -- Moléculas exclusivas de alojamientos
@@ -18,49 +16,38 @@ import { ComentarioCardComponent }           from '../../molecules/comentario-ca
 import { ComentarioFormComponent }           from '../../molecules/comentario-form/comentario-form';
 import { RespuestaComentarioComponent }      from '../../molecules/respuesta-comentario/respuesta-comentario';
 import { CalificacionGraficoComponent }      from '../../molecules/calificacion-grafico/calificacion-grafico';
-import { ConfirmModalComponent }             from '../../molecules/confirm-modal/confirm-modal';
 import { CalendarioDisponibilidadComponent } from '../../molecules/calendario-disponibilidad/calendario-disponibilidad';
 import { ReservaResumenModalComponent }      from '../../molecules/reserva-resumen-modal/reserva-resumen-modal';
 import { ImageUploaderComponent }            from '../../molecules/image-uploader/image-uploader';
-// CancelarReservaModalComponent NO va aquí → viene de SharedModule
+// ConfirmModalComponent → viene de SharedModule
 
 // -- Organismos exclusivos de alojamientos
 import { GaleriaAlojamientoComponent } from '../../organisms/galeria/galeria-alojamiento';
 import { MapaAlojamientosComponent }   from '../../organisms/mapa-alojamientos/mapa-alojamientos';
 
-// -- Páginas
+// -- Páginas (sin PanelGestionPageComponent → se movió a PanelModule)
 import { AlojamientosListaPageComponent }  from '../../pages/alojamientos-lista/alojamientos-lista';
 import { AlojamientoDetallePageComponent } from '../../pages/alojamiento-detalle/alojamiento-detalle';
 import { AlojamientoCrearPageComponent }   from '../../pages/alojamiento-crear/alojamiento-crear';
 import { AlojamientoEditarPageComponent }  from '../../pages/alojamiento-editar/alojamiento-editar';
-import { PanelGestionPageComponent }       from '../../pages/panel-gestion/panel-gestion';
 
-/**
- * AlojamientosModule — INT-3 (Lazy Loading)
- * CancelarReservaModalComponent viene de SharedModule — no se redeclara aquí.
- */
 @NgModule({
   declarations: [
-    // Moléculas exclusivas
-    AlojamientoPreviewComponent,
+    AlojamientoPreviewComponent,        // usa appLazyImg, safeUrl, peso → vienen de SharedModule
     ComentarioCardComponent,
     ComentarioFormComponent,
     RespuestaComentarioComponent,
     CalificacionGraficoComponent,
-    ConfirmModalComponent,
+    // ConfirmModalComponent → viene de SharedModule
     CalendarioDisponibilidadComponent,
     ReservaResumenModalComponent,
     ImageUploaderComponent,
-    // CancelarReservaModalComponent NO va aquí → está en SharedModule
-    // Organismos exclusivos
     GaleriaAlojamientoComponent,
     MapaAlojamientosComponent,
-    // Páginas
     AlojamientosListaPageComponent,
     AlojamientoDetallePageComponent,
     AlojamientoCrearPageComponent,
     AlojamientoEditarPageComponent,
-    PanelGestionPageComponent,
   ],
   imports: [
     CommonModule,
