@@ -9,7 +9,7 @@ import jakarta.validation.constraints.*;
 @AllArgsConstructor
 public class ReservaDTO {
 
-    private Integer id; // id de la reserva — necesario para cancelación y operaciones por id
+    private Integer id;
 
     @NotNull
     private Integer guestId;
@@ -18,10 +18,10 @@ public class ReservaDTO {
     private Integer lodgingId;
 
     @NotNull
-    private String startDate; // yyyy-MM-dd
+    private String startDate;     // yyyy-MM-dd
 
     @NotNull
-    private String endDate; // yyyy-MM-dd
+    private String endDate;       // yyyy-MM-dd
 
     @NotNull
     @Min(1)
@@ -31,8 +31,11 @@ public class ReservaDTO {
     private Double totalPrice;
 
     @NotBlank
-    private String status; // PENDIENTE, CONFIRMADA, CANCELADA, COMPLETADA
+    private String status;        // PENDIENTE, CONFIRMADA, CANCELADA, COMPLETADA
 
-    private String cancelDate; // yyyy-MM-dd
+    private String cancelDate;    // yyyy-MM-dd
     private String cancelReason;
+
+    /** Fecha en que se creó la reserva — para ordenar por más reciente primero */
+    private String reservationDate; // yyyy-MM-dd HH:mm
 }

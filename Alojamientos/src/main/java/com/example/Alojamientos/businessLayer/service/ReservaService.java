@@ -162,10 +162,11 @@ public class ReservaService {
 
     /**
      * RF23, HU-023: Historial de reservas de un usuario
+     * Ordenadas por fechaReserva DESC — la más reciente aparece primero.
      */
     @Transactional(readOnly = true)
     public List<ReservaDTO> listarPorHuesped(Integer huespedId) {
-        return reservaRepository.findByHuesped_Id(huespedId).stream()
+        return reservaRepository.findByHuesped_IdOrderByFechaReservaDesc(huespedId).stream()
                 .map(reservaMapper::toDTO)
                 .collect(Collectors.toList());
     }

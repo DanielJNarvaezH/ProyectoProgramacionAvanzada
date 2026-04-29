@@ -14,7 +14,7 @@ import { Alojamiento } from '../../../../models';
  * - Lista todas las reservas via GET /api/reservas/huesped/:guestId
  * - Enriquece cada reserva con el nombre del alojamiento
  * - Filtro por estado: TODAS | CONFIRMADA | PENDIENTE | CANCELADA | COMPLETADA
- * - Ordenadas por fecha de check-in descendente (más recientes primero)
+ * - Ordenadas por fecha de CREACIÓN de la reserva descendente (la más reciente aparece primero)
  *
  * RESERV-10: Función de cancelación de reserva
  * - Botón "Cancelar" visible solo en reservas con estado CONFIRMADA o PENDIENTE
@@ -49,9 +49,9 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
 
   // ── RESERV-10: Estado del modal de cancelación ────────────────
   mostrarModalCancelar: boolean       = false;
-  reservaSeleccionada:  Reserva | null = null;  // reserva a cancelar
-  cancelando:           boolean       = false;  // spinner mientras procesa
-  errorCancelacion:     string        = '';     // error devuelto por el API
+  reservaSeleccionada:  Reserva | null = null;
+  cancelando:           boolean       = false;
+  errorCancelacion:     string        = '';
 
   private destroy$ = new Subject<void>();
 
@@ -87,10 +87,14 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (reservas) => {
-          // Ordenar por fecha de inicio descendente (más recientes primero)
-          this.reservas = reservas.sort((a, b) =>
-            b.startDate.localeCompare(a.startDate)
-          );
+          // Ordenar por fecha de CREACIÓN de la reserva descendente.
+          // reservationDate = cuándo se hizo la reserva (más reciente primero).
+          // Fallback a startDate si por algún motivo reservationDate no llega.
+          this.reservas = reservas.sort((a, b) => {
+            const fa = a.reservationDate ?? a.startDate;
+            const fb = b.reservationDate ?? b.startDate;
+            return fb.localeCompare(fa);
+          });
           this.aplicarFiltro();
           this.cargando = false;
           this.cargarNombresAlojamientos(reservas);
@@ -135,25 +139,16 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
 
   // ── RESERV-10: Lógica de cancelación ─────────────────────────
 
-  /**
-   * Determina si una reserva puede cancelarse.
-   * Solo CONFIRMADA y PENDIENTE son cancelables.
-   */
   puedeCancelar(reserva: Reserva): boolean {
     return reserva.status === 'CONFIRMADA' || reserva.status === 'PENDIENTE';
   }
 
-  /**
-   * Abre el modal de cancelación para la reserva indicada.
-   * Resetea el estado de error previo.
-   */
   abrirModalCancelar(reserva: Reserva): void {
     this.reservaSeleccionada = reserva;
     this.errorCancelacion    = '';
     this.mostrarModalCancelar = true;
   }
 
-  /** Cierra el modal sin cancelar la reserva. */
   cerrarModalCancelar(): void {
     if (this.cancelando) return;
     this.mostrarModalCancelar = false;
@@ -161,14 +156,6 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
     this.errorCancelacion     = '';
   }
 
-  /**
-   * Ejecuta la cancelación llamando al API.
-   * Recibe el motivo emitido por el modal.
-   * Al completarse actualiza el estado de la reserva localmente
-   * sin recargar toda la lista.
-   *
-   * @param motivo Texto del motivo ingresado por el usuario
-   */
   confirmarCancelacion(motivo: string): void {
     if (!this.reservaSeleccionada?.id || !motivo) return;
 

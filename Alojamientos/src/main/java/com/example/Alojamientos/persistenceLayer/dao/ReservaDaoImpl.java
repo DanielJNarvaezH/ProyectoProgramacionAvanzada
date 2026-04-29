@@ -1,4 +1,4 @@
-package com.example.Alojamientos.persistenceLayer.dao.impl;
+package com.example.Alojamientos.persistenceLayer.dao;
 
 import com.example.Alojamientos.persistenceLayer.dao.ReservaDao;
 import com.example.Alojamientos.persistenceLayer.entity.ReservaEntity;
@@ -23,8 +23,8 @@ public class ReservaDaoImpl implements ReservaDao {
 
     @Override
     public List<ReservaEntity> findByHuespedId(Integer idHuesped) {
-        // El método real en el repository es findByHuesped_Id
-        return reservaRepository.findByHuesped_Id(idHuesped);
+        // Usa el método ordenado por fechaReserva DESC — más reciente primero
+        return reservaRepository.findByHuesped_IdOrderByFechaReservaDesc(idHuesped);
     }
 
     @Override

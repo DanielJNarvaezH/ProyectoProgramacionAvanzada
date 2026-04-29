@@ -1,64 +1,33 @@
 /**
  * EstadoReserva — RESERV-2
- *
- * Alineado con ReservaEntity.EstadoReserva del backend.
- * Los valores corresponden exactamente al enum Java:
- * PENDIENTE | CONFIRMADA | CANCELADA | COMPLETADA
  */
 export type EstadoReserva = 'PENDIENTE' | 'CONFIRMADA' | 'CANCELADA' | 'COMPLETADA';
 
 /**
  * Reserva — RESERV-2
- *
- * Alineada con ReservaDTO del backend (campos en inglés).
- * Mapeo de campos según ReservaDataMapper:
- *   guestId      ← huesped.id
- *   lodgingId    ← alojamiento.id
- *   startDate    ← fechaInicio  (yyyy-MM-dd)
- *   endDate      ← fechaFin     (yyyy-MM-dd)
- *   numGuests    ← numHuespedes
- *   totalPrice   ← precioTotal
- *   status       ← estado       (EstadoReserva)
- *   cancelDate   ← fechaCancelacion (yyyy-MM-dd, nullable)
- *   cancelReason ← motivoCancelacion (nullable)
- *
- * El campo id no está en el DTO pero el backend lo incluye
- * en las respuestas GET — se declara como opcional.
+ * Alineada con ReservaDTO del backend.
  */
 export interface Reserva {
-  id?:           number;
-  guestId:       number;
-  lodgingId:     number;
-  startDate:     string;   // yyyy-MM-dd
-  endDate:       string;   // yyyy-MM-dd
-  numGuests:     number;
-  totalPrice:    number;
-  status:        EstadoReserva;
-  cancelDate?:   string;   // yyyy-MM-dd — solo presente si status === 'CANCELADA'
-  cancelReason?: string;   // solo presente si status === 'CANCELADA'
+  id?:              number;
+  guestId:          number;
+  lodgingId:        number;
+  startDate:        string;   // yyyy-MM-dd
+  endDate:          string;   // yyyy-MM-dd
+  numGuests:        number;
+  totalPrice:       number;
+  status:           EstadoReserva;
+  cancelDate?:      string;
+  cancelReason?:    string;
+  /** Fecha y hora en que se creó la reserva — para ordenar por más reciente primero */
+  reservationDate?: string;   // ISO datetime — ej: 2026-04-28T22:30:00
 }
 
-/**
- * CrearReservaRequest — payload para POST /api/reservas
- *
- * Omite id, cancelDate y cancelReason que no se envían al crear.
- */
-export type CrearReservaRequest = Omit<Reserva, 'id' | 'cancelDate' | 'cancelReason'>;
+export type CrearReservaRequest = Omit<Reserva, 'id' | 'cancelDate' | 'cancelReason' | 'reservationDate'>;
 
-/**
- * CancelarReservaRequest — payload para cancelar una reserva
- *
- * Solo requiere el motivo; el backend gestiona el cambio de estado y fecha.
- */
 export interface CancelarReservaRequest {
   cancelReason: string;
 }
 
-/**
- * Helpers de estado — RESERV-11
- *
- * Labels y clases CSS para los badges visuales de estado en la UI.
- */
 export const ESTADO_RESERVA_LABEL: Record<EstadoReserva, string> = {
   PENDIENTE:  'Pendiente',
   CONFIRMADA: 'Confirmada',
@@ -66,19 +35,9 @@ export const ESTADO_RESERVA_LABEL: Record<EstadoReserva, string> = {
   COMPLETADA: 'Completada'
 };
 
-/**
- * RESERV-11 — Estados visuales (badges de colores):
- *   CONFIRMADA → 'success' (verde)
- *   CANCELADA  → 'danger'  (rojo)
- *   COMPLETADA → 'info'    (azul)
- *   PENDIENTE  → 'warning' (amarillo)
- *
- * Los valores corresponden a los modificadores CSS:
- *   .reserva-badge--{valor}  y  .reserva-card--{valor}
- */
 export const ESTADO_RESERVA_COLOR: Record<EstadoReserva, string> = {
-  PENDIENTE:  'warning',   // amarillo
-  CONFIRMADA: 'success',   // verde  ✅ RESERV-11
-  CANCELADA:  'danger',    // rojo   ✅ RESERV-11
-  COMPLETADA: 'info'       // azul   ✅ RESERV-11
+  PENDIENTE:  'warning',
+  CONFIRMADA: 'success',
+  CANCELADA:  'danger',
+  COMPLETADA: 'info'
 };

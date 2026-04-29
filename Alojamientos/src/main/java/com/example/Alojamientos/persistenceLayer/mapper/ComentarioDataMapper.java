@@ -9,16 +9,17 @@ import org.mapstruct.*;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = ReportingPolicy.IGNORE)
 public interface ComentarioDataMapper {
 
+    @Mapping(target = "id",            source = "id")
     @Mapping(target = "reservationId", source = "reserva.id")
-    @Mapping(target = "userId", source = "usuario.id")
-    @Mapping(target = "rating", source = "calificacion")
-    @Mapping(target = "text", source = "texto")
+    @Mapping(target = "userId",        source = "usuario.id")
+    @Mapping(target = "rating",        source = "calificacion")
+    @Mapping(target = "text",          source = "texto")
     ComentarioDTO toDTO(ComentarioEntity entity);
 
-    @Mapping(target = "reserva", source = "reservationId", qualifiedByName = "reservationIdToEntity")
-    @Mapping(target = "usuario", source = "userId", qualifiedByName = "userIdToEntity")
-    @Mapping(target = "calificacion", source = "rating")
-    @Mapping(target = "texto", source = "text")
+    @Mapping(target = "reserva",       source = "reservationId", qualifiedByName = "reservationIdToEntity")
+    @Mapping(target = "usuario",       source = "userId",        qualifiedByName = "userIdToEntity")
+    @Mapping(target = "calificacion",  source = "rating")
+    @Mapping(target = "texto",         source = "text")
     ComentarioEntity toEntity(ComentarioDTO dto);
 
     @Named("reservationIdToEntity")

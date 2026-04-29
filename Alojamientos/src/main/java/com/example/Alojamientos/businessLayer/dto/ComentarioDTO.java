@@ -9,6 +9,10 @@ import jakarta.validation.constraints.*;
 @AllArgsConstructor
 public class ComentarioDTO {
 
+    /** ID del comentario (PK) — necesario para que el frontend
+     *  pueda pasar el ID correcto al crear respuestas (COMENT-6). */
+    private Integer id;
+
     @NotNull
     private Integer reservationId;
 

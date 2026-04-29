@@ -1,4 +1,4 @@
-package com.example.Alojamientos.persistenceLayer.dao.impl;
+package com.example.Alojamientos.persistenceLayer.dao;
 
 import com.example.Alojamientos.persistenceLayer.dao.PagoDao;
 import com.example.Alojamientos.persistenceLayer.entity.PagoEntity;

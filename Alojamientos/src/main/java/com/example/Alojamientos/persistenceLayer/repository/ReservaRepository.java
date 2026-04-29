@@ -10,8 +10,8 @@ import java.util.List;
 @Repository
 public interface ReservaRepository extends JpaRepository<ReservaEntity, Integer> {
 
-    // Reservas por huésped
-    List<ReservaEntity> findByHuesped_Id(Integer idHuesped);
+    // Reservas por huésped — ordenadas por fecha de reserva descendente (más reciente primero)
+    List<ReservaEntity> findByHuesped_IdOrderByFechaReservaDesc(Integer idHuesped);
 
     // Reservas por alojamiento
     List<ReservaEntity> findByAlojamiento_Id(Integer idAlojamiento);
@@ -25,4 +25,10 @@ public interface ReservaRepository extends JpaRepository<ReservaEntity, Integer>
 
     // Verificar si un usuario ya tiene reservas en un alojamiento
     boolean existsByHuesped_IdAndAlojamiento_Id(Integer idHuesped, Integer idAlojamiento);
+
+    // ReservaScheduler: reservas CONFIRMADAS cuya fecha de fin ya pasó
+    List<ReservaEntity> findByEstadoAndFechaFinBefore(
+            ReservaEntity.EstadoReserva estado,
+            LocalDate fecha
+    );
 }
