@@ -7,6 +7,7 @@ import { ReservaService }     from '../../../../../services/ReservaService';
 import { AuthService }        from '../../../../../services/AuthService';
 import { Alojamiento }        from '../../../../models/alojamiento.model';
 import { Reserva, ESTADO_RESERVA_LABEL, ESTADO_RESERVA_COLOR } from '../../../../models/reserva.model';
+import { ToastService } from '../../../../../services/ToastService';
 
 /**
  * PanelGestionPageComponent â€” ALOJ-9 + Fix-4 + RESERV-9
@@ -56,6 +57,7 @@ export class PanelGestionPageComponent implements OnInit, OnDestroy {
     private alojamientoService: AlojamientoService,
     private reservaService:     ReservaService,
     private authService:        AuthService,
+    private toastService:       ToastService,
     private router:             Router
   ) {}
 
@@ -214,6 +216,7 @@ export class PanelGestionPageComponent implements OnInit, OnDestroy {
             a.id === aloj.id ? { ...a, active: true } : a);
           this.reactivando    = null;
           this.successMessage = `"${aloj.name}" fue reactivado correctamente.`;
+          this.toastService.success(this.successMessage);
           setTimeout(() => this.successMessage = '', 4000);
         },
         error: (err: Error) => {
@@ -253,6 +256,7 @@ export class PanelGestionPageComponent implements OnInit, OnDestroy {
           this.eliminando     = false;
           this.mostrarModal   = false;
           this.successMessage = `"${this.alojamientoAEliminar!.name}" fue eliminado.`;
+          this.toastService.success(this.successMessage);
           this.alojamientoAEliminar = null;
           setTimeout(() => this.successMessage = '', 4000);
         },

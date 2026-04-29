@@ -9,6 +9,7 @@ import { AlojamientoServicioService }   from '../../../../../services/Alojamient
 import { ImagenService }                from '../../../../../services/ImagenService';
 import { ServicioDisponible }           from '../../../../models/servicio.model';
 import { ImagenSubida }                 from '../../../../components/ad/molecules/image-uploader/image-uploader';
+import { ToastService } from '../../../../../services/ToastService';
 
 /**
  * AlojamientoCrearPageComponent — ALOJ-7 + ALOJ-10 + ALOJ-11
@@ -46,6 +47,7 @@ export class AlojamientoCrearPageComponent implements OnInit {
     private alojamientoServicioService: AlojamientoServicioService,
     private imagenService:              ImagenService,
     private authService:                AuthService,
+    private toastService:               ToastService,
     private router:                     Router
   ) {}
 
@@ -180,6 +182,7 @@ export class AlojamientoCrearPageComponent implements OnInit {
       error: (err: Error) => {
         this.isSubmitting = false;
         this.errorMessage = err.message || 'Error al crear el alojamiento.';
+        this.toastService.error(this.errorMessage);
       }
     });
   }
@@ -187,6 +190,7 @@ export class AlojamientoCrearPageComponent implements OnInit {
   private finalizarCreacion(): void {
     this.isSubmitting   = false;
     this.successMessage = '¡Alojamiento creado exitosamente!';
+    this.toastService.success('¡Alojamiento creado exitosamente!');
     setTimeout(() => this.router.navigate(['/alojamientos']), 1500);
   }
 

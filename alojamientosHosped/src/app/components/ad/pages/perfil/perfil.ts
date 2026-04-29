@@ -5,6 +5,7 @@ import { Location } from '@angular/common';
 import { UsuarioService } from '../../../../../services/UsuarioService';
 import { AuthService } from '../../../../../services/AuthService';
 import { User } from '../../../../models';
+import { ToastService } from '../../../../../services/ToastService';
 
 @Component({
   selector: 'app-perfil-page',
@@ -33,6 +34,7 @@ export class PerfilPageComponent implements OnInit {
     private usuarioService: UsuarioService,
     private authService: AuthService,
     private router: Router,
+    private toastService: ToastService,
     private location: Location
   ) {}
 
@@ -110,11 +112,13 @@ export class PerfilPageComponent implements OnInit {
         this.isSaving       = false;
         this.modoEdicion    = false;
         this.successMessage = '¡Perfil actualizado correctamente!';
+        this.toastService.success('¡Perfil actualizado correctamente!');
         setTimeout(() => this.successMessage = '', 3000);
       },
       error: (err: Error) => {
         this.isSaving     = false;
         this.errorMessage = err.message;
+        this.toastService.error(this.errorMessage);
       }
     });
   }

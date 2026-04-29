@@ -6,6 +6,7 @@ import { AuthService }        from '../../../../../services/AuthService';
 import { AlojamientoService } from '../../../../../services/AlojamientoService';
 import { Reserva, EstadoReserva, ESTADO_RESERVA_LABEL, ESTADO_RESERVA_COLOR } from '../../../../models';
 import { Alojamiento } from '../../../../models';
+import { ToastService } from '../../../../../services/ToastService';
 
 /**
  * MisReservasPageComponent — RESERV-8 + RESERV-10
@@ -59,7 +60,8 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
     private reservaService:     ReservaService,
     private alojamientoService: AlojamientoService,
     private authService:        AuthService,
-    public  router:             Router
+    public  router:             Router,
+    private toastService: ToastService
   ) {}
 
   ngOnInit(): void {
@@ -161,6 +163,7 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
 
     this.cancelando       = true;
     this.errorCancelacion = '';
+    this.toastService.success('Reserva cancelada correctamente.');
 
     this.reservaService.cancel(this.reservaSeleccionada.id, motivo)
       .pipe(takeUntil(this.destroy$))
@@ -181,6 +184,7 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
         error: (err: Error) => {
           this.cancelando       = false;
           this.errorCancelacion = err.message || 'No se pudo cancelar la reserva.';
+          this.toastService.error(this.errorCancelacion);
         }
       });
   }

@@ -8,7 +8,7 @@ import {
 } from '@angular/core';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { Subject, takeUntil } from 'rxjs';
-
+import { ToastService } from '../../../../../services/ToastService';
 import { ComentarioService }          from '../../../../../services/ComentarioService';
 import { AuthService }                from '../../../../../services/AuthService';
 import { Reserva }                    from '../../../../models/reserva.model';
@@ -85,6 +85,7 @@ export class ComentarioFormComponent implements OnInit, OnDestroy {
   constructor(
     private fb:               FormBuilder,
     private comentarioService: ComentarioService,
+    private toastService: ToastService,
     private authService:       AuthService
   ) {}
 
@@ -182,10 +183,12 @@ export class ComentarioFormComponent implements OnInit, OnDestroy {
           this.enviando  = false;
           this.publicado = true;
           this.comentarioPublicado.emit(comentario);
+          this.toastService.success('¡Comentario publicado correctamente!');
         },
         error: (err: Error) => {
           this.enviando   = false;
           this.errorEnvio = err.message || 'Ocurrió un error al publicar el comentario.';
+          this.toastService.error(this.errorEnvio);
         }
       });
   }

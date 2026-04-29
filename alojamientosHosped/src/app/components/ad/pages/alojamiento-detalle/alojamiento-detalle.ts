@@ -396,8 +396,12 @@ export class AlojamientoDetallePageComponent implements OnInit, OnDestroy {
       next: () => {
         this.esFavorito    = !this.esFavorito;
         this.toggleandoFav = false;
+        this.toastService.success(this.esFavorito ? 'Añadido a favoritos.' : 'Eliminado de favoritos.');
       },
-      error: () => { this.toggleandoFav = false; }
+      error: () => {
+        this.toggleandoFav = false;
+        this.toastService.error('No se pudo actualizar favoritos.');
+      }
     });
   }
 

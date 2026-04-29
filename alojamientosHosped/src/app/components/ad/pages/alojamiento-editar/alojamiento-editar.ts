@@ -3,7 +3,7 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Subject, forkJoin, of, takeUntil } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
-
+import { ToastService } from '../../../../../services/ToastService';
 import { AlojamientoService } from '../../../../../services/AlojamientoService';
 import { AuthService }        from '../../../../../services/AuthService';
 import { ImagenService }      from '../../../../../services/ImagenService';
@@ -56,6 +56,7 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
     private router:             Router,
     private alojamientoService: AlojamientoService,
     private authService:        AuthService,
+    private toastService:       ToastService,
     private imagenService:      ImagenService
   ) {}
 
@@ -115,7 +116,7 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
       alojamiento: this.alojamientoService.getById(this.alojamientoId),
       imagenes:    this.imagenService.getByAlojamiento(this.alojamientoId)
         .pipe(catchError(() => of([] as Imagen[])),
-      map(result => result ?? []) 
+      map(result => result ?? [])
       )
     })
       .pipe(takeUntil(this.destroy$))
@@ -202,6 +203,7 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
         error: (err) => {
           this.guardando    = false;
           this.errorGuardar = err.message || 'Error al guardar los cambios.';
+          this.toastService.error(this.errorGuardar);
         }
       });
   }
@@ -250,6 +252,7 @@ export class AlojamientoEditarPageComponent implements OnInit, OnDestroy {
   private finalizarGuardado(): void {
     this.guardando = false;
     this.exito     = true;
+    this.toastService.success('Cambios guardados correctamente.');
     // Fix nav: reenviar ids Y origenDetalle al detalle para restaurar flechas y botón Volver
     const queryParams: Record<string, string> = {};
     if (this.idsContexto)    queryParams['ids']    = this.idsContexto;
