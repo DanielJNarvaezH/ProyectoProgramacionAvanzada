@@ -7,6 +7,7 @@ import { provideBrowserGlobalErrorListeners } from '@angular/core';
 import { ToastContainerComponent } from './components/ad/atoms/toast-container/toast-container';
 import { AppRoutingModule } from './app-routing-module';
 import { App }              from './app';
+import { ErrorInterceptor } from './interceptors/error.interceptor';
 
 // -- Interceptores
 import { AuthInterceptor } from './interceptors/auth.interceptor';
@@ -41,9 +42,9 @@ import { AuthInterceptor } from './interceptors/auth.interceptor';
     provideHttpClient(withInterceptorsFromDi()),
     {
       provide:  HTTP_INTERCEPTORS,
-      useClass: AuthInterceptor,
+      useClass: ErrorInterceptor,
       multi:    true
-    }
+    },
   ],
   bootstrap: [App]
 })
