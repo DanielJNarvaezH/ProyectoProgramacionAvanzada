@@ -86,7 +86,7 @@ public class ComentarioService {
             String  estrellas   = "★".repeat(dto.getRating()) + "☆".repeat(5 - dto.getRating());
             notificacionService.crearNotificacion(NotificacionDTO.builder()
                     .userId(anfitrionId)
-                    .type("NUEVO_COMENTARIO")
+                    .type("OTRO")
                     .title("Nuevo comentario recibido")
                     .message("Tu alojamiento \"" + nombreAloj + "\" recibió una reseña " +
                             estrellas + ": \"" + truncar(dto.getText(), 80) + "\"")

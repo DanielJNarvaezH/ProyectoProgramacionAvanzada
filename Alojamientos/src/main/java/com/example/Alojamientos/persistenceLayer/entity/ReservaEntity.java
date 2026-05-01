@@ -21,17 +21,30 @@ public class ReservaEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Integer id;
 
+    /**
+     * FIX: @ToString.Exclude y @EqualsAndHashCode.Exclude en relaciones LAZY
+     * para evitar LazyInitializationException cuando Lombok intenta acceder
+     * a estas relaciones fuera de la sesión de Hibernate (e.g. durante save()).
+     */
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_huesped", nullable = false)
     private UsuarioEntity huesped;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @ManyToOne(fetch = FetchType.LAZY, optional = false)
     @JoinColumn(name = "id_alojamiento", nullable = false)
     private AlojamientoEntity alojamiento;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToOne(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true)
     private PagoEntity pago;
 
+    @ToString.Exclude
+    @EqualsAndHashCode.Exclude
     @OneToMany(mappedBy = "reserva", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<ComentarioEntity> comentarios;
 

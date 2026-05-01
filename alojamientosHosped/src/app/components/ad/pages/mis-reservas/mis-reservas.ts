@@ -8,21 +8,6 @@ import { Reserva, EstadoReserva, ESTADO_RESERVA_LABEL, ESTADO_RESERVA_COLOR } fr
 import { Alojamiento } from '../../../../models';
 import { ToastService } from '../../../../../services/ToastService';
 
-/**
- * MisReservasPageComponent — RESERV-8 + RESERV-10
- *
- * Historial de reservas del huésped autenticado:
- * - Lista todas las reservas via GET /api/reservas/huesped/:guestId
- * - Enriquece cada reserva con el nombre del alojamiento
- * - Filtro por estado: TODAS | CONFIRMADA | PENDIENTE | CANCELADA | COMPLETADA
- * - Ordenadas por fecha de CREACIÓN de la reserva descendente (la más reciente aparece primero)
- *
- * RESERV-10: Función de cancelación de reserva
- * - Botón "Cancelar" visible solo en reservas con estado CONFIRMADA o PENDIENTE
- * - Abre modal con campo de motivo obligatorio (mínimo 10 caracteres)
- * - Llama a DELETE /api/reservas/:id?motivo=... al confirmar
- * - Actualiza la lista localmente al completarse correctamente
- */
 @Component({
   selector: 'app-mis-reservas',
   standalone: false,
@@ -33,11 +18,10 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
 
   reservas:          Reserva[]    = [];
   reservasFiltradas: Reserva[]    = [];
-  nombreAlojamiento  = new Map<number, string>();   // lodgingId → nombre
+  nombreAlojamiento  = new Map<number, string>();
   cargando           = false;
   error              = '';
 
-  // Filtro activo
   filtroEstado: EstadoReserva | 'TODAS' = 'TODAS';
 
   readonly FILTROS: { label: string; valor: EstadoReserva | 'TODAS' }[] = [
@@ -48,11 +32,10 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
     { label: 'Cancelada',  valor: 'CANCELADA'  },
   ];
 
-  // ── RESERV-10: Estado del modal de cancelación ────────────────
-  mostrarModalCancelar: boolean       = false;
+  mostrarModalCancelar: boolean        = false;
   reservaSeleccionada:  Reserva | null = null;
-  cancelando:           boolean       = false;
-  errorCancelacion:     string        = '';
+  cancelando:           boolean        = false;
+  errorCancelacion:     string         = '';
 
   private destroy$ = new Subject<void>();
 
@@ -61,26 +44,19 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
     private alojamientoService: AlojamientoService,
     private authService:        AuthService,
     public  router:             Router,
-    private toastService: ToastService
+    private toastService:       ToastService
   ) {}
 
-  ngOnInit(): void {
-    this.cargarReservas();
-  }
+  ngOnInit(): void { this.cargarReservas(); }
 
   ngOnDestroy(): void {
     this.destroy$.next();
     this.destroy$.complete();
   }
 
-  // ── Carga de datos ────────────────────────────────────────────
-
   cargarReservas(): void {
     const usuario = this.authService.getUsuario();
-    if (!usuario?.id) {
-      this.error = 'No se pudo identificar al usuario.';
-      return;
-    }
+    if (!usuario?.id) { this.error = 'No se pudo identificar al usuario.'; return; }
 
     this.cargando = true;
     this.error    = '';
@@ -89,9 +65,6 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
       .pipe(takeUntil(this.destroy$))
       .subscribe({
         next: (reservas) => {
-          // Ordenar por fecha de CREACIÓN de la reserva descendente.
-          // reservationDate = cuándo se hizo la reserva (más reciente primero).
-          // Fallback a startDate si por algún motivo reservationDate no llega.
           this.reservas = reservas.sort((a, b) => {
             const fa = a.reservationDate ?? a.startDate;
             const fb = b.reservationDate ?? b.startDate;
@@ -102,10 +75,8 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
           this.cargarNombresAlojamientos(reservas);
         },
         error: (err) => {
-          // 404 significa que el usuario no tiene reservas — no es un error real
           if (err.message?.includes('no encontr') || err.message?.includes('404')) {
-            this.reservas          = [];
-            this.reservasFiltradas = [];
+            this.reservas = []; this.reservasFiltradas = [];
           } else {
             this.error = err.message || 'Error al cargar las reservas.';
           }
@@ -126,8 +97,6 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
     });
   }
 
-  // ── Filtrado por estado ───────────────────────────────────────
-
   cambiarFiltro(estado: EstadoReserva | 'TODAS'): void {
     this.filtroEstado = estado;
     this.aplicarFiltro();
@@ -139,15 +108,13 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
       : this.reservas.filter(r => r.status === this.filtroEstado);
   }
 
-  // ── RESERV-10: Lógica de cancelación ─────────────────────────
-
   puedeCancelar(reserva: Reserva): boolean {
     return reserva.status === 'CONFIRMADA' || reserva.status === 'PENDIENTE';
   }
 
   abrirModalCancelar(reserva: Reserva): void {
-    this.reservaSeleccionada = reserva;
-    this.errorCancelacion    = '';
+    this.reservaSeleccionada  = reserva;
+    this.errorCancelacion     = '';
     this.mostrarModalCancelar = true;
   }
 
@@ -163,7 +130,6 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
 
     this.cancelando       = true;
     this.errorCancelacion = '';
-    this.toastService.success('Reserva cancelada correctamente.');
 
     this.reservaService.cancel(this.reservaSeleccionada.id, motivo)
       .pipe(takeUntil(this.destroy$))
@@ -180,6 +146,8 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
           this.mostrarModalCancelar = false;
           this.reservaSeleccionada  = null;
           this.errorCancelacion     = '';
+          // Toast SOLO cuando el backend confirma OK
+          this.toastService.success('Reserva cancelada correctamente.');
         },
         error: (err: Error) => {
           this.cancelando       = false;
@@ -188,8 +156,6 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
         }
       });
   }
-
-  // ── Helpers de template ───────────────────────────────────────
 
   contarPorEstado(estado: EstadoReserva | 'TODAS'): number {
     if (estado === 'TODAS') return this.reservas.length;
@@ -200,13 +166,8 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
     return this.nombreAlojamiento.get(lodgingId) ?? '...';
   }
 
-  getEstadoLabel(status: EstadoReserva): string {
-    return ESTADO_RESERVA_LABEL[status] ?? status;
-  }
-
-  getEstadoClass(status: EstadoReserva): string {
-    return ESTADO_RESERVA_COLOR[status] ?? '';
-  }
+  getEstadoLabel(status: EstadoReserva): string { return ESTADO_RESERVA_LABEL[status] ?? status; }
+  getEstadoClass(status: EstadoReserva): string { return ESTADO_RESERVA_COLOR[status] ?? ''; }
 
   formatearFecha(fecha: string): string {
     return new Date(fecha + 'T00:00:00').toLocaleDateString('es-CO', {
@@ -220,19 +181,10 @@ export class MisReservasPageComponent implements OnInit, OnDestroy {
     return Math.round((fin.getTime() - inicio.getTime()) / (1000 * 60 * 60 * 24));
   }
 
-  irAlDetalle(lodgingId: number): void {
-    this.router.navigate(['/alojamientos', lodgingId]);
-  }
+  irAlDetalle(lodgingId: number): void { this.router.navigate(['/alojamientos', lodgingId]); }
 
-  get totalReservas(): number {
-    return this.reservasFiltradas.length;
-  }
+  get totalReservas(): number { return this.reservasFiltradas.length; }
+  get hayReservas(): boolean  { return this.reservas.length > 0; }
 
-  get hayReservas(): boolean {
-    return this.reservas.length > 0;
-  }
-
-  trackById(_: number, item: Reserva): number | undefined {
-    return item.id;
-  }
+  trackById(_: number, item: Reserva): number | undefined { return item.id; }
 }

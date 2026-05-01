@@ -152,7 +152,7 @@ public class ReservaService {
             String  nombreAloj  = entity.getAlojamiento().getNombre();
             notificacionService.crearNotificacion(NotificacionDTO.builder()
                     .userId(anfitrionId)
-                    .type("CANCELACION_RESERVA")
+                    .type("CANCELACION")
                     .title("Reserva cancelada")
                     .message("La reserva en \"" + nombreAloj +
                             "\" del " + entity.getFechaInicio() + " al " + entity.getFechaFin() +
