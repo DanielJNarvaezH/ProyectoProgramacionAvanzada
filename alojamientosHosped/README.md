@@ -1,93 +1,186 @@
 # AlojamientosHosped
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.7.
+Plataforma web para gestión de alojamientos turísticos. Permite a anfitriones publicar propiedades y a huéspedes buscar, reservar y comentar estadías.
 
-## Development server
+---
 
-To start a local development server, run:
+## Tecnologías
+
+| Capa | Tecnología |
+|---|---|
+| Frontend | Angular 17 |
+| Backend | Spring Boot 3 · Java 17 |
+| Base de datos | MySQL 8 |
+| Autenticación | JWT |
+| Documentación API | Swagger / OpenAPI 3 |
+
+---
+
+## Requisitos previos
+
+- **Java 17+**
+- **Node.js 18+** y **npm**
+- **Angular CLI** (`npm install -g @angular/cli`)
+- **MySQL 8** corriendo localmente
+- **Maven 3.8+** (o usar el wrapper `mvnw` si está disponible)
+
+---
+
+## Configuración de la base de datos
+
+1. Crea la base de datos y el usuario en MySQL:
+
+```sql
+CREATE DATABASE alojamientos_db CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER 'alojamientos_user'@'localhost' IDENTIFIED BY 'tu_password';
+GRANT ALL PRIVILEGES ON alojamientos_db.* TO 'alojamientos_user'@'localhost';
+FLUSH PRIVILEGES;
+```
+
+2. Edita `src/main/resources/application-dev.properties` con tus credenciales:
+
+```properties
+spring.datasource.url=jdbc:mysql://localhost:3306/alojamientos_db
+spring.datasource.username=alojamientos_user
+spring.datasource.password=tu_password
+```
+
+> Las tablas se crean automáticamente al iniciar el backend (`ddl-auto=update`).
+
+---
+
+## Ejecución en desarrollo
+
+### Backend (Spring Boot)
 
 ```bash
+# Desde la carpeta raíz del backend
+cd backend
+
+# Con Maven instalado
+mvn spring-boot:run -Dspring-boot.run.profiles=dev
+
+# O con el wrapper (si existe)
+./mvnw spring-boot:run -Dspring-boot.run.profiles=dev
+```
+
+El backend queda disponible en: `http://localhost:8080/alojamientos`
+
+Swagger UI: `http://localhost:8080/alojamientos/swagger-ui.html`
+
+### Frontend (Angular)
+
+```bash
+# Desde la carpeta raíz del frontend
+cd frontend
+
+# Instalar dependencias (solo la primera vez)
+npm install
+
+# Levantar servidor de desarrollo
 ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+El frontend queda disponible en: `http://localhost:4200`
 
-## Code scaffolding
+> El frontend apunta al backend en `http://localhost:8080/alojamientos/api` (configurado en `src/environments/environment.ts`).
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+---
 
+## Variables de entorno sensibles
+
+Estas variables **no deben subirse al repositorio**. Configúralas localmente antes de correr el backend:
+
+| Variable | Descripción |
+|---|---|
+| `MAIL_USERNAME` | Correo Gmail para envío de notificaciones |
+| `MAIL_PASSWORD` | Contraseña de aplicación de Gmail |
+
+En Linux/Mac:
 ```bash
-ng generate component component-name
+export MAIL_USERNAME=tu_correo@gmail.com
+export MAIL_PASSWORD=tu_app_password
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
-
-```bash
-ng generate --help
+En Windows (PowerShell):
+```powershell
+$env:MAIL_USERNAME="tu_correo@gmail.com"
+$env:MAIL_PASSWORD="tu_app_password"
 ```
 
-## Building
+---
 
-To build the project run:
+## Perfiles disponibles
 
-```bash
-ng build
+| Perfil | Uso | Activación |
+|---|---|---|
+| `dev` | Desarrollo local con MySQL local | Por defecto |
+| `docker` | Contenedores Docker, variables por env | `--spring.profiles.active=docker` |
+| `prod` | Producción | `--spring.profiles.active=prod` |
+| `test` | Tests automatizados | Automático con `mvn test` |
+
+---
+
+## Estructura del proyecto
+
+```
+backend/
+└── src/main/java/com/example/Alojamientos/
+    ├── presentationLayer/controller/   # Controladores REST
+    ├── businessLayer/
+    │   ├── service/                    # Lógica de negocio
+    │   └── dto/                        # Data Transfer Objects
+    ├── persistenceLayer/
+    │   ├── entity/                     # Entidades JPA
+    │   ├── repository/                 # Repositorios Spring Data
+    │   └── mapper/                     # MapStruct mappers
+    ├── securityLayer/                  # JWT, filtros de seguridad
+    └── config/                         # Configuración general
+
+frontend/
+└── src/app/
+    ├── components/ad/
+    │   ├── atoms/                      # Componentes base (button, input, star-rating…)
+    │   ├── molecules/                  # Componentes compuestos (comentario-card…)
+    │   ├── organisms/                  # Secciones completas
+    │   ├── templates/                  # Layouts de página
+    │   └── pages/                      # Vistas completas (login, detalle, mis-reservas…)
+    ├── models/                         # Interfaces TypeScript
+    └── services/                       # Servicios HTTP
 ```
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
+---
 
-## Running unit tests
+## Endpoints principales
 
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
+| Método | Ruta | Descripción |
+|---|---|---|
+| POST | `/api/auth/login` | Iniciar sesión |
+| POST | `/api/auth/register` | Registro de usuario |
+| GET | `/api/alojamientos` | Listar alojamientos |
+| GET | `/api/alojamientos/{id}` | Detalle de alojamiento |
+| POST | `/api/reservas` | Crear reserva |
+| GET | `/api/comentarios/alojamiento/{id}` | Comentarios de un alojamiento |
+| POST | `/api/comentarios` | Crear comentario |
+| POST | `/api/respuestas-comentarios` | Responder comentario (anfitrión) |
 
-```bash
-ng test
-```
+Documentación completa disponible en Swagger UI una vez levantado el backend.
 
-## Running end-to-end tests (ALOJ-16 — Cypress)
+---
 
-Los tests E2E del CRUD de alojamientos están implementados con Cypress.
+## Ejecución con Docker
 
-### Requisitos
-
-- Backend corriendo en `http://localhost:8080` (`./gradlew bootRun`)
-- Frontend corriendo en `http://localhost:4200` (`ng serve`)
-
-### Instalación
-
-```bash
-npm install --save-dev cypress
-```
-
-### Credenciales de prueba
-
-Configuradas en `cypress.config.ts`:
-- Email: `juanjo@gmail.com`
-- Password: `Juanjo123!`
-
-### Ejecutar los tests
+> Requiere Docker y Docker Compose instalados.
 
 ```bash
-# Modo visual (recomendado)
-npx cypress open
-
-# Modo headless
-npx cypress run
-
-# Solo CRUD alojamientos
-npx cypress run --spec cypress/e2e/alojamiento-crud.cy.ts
+# Desde la raíz del proyecto
+docker-compose up --build
 ```
 
-### Tests incluidos (17 tests)
+El perfil `docker` usa variables de entorno definidas en el `docker-compose.yml`.
 
-| Suite | Descripción |
-|-------|-------------|
-| Crear | Validaciones, creación via API, verificar en lista |
-| Leer  | Listado, detalle, filtro, paginación, botones del dueño |
-| Editar | Precarga datos, actualizar campos, validaciones, desde panel |
-| Eliminar | Modal, cancelar, soft delete, toast, acceso post-delete |
-| Guards | Protección de rutas sin sesión |
+---
 
-## Additional Resources
+## Equipo
 
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+Proyecto académico — Ingeniería de Software 3.
