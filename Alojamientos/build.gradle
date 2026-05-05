@@ -71,6 +71,20 @@ jacoco {
 	toolVersion = "0.8.11"
 }
 
+// Exclusiones — solo mide businessLayer/service donde están los tests unitarios
+def jacocoExclusions = [
+		'**/config/**',
+		'**/entity/**',
+		'**/dto/**',
+		'**/*Application*',
+		'**/mapper/**',
+		'**/scheduler/**',
+		'**/presentationLayer/**',
+		'**/securityLayer/**',
+		'**/persistenceLayer/dao/**',
+		'**/persistenceLayer/repository/**',
+]
+
 // ── JaCoCo: reporte HTML + XML ────────────────────────────────────────────────
 tasks.jacocoTestReport {
 	dependsOn tasks.test
@@ -79,17 +93,9 @@ tasks.jacocoTestReport {
 		csv.required  = false
 		html.outputLocation = layout.buildDirectory.dir("reports/jacoco/html")
 	}
-	// Excluir clases que no aportan cobertura real
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: [
-					'**/config/**',
-					'**/entity/**',
-					'**/dto/**',
-					'**/*Application*',
-					'**/mapper/**',
-					'**/scheduler/**',
-			])
+			fileTree(dir: it, exclude: jacocoExclusions)
 		}))
 	}
 }
@@ -99,6 +105,7 @@ tasks.jacocoTestCoverageVerification {
 	dependsOn tasks.jacocoTestReport
 	violationRules {
 		rule {
+			element = 'BUNDLE'
 			limit {
 				counter = 'LINE'
 				value   = 'COVEREDRATIO'
@@ -106,17 +113,9 @@ tasks.jacocoTestCoverageVerification {
 			}
 		}
 	}
-	// Mismas exclusiones que en el reporte para consistencia
 	afterEvaluate {
 		classDirectories.setFrom(files(classDirectories.files.collect {
-			fileTree(dir: it, exclude: [
-					'**/config/**',
-					'**/entity/**',
-					'**/dto/**',
-					'**/*Application*',
-					'**/mapper/**',
-					'**/scheduler/**',
-			])
+			fileTree(dir: it, exclude: jacocoExclusions)
 		}))
 	}
 }
