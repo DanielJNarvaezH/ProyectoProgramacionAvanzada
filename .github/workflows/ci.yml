@@ -1,0 +1,73 @@
+name: CI — Backend Hosped
+
+# CICD-1: Se dispara en cada push a main que toque el backend
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'Alojamientos/**'
+      - '.github/workflows/ci.yml'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'Alojamientos/**'
+
+jobs:
+  build-and-test:
+    name: Compilar, Tests y JaCoCo
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout código
+        uses: actions/checkout@v4
+
+      - name: Configurar Java 21
+        uses: actions/setup-java@v4
+        with:
+          java-version: '21'
+          distribution: 'temurin'
+
+      - name: Cache Gradle
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/.gradle/caches
+            ~/.gradle/wrapper
+          key: ${{ runner.os }}-gradle-${{ hashFiles('Alojamientos/**/*.gradle*', 'Alojamientos/**/gradle-wrapper.properties') }}
+          restore-keys: ${{ runner.os }}-gradle-
+
+      - name: Dar permisos a gradlew
+        run: chmod +x ./gradlew
+        working-directory: Alojamientos
+
+      - name: Compilar backend
+        run: ./gradlew build -x test --no-daemon
+        working-directory: Alojamientos
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+      - name: Ejecutar tests JUnit y generar reporte JaCoCo
+        run: ./gradlew test jacocoTestReport --no-daemon
+        working-directory: Alojamientos
+        env:
+          SPRING_PROFILES_ACTIVE: test
+
+      - name: Verificar cobertura mínima 70% con JaCoCo
+        run: ./gradlew jacocoTestCoverageVerification --no-daemon
+        working-directory: Alojamientos
+
+      - name: Publicar resultados de tests
+        uses: dorny/test-reporter@v1
+        if: always()
+        with:
+          name: JUnit Tests
+          path: Alojamientos/build/test-results/test/*.xml
+          reporter: java-junit
+
+      - name: Subir reporte JaCoCo como artefacto
+        uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: jacoco-report
+          path: Alojamientos/build/reports/jacoco/test/html/
+          retention-days: 7

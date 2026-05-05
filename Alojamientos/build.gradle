@@ -2,7 +2,7 @@ plugins {
 	id 'java'
 	id 'org.springframework.boot' version '3.5.5'
 	id 'io.spring.dependency-management' version '1.1.7'
-	id 'jacoco' // ✅ añadimos JaCoCo
+	id 'jacoco'
 }
 
 group = 'com.example'
@@ -52,26 +52,71 @@ dependencies {
 	runtimeOnly   'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly   'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
-	// --- Testing (JUnit 5 / Spring Boot Test) ---
+	// --- Testing ---
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
 	}
+	// H2 en memoria para tests en CI (GitHub Actions no tiene MySQL)
+	testImplementation 'com.h2database:h2'
 }
 
+// ── Tests ─────────────────────────────────────────────────────────────────────
 tasks.named('test') {
 	useJUnitPlatform()
-	finalizedBy tasks.jacocoTestReport // ✅ genera el reporte después de los tests
+	finalizedBy tasks.jacocoTestReport
 }
 
+// ── JaCoCo: configuración general ────────────────────────────────────────────
 jacoco {
-	toolVersion = "0.8.11" // ✅ versión estable de JaCoCo
+	toolVersion = "0.8.11"
 }
 
+// ── JaCoCo: reporte HTML + XML ────────────────────────────────────────────────
 tasks.jacocoTestReport {
-	dependsOn tasks.test // ✅ se ejecuta después de los tests
+	dependsOn tasks.test
 	reports {
-		xml.required = true
-		csv.required = false
+		xml.required  = true
+		csv.required  = false
 		html.outputLocation = layout.buildDirectory.dir("reports/jacoco/html")
+	}
+	// Excluir clases que no aportan cobertura real
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'**/config/**',
+					'**/entity/**',
+					'**/dto/**',
+					'**/*Application*',
+					'**/mapper/**',
+					'**/scheduler/**',
+			])
+		}))
+	}
+}
+
+// ── JaCoCo: verificación mínima del 70% — el pipeline FALLA si no se cumple ──
+tasks.jacocoTestCoverageVerification {
+	dependsOn tasks.jacocoTestReport
+	violationRules {
+		rule {
+			limit {
+				counter = 'LINE'
+				value   = 'COVEREDRATIO'
+				minimum = 0.70
+			}
+		}
+	}
+	// Mismas exclusiones que en el reporte para consistencia
+	afterEvaluate {
+		classDirectories.setFrom(files(classDirectories.files.collect {
+			fileTree(dir: it, exclude: [
+					'**/config/**',
+					'**/entity/**',
+					'**/dto/**',
+					'**/*Application*',
+					'**/mapper/**',
+					'**/scheduler/**',
+			])
+		}))
 	}
 }
