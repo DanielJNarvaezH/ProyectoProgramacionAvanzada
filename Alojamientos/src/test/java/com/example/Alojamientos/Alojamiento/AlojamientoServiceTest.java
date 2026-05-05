@@ -280,7 +280,7 @@ class AlojamientoServiceTest {
     @DisplayName("GET /api/alojamientos/{id} - Error: Alojamiento eliminado (inactivo)")
     void testObtenerAlojamientoEliminado() {
         // Given
-        alojamientoEntity.setActivo(false);
+        alojamientoEntity.setEliminado(true);
         when(alojamientoRepository.findById(1)).thenReturn(Optional.of(alojamientoEntity));
 
         // When & Then
@@ -339,7 +339,7 @@ class AlojamientoServiceTest {
     @DisplayName("PUT /api/alojamientos/{id} - Error: No se puede actualizar alojamiento eliminado")
     void testActualizarAlojamientoEliminado() {
         // Given
-        alojamientoEntity.setActivo(false);
+        alojamientoEntity.setEliminado(true);
         when(alojamientoRepository.findById(1)).thenReturn(Optional.of(alojamientoEntity));
 
         // When & Then

@@ -51,7 +51,7 @@ class AuthServiceTest {
         registerRequest = new RegisterRequest();
         registerRequest.setName("Juan Pérez");
         registerRequest.setEmail("juan@correo.com");
-        registerRequest.setPassword("Password1");
+        registerRequest.setPassword("Password1!");
         registerRequest.setPhone("3001234567");
         registerRequest.setBirthDate("1995-06-15");
         registerRequest.setRole("USUARIO");
@@ -74,7 +74,7 @@ class AuthServiceTest {
     @DisplayName("register - exitoso con rol USUARIO")
     void register_exitoso() {
         when(usuarioRepository.existsByCorreo("juan@correo.com")).thenReturn(false);
-        when(passwordEncoder.encode("Password1")).thenReturn("encoded");
+        when(passwordEncoder.encode("Password1!")).thenReturn("encoded");
         when(usuarioRepository.save(any())).thenReturn(usuarioEntity);
         when(jwtService.generarTokenConRol("juan@correo.com", "USUARIO")).thenReturn("token123");
 
@@ -225,9 +225,9 @@ class AuthServiceTest {
         when(codigoRepository.findTopByCorreoAndUsadoFalseOrderByFechaExpiracionDesc("juan@correo.com"))
                 .thenReturn(Optional.of(codigo));
         when(usuarioRepository.findByCorreo("juan@correo.com")).thenReturn(Optional.of(usuarioEntity));
-        when(passwordEncoder.encode("NuevaClave1")).thenReturn("encodedNueva");
+        when(passwordEncoder.encode("NuevaClave1!")).thenReturn("encodedNueva");
 
-        String resultado = authService.resetContrasena("juan@correo.com", "123456", "NuevaClave1");
+        String resultado = authService.resetContrasena("juan@correo.com", "123456", "NuevaClave1!");
 
         assertThat(resultado).contains("exitosamente");
         assertThat(codigo.isUsado()).isTrue();
@@ -261,7 +261,7 @@ class AuthServiceTest {
         when(codigoRepository.findTopByCorreoAndUsadoFalseOrderByFechaExpiracionDesc("juan@correo.com"))
                 .thenReturn(Optional.of(codigo));
 
-        assertThatThrownBy(() -> authService.resetContrasena("juan@correo.com", "123456", "NuevaClave1"))
+        assertThatThrownBy(() -> authService.resetContrasena("juan@correo.com", "123456", "NuevaClave1!"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("expirado");
     }
@@ -272,7 +272,7 @@ class AuthServiceTest {
         when(codigoRepository.findTopByCorreoAndUsadoFalseOrderByFechaExpiracionDesc("juan@correo.com"))
                 .thenReturn(Optional.empty());
 
-        assertThatThrownBy(() -> authService.resetContrasena("juan@correo.com", "123456", "NuevaClave1"))
+        assertThatThrownBy(() -> authService.resetContrasena("juan@correo.com", "123456", "NuevaClave1!"))
                 .isInstanceOf(IllegalArgumentException.class)
                 .hasMessageContaining("No hay un código");
     }
