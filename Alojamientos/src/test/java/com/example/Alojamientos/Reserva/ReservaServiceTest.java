@@ -278,13 +278,13 @@ class ReservaServiceTest {
     @Test
     @DisplayName("GET /api/reservas - Listar reservas por huésped")
     void testListarReservasPorHuesped() {
-        when(reservaRepository.findByHuesped_Id(2)).thenReturn(Arrays.asList(reservaEntity));
+        when(reservaRepository.findByHuesped_IdOrderByFechaReservaDesc(2)).thenReturn(Arrays.asList(reservaEntity));
         when(reservaMapper.toDTO(any(ReservaEntity.class))).thenReturn(reservaDTO);
 
         List<ReservaDTO> resultado = reservaService.listarPorHuesped(2);
 
         assertThat(resultado).isNotEmpty().hasSize(1);
-        verify(reservaRepository, times(1)).findByHuesped_Id(2);
+        verify(reservaRepository, times(1)).findByHuesped_IdOrderByFechaReservaDesc(2);
     }
 
     @Test
@@ -302,12 +302,12 @@ class ReservaServiceTest {
     @Test
     @DisplayName("GET /api/reservas - Lista vacía")
     void testListarReservasVacio() {
-        when(reservaRepository.findByHuesped_Id(999)).thenReturn(Collections.emptyList());
+        when(reservaRepository.findByHuesped_IdOrderByFechaReservaDesc(999)).thenReturn(Collections.emptyList());
 
         List<ReservaDTO> resultado = reservaService.listarPorHuesped(999);
 
         assertThat(resultado).isEmpty();
-        verify(reservaRepository, times(1)).findByHuesped_Id(999);
+        verify(reservaRepository, times(1)).findByHuesped_IdOrderByFechaReservaDesc(999);
     }
 
     @Test
