@@ -1,6 +1,5 @@
 name: CI — Backend Hosped
 
-# CICD-1: Se dispara en cada push a main que toque el backend
 on:
   push:
     branches: [ main ]
@@ -11,6 +10,12 @@ on:
     branches: [ main ]
     paths:
       - 'Alojamientos/**'
+
+# Permisos necesarios para que dorny/test-reporter pueda crear Check Runs
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
 
 jobs:
   build-and-test:
@@ -69,5 +74,5 @@ jobs:
         if: always()
         with:
           name: jacoco-report
-          path: Alojamientos/build/reports/jacoco/test/html/
+          path: Alojamientos/build/reports/jacoco/html/
           retention-days: 7
