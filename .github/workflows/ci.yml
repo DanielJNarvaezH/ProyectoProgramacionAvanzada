@@ -25,6 +25,9 @@ jobs:
     steps:
       - name: Checkout código
         uses: actions/checkout@v4
+        with:
+          # CICD-2: fetch-depth=0 requerido por SonarQube para analizar el historial completo
+          fetch-depth: 0
 
       - name: Configurar Java 21
         uses: actions/setup-java@v4
@@ -76,3 +79,15 @@ jobs:
           name: jacoco-report
           path: Alojamientos/build/reports/jacoco/html/
           retention-days: 7
+
+      # ── CICD-2: Análisis de SonarQube ────────────────────────────────────
+      # Se ejecuta después de JaCoCo para incluir el reporte de cobertura.
+      # El pipeline falla si el Quality Gate no pasa (sonar.qualitygate.wait=true
+      # configurado en sonar-project.properties).
+      # Secret requerido en GitHub: SONAR_TOKEN y SONAR_HOST_URL
+      - name: Análisis SonarQube
+        run: ./gradlew sonar --no-daemon
+        working-directory: Alojamientos
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: ${{ secrets.SONAR_HOST_URL }}
