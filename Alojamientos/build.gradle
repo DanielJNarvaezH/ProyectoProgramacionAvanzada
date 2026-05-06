@@ -3,6 +3,7 @@ plugins {
 	id 'org.springframework.boot' version '3.5.5'
 	id 'io.spring.dependency-management' version '1.1.7'
 	id 'jacoco'
+	id 'org.sonarqube' version '5.1.0.4882' // CICD-2
 }
 
 group = 'com.example'
@@ -117,5 +118,16 @@ tasks.jacocoTestCoverageVerification {
 		classDirectories.setFrom(files(classDirectories.files.collect {
 			fileTree(dir: it, exclude: jacocoExclusions)
 		}))
+	}
+}
+
+// ── SonarQube: configuración CICD-2 ──────────────────────────────────────────
+sonar {
+	properties {
+		property 'sonar.projectKey',   'alojamientos-hosped-backend'
+		property 'sonar.projectName',  'AlojamientosHosped - Backend'
+		property 'sonar.coverage.jacoco.xmlReportPaths',
+				'build/reports/jacoco/test/jacocoTestReport.xml'
+		property 'sonar.qualitygate.wait', 'true'
 	}
 }
