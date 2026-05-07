@@ -124,9 +124,9 @@ tasks.jacocoTestCoverageVerification {
 // ── SonarQube: configuración CICD-2 ──────────────────────────────────────────
 sonar {
 	properties {
-		property 'sonar.projectKey',   'alojamientos-hosped-backend'
-		property 'sonar.projectName',  'AlojamientosHosped - Backend'
-		property 'sonar.organization', 'jpelefantino'
+		property 'sonar.projectKey',   'DanielJNarvaezH_ProyectoProgramacionAvanzada'
+		property 'sonar.projectName',  'ProyectoProgramacionAvanzada'
+		property 'sonar.organization', 'danieljnarvaezh'
 		property 'sonar.coverage.jacoco.xmlReportPaths',
 				'build/reports/jacoco/test/jacocoTestReport.xml'
 		property 'sonar.qualitygate.wait', 'true'
