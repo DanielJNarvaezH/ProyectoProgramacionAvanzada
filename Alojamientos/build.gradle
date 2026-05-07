@@ -121,7 +121,6 @@ tasks.jacocoTestCoverageVerification {
 	}
 }
 
-// ── SonarQube: configuración CICD-2 ──────────────────────────────────────────
 sonar {
 	properties {
 		property 'sonar.projectKey',   'DanielJNarvaezH_ProyectoProgramacionAvanzada'
@@ -132,3 +131,4 @@ sonar {
 		property 'sonar.qualitygate.wait', 'true'
 	}
 }
+//
