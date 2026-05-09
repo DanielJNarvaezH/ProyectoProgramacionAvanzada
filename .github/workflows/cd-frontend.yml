@@ -51,9 +51,9 @@ jobs:
           aws s3 sync alojamientosHosped/dist/alojamientosHosped/ s3://hosped-frontend \
             --delete \
             --cache-control "max-age=31536000" \
-            --exclude "index.html"
+            --exclude "*/index.html"
           # index.html sin cache para que siempre descargue la versión más reciente
-          aws s3 cp alojamientosHosped/dist/alojamientosHosped/index.html s3://hosped-frontend/index.html \
+          aws s3 cp alojamientosHosped/dist/alojamientosHosped/browser/index.html s3://hosped-frontend/browser/index.html \
             --cache-control "no-cache, no-store, must-revalidate"
 
       - name: Invalidar caché de CloudFront
