@@ -32,7 +32,7 @@ jobs:
           cache-dependency-path: alojamientosHosped/package-lock.json
 
       - name: Instalar dependencias
-        run: npm ci
+        run: npm install
         working-directory: alojamientosHosped
 
       - name: Build Angular producción
