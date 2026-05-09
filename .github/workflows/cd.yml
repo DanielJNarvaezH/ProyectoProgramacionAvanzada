@@ -2,7 +2,7 @@ name: CD — Despliegue en EC2
 
 on:
   workflow_run:
-    workflows: ["CI — Build y Tests"]
+    workflows: ["CI — Backend Hosped"]  # Nombre correcto del CI en la raíz
     types:
       - completed
     branches:
@@ -31,15 +31,17 @@ jobs:
           path: |
             ~/.gradle/caches
             ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
+          key: ${{ runner.os }}-gradle-${{ hashFiles('Alojamientos/**/*.gradle*', 'Alojamientos/**/gradle-wrapper.properties') }}
           restore-keys: |
             ${{ runner.os }}-gradle-
 
       - name: Dar permisos a gradlew
         run: chmod +x gradlew
+        working-directory: Alojamientos
 
       - name: Construir JAR
         run: ./gradlew bootJar -x test
+        working-directory: Alojamientos
 
       - name: Configurar clave SSH
         run: |
@@ -51,17 +53,14 @@ jobs:
       - name: Subir JAR al EC2 por SCP
         run: |
           scp -i ~/.ssh/ec2_key.pem \
-            build/libs/Alojamientos-*.jar \
+            Alojamientos/build/libs/Alojamientos-*.jar \
             ec2-user@${{ secrets.EC2_HOST }}:~/app.jar
 
       - name: Reiniciar aplicación en EC2
         run: |
           ssh -i ~/.ssh/ec2_key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-            # Matar proceso anterior
             pkill -f "Alojamientos" || true
             sleep 3
-
-            # Lanzar nuevo JAR con variables de entorno
             nohup env \
               SPRING_PROFILES_ACTIVE=prod \
               SPRING_DATASOURCE_URL=jdbc:mysql://${{ secrets.DB_HOST }}:3306/alojamientos_db \
@@ -73,11 +72,8 @@ jobs:
               MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \
               MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}" \
               java -jar ~/app.jar > ~/app.log 2>&1 &
-
             echo "Esperando arranque..."
             sleep 20
-
-            # Verificar que arrancó
             if pgrep -f "app.jar" > /dev/null; then
               echo "✅ Aplicación iniciada correctamente"
             else
