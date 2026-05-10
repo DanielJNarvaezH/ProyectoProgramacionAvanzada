@@ -2,18 +2,23 @@ name: CD — Despliegue en EC2
 
 on:
   workflow_run:
-    workflows: ["CI — Backend Hosped"]  # Nombre correcto del CI en la raíz
+    workflows: ["CI — Backend Hosped"]
     types:
       - completed
     branches:
       - main
+  push:
+    branches: [ main ]
+    paths:
+      - 'Alojamientos/**'
+      - '.github/workflows/cd.yml'
 
 # Solo despliega si el CI pasó correctamente
 jobs:
   deploy:
     name: Desplegar en EC2
     runs-on: ubuntu-latest
-    if: ${{ github.event.workflow_run.conclusion == 'success' }}
+    if: ${{ github.event_name == 'push' || github.event.workflow_run.conclusion == 'success' }}
 
     steps:
       - name: Checkout código
