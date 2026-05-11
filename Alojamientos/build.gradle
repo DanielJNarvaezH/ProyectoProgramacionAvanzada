@@ -53,6 +53,10 @@ dependencies {
 	runtimeOnly   'io.jsonwebtoken:jjwt-impl:0.11.5'
 	runtimeOnly   'io.jsonwebtoken:jjwt-jackson:0.11.5'
 
+	// --- MET-14: Actuator + Prometheus ---
+	implementation 'org.springframework.boot:spring-boot-starter-actuator'
+	implementation 'io.micrometer:micrometer-registry-prometheus'
+
 	// --- Testing ---
 	testImplementation('org.springframework.boot:spring-boot-starter-test') {
 		exclude group: 'org.junit.vintage', module: 'junit-vintage-engine'
@@ -131,4 +135,3 @@ sonar {
 		property 'sonar.qualitygate.wait', 'true'
 	}
 }
-//
