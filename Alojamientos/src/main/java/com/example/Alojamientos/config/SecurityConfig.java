@@ -31,6 +31,10 @@ public class SecurityConfig {
     private final UserDetailsService userDetailsService;
     private final SecurityHeadersFilter securityHeadersFilter;
 
+    private static final String[] ACTUATOR_WHITELIST = {
+            "/actuator/**"
+    };
+
     private static final String[] SWAGGER_WHITELIST = {
             "/api-docs/**",
             "/api-docs.yaml",
@@ -88,6 +92,9 @@ public class SecurityConfig {
 
                 // ── Reglas de autorización ─────────────────────────────────────
                 .authorizeHttpRequests(auth -> auth
+
+                        // Actuator — público para Prometheus scraping
+                        .requestMatchers(ACTUATOR_WHITELIST).permitAll()
 
                         // Swagger / OpenAPI — público
                         .requestMatchers(SWAGGER_WHITELIST).permitAll()
