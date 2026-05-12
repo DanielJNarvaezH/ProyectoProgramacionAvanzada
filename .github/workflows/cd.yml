@@ -46,11 +46,18 @@ jobs:
         run: ./gradlew bootJar -x test --no-daemon
         working-directory: Alojamientos
 
-      - name: Comprimir JAR
+      - name: Configurar credenciales AWS
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id:     ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region:            us-east-1
+
+      - name: Subir JAR a S3
         run: |
-          cd Alojamientos/build/libs
-          gzip -9 Alojamientos-*.jar
-          ls -lh *.gz
+          aws s3 cp Alojamientos/build/libs/Alojamientos-*.jar \
+            s3://hosped-frontend/deploy/app.jar
+          echo "✅ JAR subido a S3"
 
       - name: Configurar clave SSH
         run: |
@@ -59,20 +66,21 @@ jobs:
           chmod 600 ~/.ssh/ec2_key.pem
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
 
-      - name: Subir JAR comprimido al EC2
+      - name: EC2 descarga JAR de S3 y reinicia
         run: |
-          scp -i ~/.ssh/ec2_key.pem \
-            -o ConnectTimeout=60 \
-            -o ServerAliveInterval=30 \
-            Alojamientos/build/libs/Alojamientos-*.jar.gz \
-            ec2-user@${{ secrets.EC2_HOST }}:~/app.jar.gz
+          ssh -i ~/.ssh/ec2_key.pem \
+            -o ConnectTimeout=30 \
+            -o ServerAliveInterval=10 \
+            -o ServerAliveCountMax=3 \
+            ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            # Descargar JAR desde S3 (mucho más rápido que SCP)
+            aws s3 cp s3://hosped-frontend/deploy/app.jar ~/app.jar
 
-      - name: Descomprimir y reiniciar en EC2
-        run: |
-          ssh -i ~/.ssh/ec2_key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
-            gunzip -f ~/app.jar.gz
-            pkill -f "Alojamientos" || true
+            # Matar proceso anterior
+            pkill -f "app.jar" || true
             sleep 3
+
+            # Lanzar nuevo JAR
             nohup env \
               SPRING_PROFILES_ACTIVE=prod \
               SPRING_DATASOURCE_URL=jdbc:mysql://${{ secrets.DB_HOST }}:3306/alojamientos_db \
@@ -84,8 +92,10 @@ jobs:
               MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \
               MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}" \
               java -jar ~/app.jar > ~/app.log 2>&1 &
+
             echo "Esperando arranque..."
             sleep 40
+
             if pgrep -f "app.jar" > /dev/null; then
               echo "✅ Aplicación iniciada correctamente"
             else
