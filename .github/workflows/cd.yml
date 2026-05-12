@@ -13,7 +13,6 @@ on:
       - 'Alojamientos/**'
       - '.github/workflows/cd.yml'
 
-# Solo despliega si el CI pasó correctamente
 jobs:
   deploy:
     name: Desplegar en EC2
@@ -24,51 +23,39 @@ jobs:
       - name: Checkout código
         uses: actions/checkout@v4
 
-      - name: Configurar Java 21
-        uses: actions/setup-java@v4
-        with:
-          java-version: '21'
-          distribution: 'temurin'
-
-      - name: Cache Gradle
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('Alojamientos/**/*.gradle*', 'Alojamientos/**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
-      - name: Dar permisos a gradlew
-        run: chmod +x gradlew
-        working-directory: Alojamientos
-
-      - name: Construir JAR
-        run: ./gradlew bootJar -x test
-        working-directory: Alojamientos
-
       - name: Configurar clave SSH
         run: |
           mkdir -p ~/.ssh
           echo "${{ secrets.EC2_KEY }}" > ~/.ssh/ec2_key.pem
           chmod 600 ~/.ssh/ec2_key.pem
           ssh-keyscan -H ${{ secrets.EC2_HOST }} >> ~/.ssh/known_hosts 2>/dev/null || true
-          ls -la ~/.ssh/
-          head -1 ~/.ssh/ec2_key.pem
-          wc -l ~/.ssh/ec2_key.pem
 
-      - name: Subir JAR al EC2 por SCP
+      - name: Desplegar en EC2 via SSH
         run: |
-          scp -i ~/.ssh/ec2_key.pem \
-            Alojamientos/build/libs/Alojamientos-*.jar \
-            ec2-user@${{ secrets.EC2_HOST }}:~/app.jar
+          ssh -i ~/.ssh/ec2_key.pem -o ConnectTimeout=30 ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            set -e
 
-      - name: Reiniciar aplicación en EC2
-        run: |
-          ssh -i ~/.ssh/ec2_key.pem ec2-user@${{ secrets.EC2_HOST }} << 'EOF'
+            # Verificar Java
+            java -version
+
+            # Clonar o actualizar el repo
+            if [ ! -d ~/app ]; then
+              git clone https://github.com/DanielJNarvaezH/ProyectoProgramacionAvanzada.git ~/app
+            else
+              cd ~/app && git pull origin main
+            fi
+
+            cd ~/app/Alojamientos
+
+            # Dar permisos y compilar directamente en el EC2
+            chmod +x gradlew
+            ./gradlew bootJar -x test --no-daemon
+
+            # Matar proceso anterior
             pkill -f "Alojamientos" || true
             sleep 3
+
+            # Lanzar nuevo JAR
             nohup env \
               SPRING_PROFILES_ACTIVE=prod \
               SPRING_DATASOURCE_URL=jdbc:mysql://${{ secrets.DB_HOST }}:3306/alojamientos_db \
@@ -79,13 +66,15 @@ jobs:
               CORS_ALLOWED_ORIGINS=${{ secrets.CORS_ALLOWED_ORIGINS }} \
               MAIL_USERNAME=${{ secrets.MAIL_USERNAME }} \
               MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}" \
-              java -jar ~/app.jar > ~/app.log 2>&1 &
+              java -jar build/libs/Alojamientos-*.jar > ~/app.log 2>&1 &
+
             echo "Esperando arranque..."
             sleep 40
-            if pgrep -f "app.jar" > /dev/null; then
+
+            if pgrep -f "Alojamientos" > /dev/null; then
               echo "✅ Aplicación iniciada correctamente"
             else
-              echo "❌ Error al iniciar la aplicación"
+              echo "❌ Error al iniciar"
               tail -30 ~/app.log
               exit 1
             fi
@@ -95,7 +84,5 @@ jobs:
         run: |
           sleep 10
           curl -f http://${{ secrets.EC2_HOST }}:8080/alojamientos/api/alojamientos \
-            --max-time 30 \
-            --retry 3 \
-            --retry-delay 5 \
+            --max-time 30 --retry 3 --retry-delay 5 \
             -o /dev/null -s -w "HTTP Status: %{http_code}\n" || echo "Health check completado"
