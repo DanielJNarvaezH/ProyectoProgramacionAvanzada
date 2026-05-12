@@ -81,7 +81,7 @@ jobs:
               MAIL_PASSWORD="${{ secrets.MAIL_PASSWORD }}" \
               java -jar ~/app.jar > ~/app.log 2>&1 &
             echo "Esperando arranque..."
-            sleep 20
+            sleep 40
             if pgrep -f "app.jar" > /dev/null; then
               echo "✅ Aplicación iniciada correctamente"
             else
